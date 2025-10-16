@@ -598,6 +598,7 @@
             let myPlayerId = null;
             let roomCode = null;
             let isGameActive = false;
+            let roomRef = null;
 
             // Generate a unique ID for this player
             myPlayerId = 'player_' + Math.random().toString(36).substr(2, 9);
@@ -606,7 +607,7 @@
             function getOrCreateRoom() {
                 const roomsRef = database.ref('rooms');
 
-                // First, try to find an available room with less than 3 players
+                // First, try to find an available room with less than 3 players and not started
                 roomsRef.once('value').then((snapshot) => {
                     const rooms = snapshot.val() || {};
                     let availableRoom = null;
@@ -615,7 +616,8 @@
                     for (const roomId in rooms) {
                         const room = rooms[roomId];
                         const playerCount = Object.keys(room.players || {}).length;
-                        if (playerCount < 3 && !room.gameStarted) {
+                        // Only consider rooms that haven't started or have been reset
+                        if (playerCount < 3 && (!room.game || !room.game.gameStarted)) {
                             availableRoom = roomId;
                             break;
                         }
@@ -626,82 +628,90 @@
                         availableRoom = 'room_' + Math.random().toString(36).substr(2, 9);
                         roomsRef.child(availableRoom).set({
                             players: {},
-                            gameStarted: false,
-                            gameWon: false
+                            game: {
+                                gameStarted: false,
+                                gameWon: false
+                            }
                         });
                     }
 
                     // Join the room
                     roomCode = availableRoom;
                     roomCodeElement.textContent = roomCode;
+                    roomRef = database.ref(`rooms/${roomCode}`);
                     gameRef = database.ref(`rooms/${roomCode}/game`);
                     playersRef = database.ref(`rooms/${roomCode}/players`);
 
-                    // Listen for game state changes
-                    gameRef.on('value', (snapshot) => {
-                        const gameState = snapshot.val();
-                        if (!gameState) return;
-
-                        maze = gameState.maze;
-                        playerPosition = gameState.playerPosition;
-                        exitPosition = gameState.exitPosition;
-
-                        if (gameState.gameStarted && !gameState.gameWon) {
-                            isGameActive = true;
-                            waitingScreen.classList.add('hidden');
-                            gameWonScreen.classList.add('hidden');
-
-                            if (playerRole === 'mazeViewer') {
-                                mazeViewerScreen.classList.remove('hidden');
-                                setupMazeCanvas();
-                                drawMaze();
-                            } else if (playerRole === 'forwardBackward') {
-                                forwardBackwardScreen.classList.remove('hidden');
-                                updatePositionText();
-                            } else if (playerRole === 'leftRight') {
-                                leftRightScreen.classList.remove('hidden');
-                                updatePositionText();
-                            } else {
-                                mazeViewerScreen.classList.remove('hidden');
-                                setupMazeCanvas();
-                                drawMaze();
-                            }
-                            statusMessage.textContent = 'Game in progress';
-                        } else if (gameState.gameWon) {
-                            isGameActive = false;
-                            waitingScreen.classList.add('hidden');
-                            mazeViewerScreen.classList.add('hidden');
-                            forwardBackwardScreen.classList.add('hidden');
-                            leftRightScreen.classList.add('hidden');
-                            gameWonScreen.classList.remove('hidden');
-                            statusMessage.textContent = 'Game completed!';
-                        }
-                    });
-
-                    // Listen for player role assignment
-                    playersRef.on('value', (snapshot) => {
-                        const players = snapshot.val() || {};
-                        mazeViewerIndicator.classList.toggle('connected', !!players.mazeViewer);
-                        forwardBackwardIndicator.classList.toggle('connected', !!players.forwardBackward);
-                        leftRightIndicator.classList.toggle('connected', !!players.leftRight);
-
-                        // Update status message with player count
-                        const playerCount = Object.keys(players).length;
-                        statusMessage.textContent = `Waiting for players... (${playerCount}/3)`;
-
-                        // Check if all players are connected
-                        if (players.mazeViewer && players.forwardBackward && players.leftRight) {
-                            gameRef.once('value').then((snapshot) => {
-                                const gameState = snapshot.val();
-                                if (!gameState || !gameState.gameStarted) {
-                                    startNewGame();
-                                }
-                            });
-                        }
-                    });
+                    // Set up listeners for this room
+                    setupRoomListeners();
 
                     // Assign player role
                     assignPlayerRole();
+                });
+            }
+
+            function setupRoomListeners() {
+                // Listen for game state changes
+                gameRef.on('value', (snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState) return;
+
+                    maze = gameState.maze;
+                    playerPosition = gameState.playerPosition;
+                    exitPosition = gameState.exitPosition;
+
+                    if (gameState.gameStarted && !gameState.gameWon) {
+                        isGameActive = true;
+                        waitingScreen.classList.add('hidden');
+                        gameWonScreen.classList.add('hidden');
+
+                        if (playerRole === 'mazeViewer') {
+                            mazeViewerScreen.classList.remove('hidden');
+                            setupMazeCanvas();
+                            drawMaze();
+                        } else if (playerRole === 'forwardBackward') {
+                            forwardBackwardScreen.classList.remove('hidden');
+                            updatePositionText();
+                        } else if (playerRole === 'leftRight') {
+                            leftRightScreen.classList.remove('hidden');
+                            updatePositionText();
+                        } else {
+                            mazeViewerScreen.classList.remove('hidden');
+                            setupMazeCanvas();
+                            drawMaze();
+                        }
+                        statusMessage.textContent = 'Game in progress';
+                    } else if (gameState.gameWon) {
+                        isGameActive = false;
+                        waitingScreen.classList.add('hidden');
+                        mazeViewerScreen.classList.add('hidden');
+                        forwardBackwardScreen.classList.add('hidden');
+                        leftRightScreen.classList.add('hidden');
+                        gameWonScreen.classList.remove('hidden');
+                        statusMessage.textContent = 'Game completed!';
+                    }
+                });
+
+                // Listen for player role assignment
+                playersRef.on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    mazeViewerIndicator.classList.toggle('connected', !!players.mazeViewer);
+                    forwardBackwardIndicator.classList.toggle('connected', !!players.forwardBackward);
+                    leftRightIndicator.classList.toggle('connected', !!players.leftRight);
+
+                    // Update status message with player count
+                    const playerCount = Object.keys(players).length;
+                    statusMessage.textContent = `Waiting for players... (${playerCount}/3)`;
+
+                    // Check if all players are connected
+                    if (players.mazeViewer && players.forwardBackward && players.leftRight) {
+                        gameRef.once('value').then((snapshot) => {
+                            const gameState = snapshot.val();
+                            if (!gameState || !gameState.gameStarted) {
+                                startNewGame();
+                            }
+                        });
+                    }
                 });
             }
 
@@ -884,6 +894,18 @@
                 if (playersRef && playerRole) {
                     playersRef.child(playerRole).remove();
                 }
+
+                // Reset the game state in Firebase
+                if (gameRef) {
+                    gameRef.set({
+                        gameStarted: false,
+                        gameWon: false
+                    });
+                }
+
+                // Remove all listeners
+                if (gameRef) gameRef.off();
+                if (playersRef) playersRef.off();
 
                 // Find or create a new room
                 getOrCreateRoom();
