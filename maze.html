@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumanji Maze Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- ===== CSS STYLES ===== -->
+    <style>
+        :root {
+            --primary-color: #2d5016;
+            --secondary-color: #8b4513;
+            --accent-color: #d4af37;
+            --danger-color: #c0392b;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --jungle-green: #228b22;
+            --jungle-dark: #006400;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .game-header {
+            background-color: var(--jungle-dark);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .game-title {
+            font-family: 'Bangers', cursive;
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .connection-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #status-message {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .player-indicators {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .player-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .player-indicator.connected {
+            background-color: rgba(34, 139, 34, 0.5);
+            box-shadow: 0 0 10px rgba(34, 139, 34, 0.7);
+        }
+
+        .indicator-icon {
+            font-size: 1rem;
+        }
+
+        .indicator-text {
+            font-size: 0.75rem;
+        }
+
+        .game-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            position: relative;
+        }
+
+        .game-screen {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Maze Viewer Screen */
+        .maze-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        #maze-canvas {
+            border: 3px solid var(--accent-color);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background-color: #111;
+            max-width: 100%;
+            max-height: 60%;
+        }
+
+        .maze-legend {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .player-color {
+            background-color: #3498db;
+        }
+
+        .exit-color {
+            background-color: #2ecc71;
+        }
+
+        /* Controller Screens */
+        .controller-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .player-position {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .jungle-noise {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .noise-indicator {
+            width: 16px;
+            height: 16px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(212, 175, 55, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(212, 175, 55, 0);
+            }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .control-btn {
+            background-color: var(--jungle-green);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background-color: var(--jungle-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .role-message {
+            text-align: center;
+            margin-top: 1rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .role-message h2 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .role-message p {
+            font-size: 0.875rem;
+        }
+
+        /* Waiting Screen */
+        .jungle-animation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .jungle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/jungle/800/600.jpg') center/cover;
+            filter: brightness(0.5);
+            z-index: -1;
+        }
+
+        .jungle-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .room-info {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        .room-code {
+            font-family: monospace;
+            font-size: 1.25rem;
+            color: var(--accent-color);
+            margin-top: 0.5rem;
+        }
+
+        /* Game Won Screen */
+        .win-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .win-animation h2 {
+            color: var(--accent-color);
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .control-btn {
+                padding: 0.875rem;
+                font-size: 0.9rem;
+            }
+
+            .player-info,
+            .role-message,
+            .jungle-overlay,
+            .win-animation {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 1.25rem;
+            }
+
+            .indicator-text {
+                display: none;
+            }
+
+            .player-indicator {
+                padding: 0.25rem 0.5rem;
+            }
+
+            .control-btn {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===== HTML STRUCTURE ===== -->
+    <div class="game-container">
+        <header class="game-header">
+            <h1 class="game-title">JUMANJI MAZE CHALLENGE</h1>
+            <div class="connection-status">
+                <div id="status-message">Waiting for players...</div>
+                <div class="player-indicators">
+                    <div class="player-indicator" id="maze-viewer-indicator">
+                        <span class="indicator-icon"><i class="fas fa-eye"></i></span>
+                        <span class="indicator-text">Maze Viewer</span>
+                    </div>
+                    <div class="player-indicator" id="forward-backward-indicator">
+                        <span class="indicator-icon"><i class="fas fa-arrows-alt-v"></i></span>
+                        <span class="indicator-text">Forward/Backward</span>
+                    </div>
+                    <div class="player-indicator" id="left-right-indicator">
+                        <span class="indicator-icon"><i class="fas fa-arrows-alt-h"></i></span>
+                        <span class="indicator-text">Left/Right</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="game-content">
+            <!-- Maze Viewer Screen -->
+            <div id="maze-viewer-screen" class="game-screen hidden">
+                <div class="maze-container">
+                    <canvas id="maze-canvas"></canvas>
+                    <div class="maze-legend">
+                        <div class="legend-item">
+                            <div class="legend-color player-color"></div><span>Player</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color exit-color"></div><span>Exit</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="role-message">
+                    <h2>You are the Maze Viewer</h2>
+                    <p>You can see the maze but cannot control the player. Guide your teammates!</p>
+                </div>
+            </div>
+
+            <!-- Forward/Backward Controller Screen -->
+            <div id="forward-backward-screen" class="game-screen hidden">
+                <div class="controller-container">
+                    <div class="player-info">
+                        <div class="player-position"><span>Position: </span><span id="position-text">Unknown</span>
+                        </div>
+                        <div class="jungle-noise">
+                            <div class="noise-indicator"></div><span>Listening to the jungle...</span>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button id="forward-btn" class="control-btn">
+                            <i class="fas fa-arrow-up"></i> Forward
+                        </button>
+                        <button id="backward-btn" class="control-btn">
+                            <i class="fas fa-arrow-down"></i> Backward
+                        </button>
+                    </div>
+                </div>
+                <div class="role-message">
+                    <h2>You control Forward/Backward</h2>
+                    <p>You can't see the maze. Listen to your teammates!</p>
+                </div>
+            </div>
+
+            <!-- Left/Right Controller Screen -->
+            <div id="left-right-screen" class="game-screen hidden">
+                <div class="controller-container">
+                    <div class="player-info">
+                        <div class="player-position"><span>Position: </span><span id="position-text-lr">Unknown</span>
+                        </div>
+                        <div class="jungle-noise">
+                            <div class="noise-indicator"></div><span>Listening to the jungle...</span>
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <button id="left-btn" class="control-btn">
+                            <i class="fas fa-arrow-left"></i> Left
+                        </button>
+                        <button id="right-btn" class="control-btn">
+                            <i class="fas fa-arrow-right"></i> Right
+                        </button>
+                    </div>
+                </div>
+                <div class="role-message">
+                    <h2>You control Left/Right</h2>
+                    <p>You can't see the maze. Listen to your teammates!</p>
+                </div>
+            </div>
+
+            <!-- Waiting Screen -->
+            <div id="waiting-screen" class="game-screen">
+                <div class="jungle-animation">
+                    <div class="jungle-bg"></div>
+                    <div class="jungle-overlay">
+                        <h2>Welcome to Jumanji</h2>
+                        <p>Waiting for all players to connect...</p>
+                        <div class="loading-spinner"></div>
+                        <div class="room-info">
+                            <p>Share this room code with your friends:</p>
+                            <div class="room-code" id="room-code">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Won Screen -->
+            <div id="game-won-screen" class="game-screen hidden">
+                <div class="win-animation">
+                    <h2>You Escaped the Jungle!</h2>
+                    <p>Congratulations on completing the Jumanji Maze Challenge!</p>
+                    <button id="play-again-btn" class="control-btn">
+                        <i class="fas fa-redo"></i> Play Again
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <!-- ===== JAVASCRIPT LOGIC ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Your Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyCpb5gI41MNaoRncb6iOqppYpAWOUvT25Q",
+                authDomain: "maze-c25dd.firebaseapp.com",
+                databaseURL: "https://maze-c25dd-default-rtdb.asia-southeast1.firebasedatabase.app/",
+                projectId: "maze-c25dd",
+                storageBucket: "maze-c25dd.firebasestorage.app",
+                messagingSenderId: "1006853371831",
+                appId: "1:1006853371831:web:bbd8ee764f4a5959769a32"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // Game elements
+            const mazeViewerScreen = document.getElementById('maze-viewer-screen');
+            const forwardBackwardScreen = document.getElementById('forward-backward-screen');
+            const leftRightScreen = document.getElementById('left-right-screen');
+            const waitingScreen = document.getElementById('waiting-screen');
+            const gameWonScreen = document.getElementById('game-won-screen');
+
+            const statusMessage = document.getElementById('status-message');
+            const mazeViewerIndicator = document.getElementById('maze-viewer-indicator');
+            const forwardBackwardIndicator = document.getElementById('forward-backward-indicator');
+            const leftRightIndicator = document.getElementById('left-right-indicator');
+            const roomCodeElement = document.getElementById('room-code');
+
+            const mazeCanvas = document.getElementById('maze-canvas');
+            const ctx = mazeCanvas ? mazeCanvas.getContext('2d') : null;
+
+            const positionText = document.getElementById('position-text');
+            const positionTextLR = document.getElementById('position-text-lr');
+
+            const forwardBtn = document.getElementById('forward-btn');
+            const backwardBtn = document.getElementById('backward-btn');
+            const leftBtn = document.getElementById('left-btn');
+            const rightBtn = document.getElementById('right-btn');
+            const playAgainBtn = document.getElementById('play-again-btn');
+
+            // Game state
+            let playerRole = null;
+            let maze = null;
+            let playerPosition = { x: 1, y: 1 };
+            let exitPosition = { x: 0, y: 0 };
+            let cellSize = 20;
+            let gameRef = null;
+            let playersRef = null;
+            let myPlayerId = null;
+            let roomCode = null;
+            let isGameActive = false;
+            let roomRef = null;
+
+            // Generate a unique ID for this player
+            myPlayerId = 'player_' + Math.random().toString(36).substr(2, 9);
+
+            // Get or create a room
+            function getOrCreateRoom() {
+                const roomsRef = database.ref('rooms');
+
+                // First, try to find an available room with less than 3 players and not started
+                roomsRef.once('value').then((snapshot) => {
+                    const rooms = snapshot.val() || {};
+                    let availableRoom = null;
+
+                    // Find a room with available slots
+                    for (const roomId in rooms) {
+                        const room = rooms[roomId];
+                        const playerCount = Object.keys(room.players || {}).length;
+                        // Only consider rooms that haven't started or have been reset
+                        if (playerCount < 3 && (!room.game || !room.game.gameStarted)) {
+                            availableRoom = roomId;
+                            break;
+                        }
+                    }
+
+                    // If no available room, create a new one
+                    if (!availableRoom) {
+                        availableRoom = 'room_' + Math.random().toString(36).substr(2, 9);
+                        roomsRef.child(availableRoom).set({
+                            players: {},
+                            game: {
+                                gameStarted: false,
+                                gameWon: false
+                            }
+                        });
+                    }
+
+                    // Join the room
+                    roomCode = availableRoom;
+                    roomCodeElement.textContent = roomCode;
+                    roomRef = database.ref(`rooms/${roomCode}`);
+                    gameRef = database.ref(`rooms/${roomCode}/game`);
+                    playersRef = database.ref(`rooms/${roomCode}/players`);
+
+                    // Set up listeners for this room
+                    setupRoomListeners();
+
+                    // Assign player role
+                    assignPlayerRole();
+                });
+            }
+
+            function setupRoomListeners() {
+                // Listen for game state changes
+                gameRef.on('value', (snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState) return;
+
+                    maze = gameState.maze;
+                    playerPosition = gameState.playerPosition;
+                    exitPosition = gameState.exitPosition;
+
+                    if (gameState.gameStarted && !gameState.gameWon) {
+                        isGameActive = true;
+                        waitingScreen.classList.add('hidden');
+                        gameWonScreen.classList.add('hidden');
+
+                        if (playerRole === 'mazeViewer') {
+                            mazeViewerScreen.classList.remove('hidden');
+                            setupMazeCanvas();
+                            drawMaze();
+                        } else if (playerRole === 'forwardBackward') {
+                            forwardBackwardScreen.classList.remove('hidden');
+                            updatePositionText();
+                        } else if (playerRole === 'leftRight') {
+                            leftRightScreen.classList.remove('hidden');
+                            updatePositionText();
+                        } else {
+                            mazeViewerScreen.classList.remove('hidden');
+                            setupMazeCanvas();
+                            drawMaze();
+                        }
+                        statusMessage.textContent = 'Game in progress';
+                    } else if (gameState.gameWon) {
+                        isGameActive = false;
+                        waitingScreen.classList.add('hidden');
+                        mazeViewerScreen.classList.add('hidden');
+                        forwardBackwardScreen.classList.add('hidden');
+                        leftRightScreen.classList.add('hidden');
+                        gameWonScreen.classList.remove('hidden');
+                        statusMessage.textContent = 'Game completed!';
+                    }
+                });
+
+                // Listen for player role assignment
+                playersRef.on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    mazeViewerIndicator.classList.toggle('connected', !!players.mazeViewer);
+                    forwardBackwardIndicator.classList.toggle('connected', !!players.forwardBackward);
+                    leftRightIndicator.classList.toggle('connected', !!players.leftRight);
+
+                    // Update status message with player count
+                    const playerCount = Object.keys(players).length;
+                    statusMessage.textContent = `Waiting for players... (${playerCount}/3)`;
+
+                    // Check if all players are connected
+                    if (players.mazeViewer && players.forwardBackward && players.leftRight) {
+                        gameRef.once('value').then((snapshot) => {
+                            const gameState = snapshot.val();
+                            if (!gameState || !gameState.gameStarted) {
+                                startNewGame();
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Assign player role
+            function assignPlayerRole() {
+                playersRef.once('value').then((snapshot) => {
+                    const players = snapshot.val() || {};
+                    if (!players.mazeViewer) {
+                        playerRole = 'mazeViewer';
+                        playersRef.child(playerRole).set(myPlayerId);
+                    } else if (!players.forwardBackward) {
+                        playerRole = 'forwardBackward';
+                        playersRef.child(playerRole).set(myPlayerId);
+                    } else if (!players.leftRight) {
+                        playerRole = 'leftRight';
+                        playersRef.child(playerRole).set(myPlayerId);
+                    } else {
+                        playerRole = 'spectator';
+                    }
+                });
+            }
+
+            function startNewGame() {
+                const newMaze = generateMaze(21, 21);
+                const initialPosition = { x: 1, y: 1 };
+                const exitPos = { x: 19, y: 19 };
+                newMaze[exitPos.y][exitPos.x] = 2;
+
+                gameRef.set({
+                    maze: newMaze,
+                    playerPosition: initialPosition,
+                    exitPosition: exitPos,
+                    gameStarted: true,
+                    gameWon: false
+                });
+            }
+
+            function movePlayer(direction) {
+                if (!isGameActive) return;
+
+                gameRef.once('value').then((snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState.gameStarted || gameState.gameWon) return;
+
+                    let newPosition = { ...gameState.playerPosition };
+                    switch (direction) {
+                        case 'forward': newPosition.y -= 1; break;
+                        case 'backward': newPosition.y += 1; break;
+                        case 'left': newPosition.x -= 1; break;
+                        case 'right': newPosition.x += 1; break;
+                    }
+
+                    if (gameState.maze[newPosition.y][newPosition.x] !== 1) {
+                        gameRef.child('playerPosition').set(newPosition);
+                        if (newPosition.x === gameState.exitPosition.x && newPosition.y === gameState.exitPosition.y) {
+                            gameRef.child('gameWon').set(true);
+                        }
+                    }
+                });
+            }
+
+            function generateMaze(width, height) {
+                const maze = Array(height).fill().map(() => Array(width).fill(1));
+                const stack = [];
+                const start = { x: 1, y: 1 };
+                maze[start.y][start.x] = 0;
+                stack.push(start);
+
+                while (stack.length > 0) {
+                    const current = stack[stack.length - 1];
+                    const neighbors = getUnvisitedNeighbors(current, maze);
+                    if (neighbors.length > 0) {
+                        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        removeWall(current, next, maze);
+                        maze[next.y][next.x] = 0;
+                        stack.push(next);
+                    } else {
+                        stack.pop();
+                    }
+                }
+                return maze;
+            }
+
+            function getUnvisitedNeighbors(cell, maze) {
+                const neighbors = [];
+                const { x, y } = cell;
+                const directions = [
+                    { x: x, y: y - 2 }, { x: x + 2, y: y },
+                    { x: x, y: y + 2 }, { x: x - 2, y: y }
+                ];
+                for (const dir of directions) {
+                    if (dir.x > 0 && dir.x < maze[0].length - 1 && dir.y > 0 && dir.y < maze.length - 1 && maze[dir.y][dir.x] === 1) {
+                        neighbors.push(dir);
+                    }
+                }
+                return neighbors;
+            }
+
+            function removeWall(cell1, cell2, maze) {
+                const x = (cell1.x + cell2.x) / 2;
+                const y = (cell1.y + cell2.y) / 2;
+                maze[y][x] = 0;
+            }
+
+            function setupMazeCanvas() {
+                if (!ctx || !maze) return;
+                const mazeWidth = maze[0].length * cellSize;
+                const mazeHeight = maze.length * cellSize;
+                mazeCanvas.width = mazeWidth;
+                mazeCanvas.height = mazeHeight;
+            }
+
+            function drawMaze() {
+                if (!ctx || !maze) return;
+                ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+
+                for (let y = 0; y < maze.length; y++) {
+                    for (let x = 0; x < maze[y].length; x++) {
+                        const cell = maze[y][x];
+                        if (cell === 1) { // Wall
+                            ctx.fillStyle = '#654321';
+                        } else if (cell === 0) { // Path
+                            ctx.fillStyle = '#1a1a1a';
+                        } else if (cell === 2) { // Exit
+                            ctx.fillStyle = '#2ecc71';
+                        }
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                        ctx.strokeStyle = '#333';
+                        ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+
+                // Draw player
+                ctx.fillStyle = '#3498db';
+                ctx.beginPath();
+                ctx.arc(
+                    playerPosition.x * cellSize + cellSize / 2,
+                    playerPosition.y * cellSize + cellSize / 2,
+                    cellSize / 3, 0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            function updatePositionText() {
+                if (!maze) return;
+                let positionDescription = '';
+                const centerX = Math.floor(maze[0].length / 2);
+                const centerY = Math.floor(maze.length / 2);
+
+                if (playerPosition.x < centerX && playerPosition.y < centerY) positionDescription = 'Northwest quadrant';
+                else if (playerPosition.x >= centerX && playerPosition.y < centerY) positionDescription = 'Northeast quadrant';
+                else if (playerPosition.x < centerX && playerPosition.y >= centerY) positionDescription = 'Southwest quadrant';
+                else positionDescription = 'Southeast quadrant';
+
+                const distanceToExit = Math.abs(playerPosition.x - exitPosition.x) + Math.abs(playerPosition.y - exitPosition.y);
+                const maxDistance = maze[0].length + maze.length;
+                const progress = Math.round((1 - distanceToExit / maxDistance) * 100);
+                positionDescription += ` - ${progress}% to exit`;
+
+                if (positionText) positionText.textContent = positionDescription;
+                if (positionTextLR) positionTextLR.textContent = positionDescription;
+            }
+
+            function resetGame() {
+                // Clear current game state
+                isGameActive = false;
+                playerRole = null;
+                maze = null;
+                playerPosition = { x: 1, y: 1 };
+                exitPosition = { x: 0, y: 0 };
+
+                // Hide all game screens
+                mazeViewerScreen.classList.add('hidden');
+                forwardBackwardScreen.classList.add('hidden');
+                leftRightScreen.classList.add('hidden');
+                gameWonScreen.classList.add('hidden');
+                waitingScreen.classList.remove('hidden');
+
+                // Remove current player from the room
+                if (playersRef && playerRole) {
+                    playersRef.child(playerRole).remove();
+                }
+
+                // Reset the game state in Firebase
+                if (gameRef) {
+                    gameRef.set({
+                        gameStarted: false,
+                        gameWon: false
+                    });
+                }
+
+                // Remove all listeners
+                if (gameRef) gameRef.off();
+                if (playersRef) playersRef.off();
+
+                // Find or create a new room
+                getOrCreateRoom();
+            }
+
+            // Button event handlers
+            forwardBtn?.addEventListener('click', () => { if (playerRole === 'forwardBackward') movePlayer('forward'); });
+            backwardBtn?.addEventListener('click', () => { if (playerRole === 'forwardBackward') movePlayer('backward'); });
+            leftBtn?.addEventListener('click', () => { if (playerRole === 'leftRight') movePlayer('left'); });
+            rightBtn?.addEventListener('click', () => { if (playerRole === 'leftRight') movePlayer('right'); });
+            playAgainBtn?.addEventListener('click', resetGame);
+
+            // Handle page unload - remove player from the game
+            window.addEventListener('beforeunload', () => {
+                if (playersRef && playerRole) playersRef.child(playerRole).remove();
+            });
+
+            // Initialize the game
+            getOrCreateRoom();
+        });
+    </script>
+</body>
+
+</html>
