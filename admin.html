@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumanji: Digital Odyssey - Admin Panel</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Creepster&family=Permanent+Marker&family=Roboto:wght@400;500;700&family=Monoton&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-green: #2d5016;
+            --dark-green: #1a3009;
+            --light-green: #4a7c2e;
+            --accent-gold: #d4af37;
+            --accent-red: #8b0000;
+            --text-light: #f5f5dc;
+            --text-dark: #333;
+            --jungle-pattern: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232d5016"/><path d="M0,50 Q25,30 50,50 T100,50" stroke="%234a7c2e" stroke-width="2" fill="none"/><path d="M0,20 Q25,0 50,20 T100,20" stroke="%234a7c2e" stroke-width="2" fill="none"/><path d="M0,80 Q25,60 50,80 T100,80" stroke="%234a7c2e" stroke-width="2" fill="none"/></svg>');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary-green);
+            background-image: var(--jungle-pattern);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://picsum.photos/seed/jungle-admin/1920/1080.jpg') center/cover no-repeat;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        header {
+            background-color: rgba(26, 48, 9, 0.9);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid var(--accent-gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .logo {
+            font-family: 'Creepster', cursive;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: rgba(45, 80, 22, 0.9);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--light-green);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-gold), transparent, var(--accent-gold));
+            z-index: -1;
+            opacity: 0.5;
+            animation: borderGlow 3s infinite;
+        }
+
+        @keyframes borderGlow {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .card-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 5px;
+            border: 2px solid var(--light-green);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+        }
+
+        button {
+            background-color: var(--accent-gold);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background-color: #b8941f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #6b0000;
+        }
+
+        .btn-copy {
+            background-color: var(--light-green);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 3px;
+        }
+
+        .btn-copy:hover {
+            background-color: #3a6324;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .team-card {
+            background-color: rgba(26, 48, 9, 0.7);
+            border: 2px solid var(--light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .team-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .team-code {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+        }
+
+        .team-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-empty {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+        }
+
+        .status-partial {
+            background-color: rgba(212, 175, 55, 0.3);
+            color: var(--accent-gold);
+        }
+
+        .status-full {
+            background-color: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .team-players {
+            margin-top: 1rem;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-item:last-child {
+            border-bottom: none;
+        }
+
+        .player-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--light-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .player-name {
+            flex: 1;
+        }
+
+        .player-status {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.online {
+            background-color: #4CAF50;
+        }
+
+        .status-indicator.offline {
+            background-color: #F44336;
+        }
+
+        .team-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .team-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: rgba(26, 48, 9, 0.7);
+            border: 2px solid var(--light-green);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 2rem;
+            color: var(--accent-gold);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+        }
+
+        .notification.error {
+            background-color: var(--accent-red);
+        }
+
+        .notification.info {
+            background-color: #2196F3;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--light-green);
+        }
+
+        .tab {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-family: 'Permanent Marker', cursive;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 0 auto;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--primary-green);
+            border: 2px solid var(--accent-gold);
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--accent-red);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .code-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 class="logo">JUMANJI: DIGITAL ODYSSEY</h1>
+        <p class="tagline">Admin Control Center</p>
+        <button id="logout-btn" class="logout-btn hidden">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </header>
+
+    <main>
+        <!-- Login Screen -->
+        <div id="login-screen" class="card fade-in">
+            <h2 class="card-title">
+                <i class="fas fa-lock"></i>
+                Admin Login
+            </h2>
+
+            <div class="form-group">
+                <label for="admin-email">Email</label>
+                <input type="email" id="admin-email" placeholder="Enter admin email">
+            </div>
+
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter admin password">
+            </div>
+
+            <button id="login-btn" class="btn-block">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </button>
+
+            <div style="margin-top: 1rem; text-align: center; font-size: 0.9rem; opacity: 0.7;">
+                <p>Demo Credentials:</p>
+                <p>Email: admin@jumanji.com</p>
+                <p>Password: jumanji123</p>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="admin-dashboard" class="hidden">
+            <!-- Stats Overview -->
+            <div class="card fade-in">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Game Overview
+                </h2>
+
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-teams">0</div>
+                        <div class="stat-label">Total Teams</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="active-teams">0</div>
+                        <div class="stat-label">Active Teams</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-players">0</div>
+                        <div class="stat-label">Total Players</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="online-players">0</div>
+                        <div class="stat-label">Online Players</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Management -->
+            <div class="card fade-in">
+                <h2 class="card-title">
+                    <i class="fas fa-users-cog"></i>
+                    Team Management
+                </h2>
+
+                <button id="create-team-btn" class="btn-block">
+                    <i class="fas fa-plus-circle"></i>
+                    Generate New Team Slot
+                </button>
+
+                <div class="tabs" style="margin-top: 1.5rem;">
+                    <div class="tab active" data-tab="all-teams">All Teams</div>
+                    <div class="tab" data-tab="empty-teams">Empty</div>
+                    <div class="tab" data-tab="partial-teams">Partial</div>
+                    <div class="tab" data-tab="full-teams">Full</div>
+                </div>
+
+                <div class="tab-content active" id="all-teams">
+                    <div class="team-grid" id="all-teams-grid">
+                        <!-- Teams will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="empty-teams">
+                    <div class="team-grid" id="empty-teams-grid">
+                        <!-- Empty teams will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="partial-teams">
+                    <div class="team-grid" id="partial-teams-grid">
+                        <!-- Partial teams will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="full-teams">
+                    <div class="team-grid" id="full-teams-grid">
+                        <!-- Full teams will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Actions -->
+            <div class="card fade-in">
+                <h2 class="card-title">
+                    <i class="fas fa-gamepad"></i>
+                    Game Controls
+                </h2>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button id="start-game-btn" class="btn-block" style="flex: 1;">
+                        <i class="fas fa-play"></i>
+                        Start Game
+                    </button>
+
+                    <button id="reset-game-btn" class="btn-block btn-danger" style="flex: 1;">
+                        <i class="fas fa-redo"></i>
+                        Reset Game
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Team Details Modal -->
+    <div id="team-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Team Details</h3>
+                <button class="close-modal" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="modal-body">
+                <!-- Team details will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Initialize Firebase with the provided configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDeu-PF9W3fHf7shBV-_aVRCEZ6atBCJ5E",
+            authDomain: "jumanji-d14a9.firebaseapp.com",
+            projectId: "jumanji-d14a9",
+            storageBucket: "jumanji-d14a9.firebasestorage.app",
+            messagingSenderId: "1008263887985",
+            appId: "1:1008263887985:web:8be0e837e07bdecc9eafd0",
+            databaseURL: "https://jumanji-d14a9-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const loginScreen = document.getElementById('login-screen');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const createTeamBtn = document.getElementById('create-team-btn');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const resetGameBtn = document.getElementById('reset-game-btn');
+        const teamModal = document.getElementById('team-modal');
+        const closeModal = document.getElementById('close-modal');
+        const modalBody = document.getElementById('modal-body');
+        const notification = document.getElementById('notification');
+
+        // Stats Elements
+        const totalTeamsEl = document.getElementById('total-teams');
+        const activeTeamsEl = document.getElementById('active-teams');
+        const totalPlayersEl = document.getElementById('total-players');
+        const onlinePlayersEl = document.getElementById('online-players');
+
+        // Tab Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State
+        let currentUser = null;
+        let teams = {};
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Copy team code to clipboard
+        function copyTeamCode(teamCode) {
+            navigator.clipboard.writeText(teamCode).then(() => {
+                showNotification(`Team code ${teamCode} copied to clipboard!`, 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showNotification('Failed to copy team code', 'error');
+            });
+        }
+
+        // Generate unique 4-character team code
+        function generateTeamCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+
+            for (let i = 0; i < 4; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            return code;
+        }
+
+        // Generate QR code for team
+        function generateQRCode(teamCode) {
+            // Using a simple QR code API for demonstration
+            // In production, you might want to use a more robust solution
+            return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${teamCode}`;
+        }
+
+        // Admin login
+        async function adminLogin(email, password) {
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
+
+                // For demo purposes, we'll use a simple authentication
+                // In production, you would use Firebase Auth with proper admin accounts
+                if (email === 'admin@jumanji.com' && password === 'jumanji123') {
+                    // Create a mock admin user
+                    currentUser = {
+                        email: email,
+                        displayName: 'Jumanji Admin',
+                        uid: 'admin-uid'
+                    };
+
+                    // Store session in localStorage
+                    localStorage.setItem('jumanjiAdminSession', JSON.stringify(currentUser));
+
+                    showNotification('Login successful!', 'success');
+                    showAdminDashboard();
+                } else {
+                    showNotification('Invalid email or password', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Login failed. Please try again.', 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        }
+
+        // Admin logout
+        function adminLogout() {
+            localStorage.removeItem('jumanjiAdminSession');
+            currentUser = null;
+
+            // Remove any real-time listeners
+            database.ref('teams').off();
+
+            // Show login screen
+            loginScreen.classList.remove('hidden');
+            adminDashboard.classList.add('hidden');
+            logoutBtn.classList.add('hidden');
+
+            showNotification('Logged out successfully', 'info');
+        }
+
+        // Show admin dashboard
+        function showAdminDashboard() {
+            loginScreen.classList.add('hidden');
+            adminDashboard.classList.remove('hidden');
+            adminDashboard.classList.add('fade-in');
+            logoutBtn.classList.remove('hidden');
+
+            // Load teams data
+            loadTeamsData();
+
+            // Set up real-time listener for teams
+            database.ref('teams').on('value', (snapshot) => {
+                teams = snapshot.val() || {};
+                updateTeamsDisplay();
+                updateStats();
+            });
+        }
+
+        // Load teams data
+        function loadTeamsData() {
+            database.ref('teams').once('value', (snapshot) => {
+                teams = snapshot.val() || {};
+                updateTeamsDisplay();
+                updateStats();
+            });
+        }
+
+        // Create new team
+        async function createNewTeam() {
+            try {
+                createTeamBtn.disabled = true;
+                createTeamBtn.innerHTML = '<span class="loading"></span> Creating team...';
+
+                const teamCode = generateTeamCode();
+
+                // Create team in database
+                await database.ref(`teams/${teamCode}`).set({
+                    code: teamCode,
+                    players: [],
+                    status: 'empty',
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                showNotification(`Team ${teamCode} created successfully!`, 'success');
+            } catch (error) {
+                console.error('Error creating team:', error);
+                showNotification('Failed to create team. Please try again.', 'error');
+            } finally {
+                createTeamBtn.disabled = false;
+                createTeamBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Generate New Team Slot';
+            }
+        }
+
+        // Update teams display
+        function updateTeamsDisplay() {
+            const allTeamsGrid = document.getElementById('all-teams-grid');
+            const emptyTeamsGrid = document.getElementById('empty-teams-grid');
+            const partialTeamsGrid = document.getElementById('partial-teams-grid');
+            const fullTeamsGrid = document.getElementById('full-teams-grid');
+
+            // Clear existing teams
+            allTeamsGrid.innerHTML = '';
+            emptyTeamsGrid.innerHTML = '';
+            partialTeamsGrid.innerHTML = '';
+            fullTeamsGrid.innerHTML = '';
+
+            // Sort teams by creation time (newest first)
+            const sortedTeams = Object.entries(teams).sort((a, b) => {
+                return (b[1].createdAt || 0) - (a[1].createdAt || 0);
+            });
+
+            // Create team cards
+            sortedTeams.forEach(([teamCode, teamData]) => {
+                const teamCard = createTeamCard(teamCode, teamData);
+
+                // Add to appropriate grid
+                allTeamsGrid.appendChild(teamCard.cloneNode(true));
+
+                if (!teamData.players || teamData.players.length === 0) {
+                    emptyTeamsGrid.appendChild(teamCard.cloneNode(true));
+                } else if (teamData.players.length < 4) {
+                    partialTeamsGrid.appendChild(teamCard.cloneNode(true));
+                } else {
+                    fullTeamsGrid.appendChild(teamCard.cloneNode(true));
+                }
+            });
+
+            // Add event listeners to the new cards
+            document.querySelectorAll('.view-team-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const teamCode = e.target.getAttribute('data-team-code');
+                    showTeamDetails(teamCode);
+                });
+            });
+
+            document.querySelectorAll('.delete-team-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const teamCode = e.target.getAttribute('data-team-code');
+                    deleteTeam(teamCode);
+                });
+            });
+
+            document.querySelectorAll('.copy-code-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const teamCode = e.target.getAttribute('data-team-code');
+                    copyTeamCode(teamCode);
+                });
+            });
+        }
+
+        // Create team card element
+        function createTeamCard(teamCode, teamData) {
+            const players = teamData.players || [];
+            const playerCount = players.length;
+            let statusClass = 'status-empty';
+            let statusText = 'Empty';
+
+            if (playerCount > 0 && playerCount < 4) {
+                statusClass = 'status-partial';
+                statusText = `${playerCount}/4 Players`;
+            } else if (playerCount === 4) {
+                statusClass = 'status-full';
+                statusText = 'Full';
+            }
+
+            const teamCard = document.createElement('div');
+            teamCard.className = 'team-card';
+
+            teamCard.innerHTML = `
+                <div class="team-header">
+                    <div class="code-container">
+                        <div class="team-code">${teamCode}</div>
+                        <button class="btn-copy copy-code-btn" data-team-code="${teamCode}" title="Copy Code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="team-status ${statusClass}">${statusText}</div>
+                </div>
+                
+                <div class="team-players">
+                    ${players.length > 0 ? players.map(player => `
+                        <div class="player-item">
+                            <div class="player-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-status">
+                                <span class="status-indicator ${player.online ? 'online' : 'offline'}"></span>
+                                ${player.online ? 'Online' : 'Offline'}
+                            </div>
+                        </div>
+                    `).join('') : '<p style="text-align: center; opacity: 0.7;">No players yet</p>'}
+                </div>
+                
+                <div class="team-actions">
+                    <button class="view-team-btn" data-team-code="${teamCode}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="delete-team-btn" data-team-code="${teamCode}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+
+            return teamCard;
+        }
+
+        // Show team details modal
+        function showTeamDetails(teamCode) {
+            const teamData = teams[teamCode];
+            if (!teamData) return;
+
+            const players = teamData.players || [];
+            const qrCodeUrl = generateQRCode(teamCode);
+
+            modalBody.innerHTML = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <h3 style="font-family: 'Orbitron', monospace; color: var(--accent-gold); font-size: 1.8rem; font-weight: 700; letter-spacing: 2px;">${teamCode}</h3>
+                        <button class="btn-copy copy-code-btn" data-team-code="${teamCode}" title="Copy Code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="team-status ${players.length === 0 ? 'status-empty' : players.length < 4 ? 'status-partial' : 'status-full'}" style="display: inline-block;">
+                        ${players.length === 0 ? 'Empty' : players.length < 4 ? `${players.length}/4 Players` : 'Full'}
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <img src="${qrCodeUrl}" alt="QR Code" class="qr-code">
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Scan this QR code to join the team</p>
+                </div>
+                
+                <div class="team-players">
+                    <h4 style="margin-bottom: 1rem; font-family: 'Permanent Marker', cursive;">Players</h4>
+                    ${players.length > 0 ? players.map(player => `
+                        <div class="player-item">
+                            <div class="player-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="player-name">${player.name}</div>
+                            <div class="player-status">
+                                <span class="status-indicator ${player.online ? 'online' : 'offline'}"></span>
+                                ${player.online ? 'Online' : 'Offline'}
+                            </div>
+                        </div>
+                    `).join('') : '<p style="text-align: center; opacity: 0.7;">No players yet</p>'}
+                </div>
+                
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Created: ${new Date(teamData.createdAt).toLocaleString()}</p>
+                    <p style="font-size: 0.9rem; opacity: 0.7;">Last Updated: ${new Date(teamData.updatedAt).toLocaleString()}</p>
+                </div>
+            `;
+
+            teamModal.classList.remove('hidden');
+
+            // Add event listener to the copy button in the modal
+            document.querySelector('#modal-body .copy-code-btn').addEventListener('click', (e) => {
+                const teamCode = e.target.getAttribute('data-team-code');
+                copyTeamCode(teamCode);
+            });
+        }
+
+        // Delete team
+        async function deleteTeam(teamCode) {
+            if (!confirm(`Are you sure you want to delete team ${teamCode}?`)) return;
+
+            try {
+                await database.ref(`teams/${teamCode}`).remove();
+                showNotification(`Team ${teamCode} deleted successfully!`, 'success');
+            } catch (error) {
+                console.error('Error deleting team:', error);
+                showNotification('Failed to delete team. Please try again.', 'error');
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const teamCodes = Object.keys(teams);
+            const totalTeams = teamCodes.length;
+
+            let activeTeams = 0;
+            let totalPlayers = 0;
+            let onlinePlayers = 0;
+
+            teamCodes.forEach(teamCode => {
+                const teamData = teams[teamCode];
+                const players = teamData.players || [];
+
+                if (players.length > 0) {
+                    activeTeams++;
+                    totalPlayers += players.length;
+
+                    players.forEach(player => {
+                        if (player.online) {
+                            onlinePlayers++;
+                        }
+                    });
+                }
+            });
+
+            totalTeamsEl.textContent = totalTeams;
+            activeTeamsEl.textContent = activeTeams;
+            totalPlayersEl.textContent = totalPlayers;
+            onlinePlayersEl.textContent = onlinePlayers;
+        }
+
+        // Start game
+        async function startGame() {
+            if (!confirm('Are you sure you want to start the game? This will notify all teams.')) return;
+
+            try {
+                startGameBtn.disabled = true;
+                startGameBtn.innerHTML = '<span class="loading"></span> Starting game...';
+
+                // Update game status in database
+                await database.ref('gameStatus').set({
+                    status: 'started',
+                    startedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                showNotification('Game started successfully!', 'success');
+            } catch (error) {
+                console.error('Error starting game:', error);
+                showNotification('Failed to start game. Please try again.', 'error');
+            } finally {
+                startGameBtn.disabled = false;
+                startGameBtn.innerHTML = '<i class="fas fa-play"></i> Start Game';
+            }
+        }
+
+        // Reset game
+        async function resetGame() {
+            if (!confirm('Are you sure you want to reset the game? This will clear all team data.')) return;
+
+            try {
+                resetGameBtn.disabled = true;
+                resetGameBtn.innerHTML = '<span class="loading"></span> Resetting game...';
+
+                // Clear all teams
+                await database.ref('teams').remove();
+
+                // Reset game status
+                await database.ref('gameStatus').set({
+                    status: 'not_started',
+                    resetAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                showNotification('Game reset successfully!', 'success');
+            } catch (error) {
+                console.error('Error resetting game:', error);
+                showNotification('Failed to reset game. Please try again.', 'error');
+            } finally {
+                resetGameBtn.disabled = false;
+                resetGameBtn.innerHTML = '<i class="fas fa-redo"></i> Reset Game';
+            }
+        }
+
+        // Check for existing admin session
+        function checkAdminSession() {
+            const sessionData = localStorage.getItem('jumanjiAdminSession');
+
+            if (sessionData) {
+                try {
+                    currentUser = JSON.parse(sessionData);
+                    showAdminDashboard();
+                } catch (error) {
+                    console.error('Error parsing admin session:', error);
+                    localStorage.removeItem('jumanjiAdminSession');
+                }
+            }
+        }
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Event Listeners
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value.trim();
+
+            if (!email || !password) {
+                showNotification('Please enter both email and password', 'error');
+                return;
+            }
+
+            adminLogin(email, password);
+        });
+
+        logoutBtn.addEventListener('click', adminLogout);
+        createTeamBtn.addEventListener('click', createNewTeam);
+        startGameBtn.addEventListener('click', startGame);
+        resetGameBtn.addEventListener('click', resetGame);
+
+        closeModal.addEventListener('click', () => {
+            teamModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        teamModal.addEventListener('click', (e) => {
+            if (e.target === teamModal) {
+                teamModal.classList.add('hidden');
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure login screen is visible on page load
+            loginScreen.classList.remove('hidden');
+            adminDashboard.classList.add('hidden');
+            teamModal.classList.add('hidden');
+
+            // Check for existing session after a short delay
+            setTimeout(checkAdminSession, 100);
+        });
+    </script>
+</body>
+
+</html>
