@@ -1718,7 +1718,8 @@
     <div class="connection-modal" id="connectionModal">
         <div class="connection-content">
             <h3 class="connection-title">Connection Failed</h3>
-            <p class="connection-message">Unable to connect to the room. This might be due to network restrictions or the room not being available.</p>
+            <p class="connection-message">Unable to connect to the room. This might be due to network restrictions or
+                the room not being available.</p>
             <div class="connection-buttons">
                 <button class="retry-button" id="retryButton">Retry</button>
                 <button class="cancel-button" id="cancelButton">Cancel</button>
@@ -1758,6 +1759,8 @@
         let isHost = false;
         let hostPeerId = null;
         let roomData = null;
+        let peerId = null;
+        let connectionEstablished = false;
 
         // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
@@ -2074,6 +2077,7 @@
         async function initializeWalkieTalkie(host) {
             // Reset room initialization flag
             roomInitialized = false;
+            connectionEstablished = false;
 
             // Hide landing page and show walkie interface
             landingPage.style.display = 'none';
@@ -2092,7 +2096,33 @@
             // Set connection status to connecting
             updateConnectionStatus('connecting');
 
-            // Initialize PeerJS with improved ICE server configuration for cross-device connectivity
+            // Request microphone access first
+            try {
+                const audioConstraints = {
+                    echoCancellation: document.getElementById('echoCancellation').checked,
+                    noiseSuppression: document.getElementById('noiseSuppression').checked,
+                    autoGainControl: document.getElementById('autoGainControl').checked
+                };
+
+                // Add mobile-specific constraints
+                if (isMobile) {
+                    audioConstraints.sampleRate = 16000; // Lower sample rate for mobile
+                }
+
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: audioConstraints
+                });
+
+                setupAudioProcessing();
+                showToast('Microphone access granted');
+            } catch (error) {
+                showToast('Microphone access denied');
+                console.error('Error accessing microphone:', error);
+                showConnectionModal();
+                return;
+            }
+
+            // Initialize PeerJS with improved configuration
             try {
                 const peerOptions = {
                     debug: 2,
@@ -2122,10 +2152,16 @@
                     }
                 };
 
+                // Add additional options for mobile
+                if (isMobile) {
+                    peerOptions.config.iceTransportPolicy = 'relay'; // Force relay for mobile
+                }
+
                 peer = new Peer(peerOptions);
 
                 peer.on('open', (id) => {
                     console.log('My peer ID is: ' + id);
+                    peerId = id;
                     updateConnectionStatus(true);
 
                     if (host) {
@@ -2207,30 +2243,6 @@
                 console.error('PeerJS error:', error);
                 showConnectionModal();
             }
-
-            // Request microphone access with mobile-friendly options
-            try {
-                const audioConstraints = {
-                    echoCancellation: document.getElementById('echoCancellation').checked,
-                    noiseSuppression: document.getElementById('noiseSuppression').checked,
-                    autoGainControl: document.getElementById('autoGainControl').checked
-                };
-
-                // Add mobile-specific constraints
-                if (isMobile) {
-                    audioConstraints.sampleRate = 16000; // Lower sample rate for mobile
-                }
-
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    audio: audioConstraints
-                });
-
-                setupAudioProcessing();
-                showToast('Microphone access granted');
-            } catch (error) {
-                showToast('Microphone access denied');
-                console.error('Error accessing microphone:', error);
-            }
         }
 
         // Update connection status
@@ -2240,14 +2252,17 @@
                 statusDot.classList.remove('disconnected', 'connecting');
                 statusDot.classList.add('active');
                 reconnectAttempts = 0;
+                connectionEstablished = true;
             } else if (status === 'connecting') {
                 connectionStatus.textContent = 'Connecting...';
                 statusDot.classList.remove('disconnected', 'active');
                 statusDot.classList.add('connecting');
+                connectionEstablished = false;
             } else {
                 connectionStatus.textContent = 'Disconnected';
                 statusDot.classList.remove('active', 'connecting');
                 statusDot.classList.add('disconnected');
+                connectionEstablished = false;
             }
         }
 
@@ -2278,13 +2293,21 @@
                 hostPeerId = data.hostId;
 
                 // Try to connect to the host
-                const conn = peer.connect(hostPeerId);
+                const conn = peer.connect(hostPeerId, {
+                    reliable: true
+                });
 
                 conn.on('open', () => {
                     conn.send({
                         type: 'join',
                         userName: userName
                     });
+                    connectionEstablished = true;
+                });
+
+                conn.on('error', (err) => {
+                    console.error('Connection error:', err);
+                    showConnectionModal();
                 });
 
                 handleConnection(conn);
@@ -2798,6 +2821,8 @@
             isHost = false;
             hostPeerId = null;
             roomData = null;
+            peerId = null;
+            connectionEstablished = false;
 
             showToast('You left the room');
         }
