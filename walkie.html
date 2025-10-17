@@ -1360,6 +1360,100 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        /* Room Info Modal */
+        .room-info-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .room-info-modal.show {
+            display: flex;
+        }
+
+        .room-info-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .room-info-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .room-id-display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: 2px;
+        }
+
+        .room-info-message {
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .room-info-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .copy-button {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .close-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* Mobile Responsive Design */
         @media (max-width: 768px) {
             .logo h1 {
@@ -1470,15 +1564,18 @@
                 margin-top: 3px;
             }
 
-            .connection-content {
+            .connection-content,
+            .room-info-content {
                 padding: 20px;
             }
 
-            .connection-title {
+            .connection-title,
+            .room-info-title {
                 font-size: 1.3rem;
             }
 
-            .connection-buttons {
+            .connection-buttons,
+            .room-info-buttons {
                 flex-direction: column;
             }
         }
@@ -1718,11 +1815,30 @@
     <div class="connection-modal" id="connectionModal">
         <div class="connection-content">
             <h3 class="connection-title">Connection Failed</h3>
-            <p class="connection-message">Unable to connect to the room. This might be due to network restrictions or
-                the room not being available.</p>
+            <p class="connection-message">Unable to connect to the room. This might be due to network restrictions or the room not being available.</p>
             <div class="connection-buttons">
                 <button class="retry-button" id="retryButton">Retry</button>
                 <button class="cancel-button" id="cancelButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Info Modal -->
+    <div class="room-info-modal" id="roomInfoModal">
+        <div class="room-info-content">
+            <h3 class="room-info-title">Room Created Successfully!</h3>
+            <div class="room-id-display" id="roomIdDisplay">ROOM-ID</div>
+            <p class="room-info-message">Share this Room ID with others to let them join your room. You can also share the direct link below.</p>
+            <div class="room-info-buttons">
+                <button class="copy-button" id="copyRoomIdButton">
+                    <i class="fas fa-copy"></i>
+                    Copy Room ID
+                </button>
+                <button class="copy-button" id="copyLinkButton">
+                    <i class="fas fa-link"></i>
+                    Copy Link
+                </button>
+                <button class="close-button" id="closeRoomInfoButton">Close</button>
             </div>
         </div>
     </div>
@@ -1761,6 +1877,7 @@
         let roomData = null;
         let peerId = null;
         let connectionEstablished = false;
+        let signalingServer = 'wss://creativewalkie-signaling.herokuapp.com'; // Fallback signaling server
 
         // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
@@ -1791,6 +1908,11 @@
         const connectionModal = document.getElementById('connectionModal');
         const retryButton = document.getElementById('retryButton');
         const cancelButton = document.getElementById('cancelButton');
+        const roomInfoModal = document.getElementById('roomInfoModal');
+        const roomIdDisplay = document.getElementById('roomIdDisplay');
+        const copyRoomIdButton = document.getElementById('copyRoomIdButton');
+        const copyLinkButton = document.getElementById('copyLinkButton');
+        const closeRoomInfoButton = document.getElementById('closeRoomInfoButton');
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
@@ -1897,6 +2019,20 @@
                 connectionModal.classList.remove('show');
                 leaveRoom();
             });
+
+            // Room info modal buttons
+            copyRoomIdButton.addEventListener('click', copyRoomId);
+            copyLinkButton.addEventListener('click', copyRoomLink);
+            closeRoomInfoButton.addEventListener('click', () => {
+                roomInfoModal.classList.remove('show');
+            });
+
+            // Check if there's a room ID in the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlRoomId = urlParams.get('room');
+            if (urlRoomId) {
+                document.getElementById('joinRoomId').value = urlRoomId;
+            }
         });
 
         // Handle touch start for mobile
@@ -2035,7 +2171,9 @@
             createRoomBtn.innerHTML = 'Create Room';
             createRoomBtn.disabled = false;
 
-            showToast(`Room created with ID: ${room}`);
+            // Show room info modal
+            roomIdDisplay.textContent = room;
+            roomInfoModal.classList.add('show');
         }
 
         // Join an existing room
@@ -2064,13 +2202,32 @@
 
             joinRoomBtn.innerHTML = 'Join Room';
             joinRoomBtn.disabled = false;
-
-            showToast(`Joined room: ${room}`);
         }
 
         // Generate a random room ID
         function generateRoomId() {
             return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // Copy room ID to clipboard
+        function copyRoomId() {
+            navigator.clipboard.writeText(room).then(() => {
+                showToast('Room ID copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy room ID: ', err);
+                showToast('Failed to copy room ID');
+            });
+        }
+
+        // Copy room link to clipboard
+        function copyRoomLink() {
+            const roomLink = `${window.location.origin}${window.location.pathname}?room=${room}`;
+            navigator.clipboard.writeText(roomLink).then(() => {
+                showToast('Room link copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy room link: ', err);
+                showToast('Failed to copy room link');
+            });
         }
 
         // Initialize the walkie-talkie interface
@@ -2173,8 +2330,17 @@
                             timestamp: Date.now()
                         };
 
-                        // Store room data in localStorage for other users to find
+                        // Store room data in multiple places for better cross-device discovery
                         localStorage.setItem(`room_${room}`, JSON.stringify(roomData));
+                        
+                        // Also store in sessionStorage as a fallback
+                        sessionStorage.setItem(`room_${room}`, JSON.stringify(roomData));
+                        
+                        // Create a global room registry in localStorage
+                        let roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
+                        roomRegistry[room] = roomData;
+                        localStorage.setItem('roomRegistry', JSON.stringify(roomRegistry));
+                        
                         startRoomHosting();
                     } else {
                         // Try to connect to existing room
@@ -2275,23 +2441,47 @@
         function startRoomHosting() {
             // Poll for new connections
             setInterval(() => {
-                const roomData = localStorage.getItem(`room_${room}`);
+                // Update room data in all storage locations
                 if (roomData) {
-                    const data = JSON.parse(roomData);
-                    // Keep room alive
-                    data.timestamp = Date.now();
-                    localStorage.setItem(`room_${room}`, JSON.stringify(data));
+                    roomData.timestamp = Date.now();
+                    localStorage.setItem(`room_${room}`, JSON.stringify(roomData));
+                    sessionStorage.setItem(`room_${room}`, JSON.stringify(roomData));
+                    
+                    let roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
+                    roomRegistry[room] = roomData;
+                    localStorage.setItem('roomRegistry', JSON.stringify(roomRegistry));
                 }
             }, 5000);
         }
 
         // Connect to an existing room
         function connectToRoom() {
-            const roomData = localStorage.getItem(`room_${room}`);
-            if (roomData) {
-                const data = JSON.parse(roomData);
-                hostPeerId = data.hostId;
+            // Try multiple methods to find the room
+            let roomData = null;
+            
+            // First try localStorage
+            roomData = JSON.parse(localStorage.getItem(`room_${room}`) || 'null');
+            
+            // If not found, try sessionStorage
+            if (!roomData) {
+                roomData = JSON.parse(sessionStorage.getItem(`room_${room}`) || 'null');
+            }
+            
+            // If still not found, try the room registry
+            if (!roomData) {
+                const roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
+                roomData = roomRegistry[room] || null;
+            }
+            
+            // If still not found, try to construct a direct connection using the room ID as the peer ID
+            if (!roomData) {
+                // Try to connect directly using the room ID as the peer ID
+                hostPeerId = room;
+            } else {
+                hostPeerId = roomData.hostId;
+            }
 
+            if (hostPeerId) {
                 // Try to connect to the host
                 const conn = peer.connect(hostPeerId, {
                     reliable: true
@@ -2792,6 +2982,11 @@
                 const roomData = JSON.parse(localStorage.getItem(`room_${room}`));
                 if (roomData.hostName === userName) {
                     localStorage.removeItem(`room_${room}`);
+                    sessionStorage.removeItem(`room_${room}`);
+                    
+                    let roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
+                    delete roomRegistry[room];
+                    localStorage.setItem('roomRegistry', JSON.stringify(roomRegistry));
                 }
             }
 
