@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechFest Walkie-Talkie - Pro Communication System</title>
+    <title>Creative Walkie - Pro Communication System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -579,6 +579,11 @@
         .status-dot.disconnected {
             background: var(--danger-color);
             animation: none;
+        }
+
+        .status-dot.connecting {
+            background: var(--warning-color);
+            animation: pulse 1s infinite;
         }
 
         @keyframes blink {
@@ -1275,6 +1280,86 @@
             }
         }
 
+        /* Connection Status Modal */
+        .connection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .connection-modal.show {
+            display: flex;
+        }
+
+        .connection-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .connection-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .connection-message {
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .connection-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .retry-button {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .cancel-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cancel-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
         /* Mobile Responsive Design */
         @media (max-width: 768px) {
             .logo h1 {
@@ -1349,6 +1434,53 @@
                 width: 100%;
                 justify-content: center;
             }
+
+            /* Center-align mobile elements */
+            .option-card {
+                text-align: center;
+            }
+
+            .option-card h2,
+            .option-card p {
+                text-align: center;
+            }
+
+            .participant {
+                justify-content: center;
+            }
+
+            .control-button {
+                justify-content: center;
+            }
+
+            .volume-control {
+                justify-content: center;
+            }
+
+            .status-message {
+                text-align: center;
+            }
+
+            .chat-message-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .chat-message-time {
+                margin-top: 3px;
+            }
+
+            .connection-content {
+                padding: 20px;
+            }
+
+            .connection-title {
+                font-size: 1.3rem;
+            }
+
+            .connection-buttons {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -1371,7 +1503,7 @@
             <div class="loader"></div>
         </div>
         <div class="loading-text">
-            Initializing TechFest Walkie<span class="loading-dots">...</span>
+            Initializing Creative Walkie<span class="loading-dots">...</span>
         </div>
     </div>
 
@@ -1384,7 +1516,7 @@
                     <div class="logo-bg"></div>
                     <div class="logo">
                         <i class="fas fa-walkie-talkie"></i>
-                        <h1>TechFest Walkie</h1>
+                        <h1>Creative Walkie</h1>
                     </div>
                 </div>
                 <p class="tagline">Professional real-time voice communication system for your team</p>
@@ -1582,6 +1714,18 @@
         </div>
     </div>
 
+    <!-- Connection Status Modal -->
+    <div class="connection-modal" id="connectionModal">
+        <div class="connection-content">
+            <h3 class="connection-title">Connection Failed</h3>
+            <p class="connection-message">Unable to connect to the room. This might be due to network restrictions or the room not being available.</p>
+            <div class="connection-buttons">
+                <button class="retry-button" id="retryButton">Retry</button>
+                <button class="cancel-button" id="cancelButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
@@ -1610,6 +1754,10 @@
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let touchStartTime = 0;
         let touchStartY = 0;
+        let roomInitialized = false;
+        let isHost = false;
+        let hostPeerId = null;
+        let roomData = null;
 
         // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
@@ -1637,6 +1785,9 @@
         const chatSend = document.getElementById('chatSend');
         const settingsPanel = document.getElementById('settingsPanel');
         const emojiButtons = document.querySelectorAll('.emoji-button');
+        const connectionModal = document.getElementById('connectionModal');
+        const retryButton = document.getElementById('retryButton');
+        const cancelButton = document.getElementById('cancelButton');
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
@@ -1728,6 +1879,21 @@
                     lastTouchEnd = now;
                 }, false);
             }
+
+            // Connection modal buttons
+            retryButton.addEventListener('click', () => {
+                connectionModal.classList.remove('show');
+                if (isHost) {
+                    initializeWalkieTalkie(true);
+                } else {
+                    initializeWalkieTalkie(false);
+                }
+            });
+
+            cancelButton.addEventListener('click', () => {
+                connectionModal.classList.remove('show');
+                leaveRoom();
+            });
         });
 
         // Handle touch start for mobile
@@ -1755,7 +1921,8 @@
 
         // Handle page visibility change
         function handleVisibilityChange() {
-            if (document.hidden && isTalking) {
+            // Only stop talking if the page is hidden AND the room is already initialized
+            if (document.hidden && isTalking && roomInitialized) {
                 stopTalking(new Event(isMobile ? 'touchend' : 'mouseup'));
             }
         }
@@ -1855,6 +2022,7 @@
 
             userName = nameInput.value.trim();
             room = roomIdInput.value.trim() || generateRoomId();
+            isHost = true;
 
             createRoomBtn.innerHTML = '<span class="loading"></span> Creating...';
             createRoomBtn.disabled = true;
@@ -1884,6 +2052,7 @@
 
             userName = nameInput.value.trim();
             room = roomIdInput.value.trim();
+            isHost = false;
 
             joinRoomBtn.innerHTML = '<span class="loading"></span> Joining...';
             joinRoomBtn.disabled = true;
@@ -1902,7 +2071,10 @@
         }
 
         // Initialize the walkie-talkie interface
-        async function initializeWalkieTalkie(isHost) {
+        async function initializeWalkieTalkie(host) {
+            // Reset room initialization flag
+            roomInitialized = false;
+
             // Hide landing page and show walkie interface
             landingPage.style.display = 'none';
             walkieContainer.style.display = 'flex';
@@ -1917,24 +2089,38 @@
             // Add system message to chat
             addChatMessage('System', `Welcome to room ${room}!`, true);
 
-            // Initialize PeerJS with mobile-friendly options
+            // Set connection status to connecting
+            updateConnectionStatus('connecting');
+
+            // Initialize PeerJS with improved ICE server configuration for cross-device connectivity
             try {
                 const peerOptions = {
                     debug: 2,
                     config: {
                         iceServers: [
                             { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' }
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:stun2.l.google.com:19302' },
+                            { urls: 'stun:stun3.l.google.com:19302' },
+                            { urls: 'stun:stun4.l.google.com:19302' },
+                            {
+                                urls: 'turn:numb.viagenie.ca',
+                                credential: 'muazkh',
+                                username: 'webrtc@live.com'
+                            },
+                            {
+                                urls: 'turn:relay.metered.ca:80',
+                                credential: 'f87b9f0a5c6f5e5d5e5d5e5d',
+                                username: 'c6f5e5d5e5d5e5d5'
+                            },
+                            {
+                                urls: 'turn:relay.metered.ca:443',
+                                credential: 'f87b9f0a5c6f5e5d5e5d5e5d',
+                                username: 'c6f5e5d5e5d5e5d5'
+                            }
                         ]
                     }
                 };
-
-                // Add additional options for mobile
-                if (isMobile) {
-                    peerOptions.config.iceServers.push(
-                        { urls: 'turn:numb.viagenie.ca', credential: 'muazkh', username: 'webrtc@live.com' }
-                    );
-                }
 
                 peer = new Peer(peerOptions);
 
@@ -1942,20 +2128,25 @@
                     console.log('My peer ID is: ' + id);
                     updateConnectionStatus(true);
 
-                    // Store room info in localStorage for other users to find
-                    const roomData = {
-                        roomId: room,
-                        hostId: id,
-                        hostName: userName,
-                        timestamp: Date.now()
-                    };
+                    if (host) {
+                        // Create room data with our peer ID
+                        roomData = {
+                            roomId: room,
+                            hostId: id,
+                            hostName: userName,
+                            timestamp: Date.now()
+                        };
 
-                    if (isHost) {
+                        // Store room data in localStorage for other users to find
                         localStorage.setItem(`room_${room}`, JSON.stringify(roomData));
                         startRoomHosting();
                     } else {
+                        // Try to connect to existing room
                         connectToRoom();
                     }
+
+                    // Mark room as initialized
+                    roomInitialized = true;
                 });
 
                 peer.on('connection', (conn) => {
@@ -1964,18 +2155,23 @@
 
                 peer.on('call', (call) => {
                     // Answer the call with our local stream
-                    call.answer(localStream);
-                    call.on('stream', (remoteStream) => {
-                        handleRemoteStream(call.peer, remoteStream);
-                    });
+                    if (localStream) {
+                        call.answer(localStream);
+                        call.on('stream', (remoteStream) => {
+                            handleRemoteStream(call.peer, remoteStream);
+                        });
 
-                    call.on('close', () => {
-                        console.log('Call closed');
-                    });
+                        call.on('close', () => {
+                            console.log('Call closed');
+                        });
 
-                    call.on('error', (err) => {
-                        console.error('Call error:', err);
-                    });
+                        call.on('error', (err) => {
+                            console.error('Call error:', err);
+                        });
+                    } else {
+                        // If we don't have a local stream yet, reject the call
+                        call.close();
+                    }
                 });
 
                 peer.on('disconnected', () => {
@@ -1987,7 +2183,7 @@
                             peer.reconnect();
                         }, 3000);
                     } else {
-                        showToast('Connection failed. Please refresh the page.');
+                        showConnectionModal();
                     }
                 });
 
@@ -1997,6 +2193,10 @@
                         showToast('Your browser is not compatible with WebRTC');
                     } else if (err.type === 'unavailable-id') {
                         showToast('ID is taken');
+                    } else if (err.type === 'network' || err.type === 'peer-unavailable') {
+                        // Network errors are common with cross-device connections
+                        updateConnectionStatus(false);
+                        showConnectionModal();
                     } else {
                         showToast('Connection error: ' + err);
                     }
@@ -2005,6 +2205,7 @@
             } catch (error) {
                 showToast('Failed to initialize peer connection');
                 console.error('PeerJS error:', error);
+                showConnectionModal();
             }
 
             // Request microphone access with mobile-friendly options
@@ -2033,15 +2234,26 @@
         }
 
         // Update connection status
-        function updateConnectionStatus(isConnected) {
-            if (isConnected) {
+        function updateConnectionStatus(status) {
+            if (status === true) {
                 connectionStatus.textContent = 'Connected';
-                statusDot.classList.remove('disconnected');
+                statusDot.classList.remove('disconnected', 'connecting');
+                statusDot.classList.add('active');
                 reconnectAttempts = 0;
+            } else if (status === 'connecting') {
+                connectionStatus.textContent = 'Connecting...';
+                statusDot.classList.remove('disconnected', 'active');
+                statusDot.classList.add('connecting');
             } else {
                 connectionStatus.textContent = 'Disconnected';
+                statusDot.classList.remove('active', 'connecting');
                 statusDot.classList.add('disconnected');
             }
+        }
+
+        // Show connection modal
+        function showConnectionModal() {
+            connectionModal.classList.add('show');
         }
 
         // Start hosting a room
@@ -2063,7 +2275,10 @@
             const roomData = localStorage.getItem(`room_${room}`);
             if (roomData) {
                 const data = JSON.parse(roomData);
-                const conn = peer.connect(data.hostId);
+                hostPeerId = data.hostId;
+
+                // Try to connect to the host
+                const conn = peer.connect(hostPeerId);
 
                 conn.on('open', () => {
                     conn.send({
@@ -2075,13 +2290,21 @@
                 handleConnection(conn);
 
                 // Make a call to the host
-                const call = peer.call(data.hostId, localStream);
-                call.on('stream', (remoteStream) => {
-                    handleRemoteStream(data.hostId, remoteStream);
-                });
+                if (localStream) {
+                    const call = peer.call(hostPeerId, localStream);
+                    call.on('stream', (remoteStream) => {
+                        handleRemoteStream(hostPeerId, remoteStream);
+                    });
+
+                    call.on('error', (err) => {
+                        console.error('Call error:', err);
+                        // If the call fails, show the connection modal
+                        showConnectionModal();
+                    });
+                }
             } else {
                 showToast('Room not found or expired');
-                leaveRoom();
+                showConnectionModal();
             }
         }
 
@@ -2571,6 +2794,10 @@
             isTalking = false;
             isMuted = false;
             isRecording = false;
+            roomInitialized = false;
+            isHost = false;
+            hostPeerId = null;
+            roomData = null;
 
             showToast('You left the room');
         }
