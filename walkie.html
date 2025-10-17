@@ -239,16 +239,13 @@
         }
 
         /* Main Container */
-        .main-container {
+        .app-container {
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
 
         /* Landing Page Styles */
@@ -531,13 +528,14 @@
             background: rgba(30, 41, 59, 0.9);
             backdrop-filter: blur(10px);
             color: white;
-            padding: 20px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 10;
+            flex-shrink: 0;
         }
 
         .room-info {
@@ -595,7 +593,7 @@
             }
         }
 
-        .walkie-body {
+        .walkie-content {
             display: flex;
             flex: 1;
             overflow: hidden;
@@ -610,6 +608,7 @@
             padding: 25px;
             overflow-y: auto;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .panel-title {
@@ -689,7 +688,7 @@
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
 
-        .controls-panel {
+        .main-controls {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -743,6 +742,9 @@
             margin-bottom: 40px;
             position: relative;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .talk-button::before {
@@ -854,6 +856,9 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
             backdrop-filter: blur(10px);
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .control-button:hover {
@@ -877,6 +882,172 @@
             animation: pulse 1.5s infinite;
         }
 
+        /* Side Panels Container */
+        .side-panels {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 400px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Emoji Reactions */
+        .emoji-reactions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .emoji-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .emoji-button:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .emoji-button.active {
+            background: var(--gradient-1);
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            width: 300px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            display: none;
+            pointer-events: auto;
+        }
+
+        .settings-panel.show {
+            display: block;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .settings-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-label {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .setting-control {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .setting-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .setting-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
         /* Bottom Controls Container */
         .bottom-controls {
             position: absolute;
@@ -890,6 +1061,7 @@
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 5;
+            flex-shrink: 0;
         }
 
         .left-controls {
@@ -915,6 +1087,9 @@
             gap: 10px;
             box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
             transition: all 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .leave-button:hover {
@@ -940,6 +1115,7 @@
             transition: all 0.3s;
             transform: translateY(calc(100% - 60px));
             z-index: 4;
+            pointer-events: auto;
         }
 
         .chat-panel.expanded {
@@ -953,6 +1129,9 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .chat-header h3 {
@@ -1050,163 +1229,14 @@
             padding: 10px 15px;
             cursor: pointer;
             transition: all 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .chat-send:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        /* Emoji Reactions */
-        .emoji-reactions {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 4;
-        }
-
-        .emoji-button {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1.2rem;
-        }
-
-        .emoji-button:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .emoji-button.active {
-            background: var(--gradient-1);
-            animation: bounce 0.5s;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.2);
-            }
-        }
-
-        /* Settings Panel */
-        .settings-panel {
-            position: absolute;
-            top: 80px;
-            right: 20px;
-            width: 300px;
-            background: rgba(30, 41, 59, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            display: none;
-            z-index: 4;
-        }
-
-        .settings-panel.show {
-            display: block;
-            animation: fadeInUp 0.3s ease-out;
-        }
-
-        .settings-title {
-            color: white;
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .setting-item {
-            margin-bottom: 15px;
-        }
-
-        .setting-label {
-            color: #cbd5e1;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .setting-control {
-            width: 100%;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 0.9rem;
-        }
-
-        .setting-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        .setting-switch {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #475569;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(26px);
         }
 
         /* Toast Notification */
@@ -1260,7 +1290,7 @@
                 max-width: 400px;
             }
 
-            .walkie-body {
+            .walkie-content {
                 flex-direction: column;
             }
 
@@ -1284,6 +1314,11 @@
             .controls-row {
                 flex-direction: column;
                 gap: 15px;
+            }
+
+            .side-panels {
+                width: 100%;
+                pointer-events: none;
             }
 
             .chat-panel {
@@ -1340,8 +1375,8 @@
         </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Main App Container -->
+    <div class="app-container">
         <!-- Landing Page -->
         <div class="landing-page" id="landingPage">
             <div class="landing-header">
@@ -1407,7 +1442,7 @@
                 </div>
             </div>
 
-            <div class="walkie-body">
+            <div class="walkie-content">
                 <div class="participants-panel">
                     <h3 class="panel-title">
                         <i class="fas fa-users"></i>
@@ -1418,7 +1453,7 @@
                     </div>
                 </div>
 
-                <div class="controls-panel">
+                <div class="main-controls">
                     <div class="status-message" id="statusMessage">Press and hold to talk</div>
 
                     <div class="audio-visualizer" id="audioVisualizer">
@@ -1453,15 +1488,63 @@
                         </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Emoji Reactions -->
-            <div class="emoji-reactions">
-                <div class="emoji-button" data-emoji="👍">👍</div>
-                <div class="emoji-button" data-emoji="👎">👎</div>
-                <div class="emoji-button" data-emoji="🎉">🎉</div>
-                <div class="emoji-button" data-emoji="❤️">❤️</div>
-                <div class="emoji-button" data-emoji="😂">😂</div>
+                <!-- Side Panels Container -->
+                <div class="side-panels">
+                    <!-- Emoji Reactions -->
+                    <div class="emoji-reactions">
+                        <div class="emoji-button" data-emoji="👍">👍</div>
+                        <div class="emoji-button" data-emoji="👎">👎</div>
+                        <div class="emoji-button" data-emoji="🎉">🎉</div>
+                        <div class="emoji-button" data-emoji="❤️">❤️</div>
+                        <div class="emoji-button" data-emoji="😂">😂</div>
+                    </div>
+
+                    <!-- Settings Panel -->
+                    <div class="settings-panel" id="settingsPanel">
+                        <h3 class="settings-title">Audio Settings</h3>
+
+                        <div class="setting-item">
+                            <label class="setting-label">Echo Cancellation</label>
+                            <div class="setting-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="echoCancellation" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">Noise Suppression</label>
+                            <div class="setting-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="noiseSuppression" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">Auto Gain Control</label>
+                            <div class="setting-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="autoGainControl" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label class="setting-label">Notification Sound</label>
+                            <div class="setting-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="notificationSound" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Chat Panel -->
@@ -1481,51 +1564,6 @@
                     <button class="chat-send" id="chatSend">
                         <i class="fas fa-paper-plane"></i>
                     </button>
-                </div>
-            </div>
-
-            <!-- Settings Panel -->
-            <div class="settings-panel" id="settingsPanel">
-                <h3 class="settings-title">Audio Settings</h3>
-
-                <div class="setting-item">
-                    <label class="setting-label">Echo Cancellation</label>
-                    <div class="setting-switch">
-                        <label class="switch">
-                            <input type="checkbox" id="echoCancellation" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <label class="setting-label">Noise Suppression</label>
-                    <div class="setting-switch">
-                        <label class="switch">
-                            <input type="checkbox" id="noiseSuppression" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <label class="setting-label">Auto Gain Control</label>
-                    <div class="setting-switch">
-                        <label class="switch">
-                            <input type="checkbox" id="autoGainControl" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="setting-item">
-                    <label class="setting-label">Notification Sound</label>
-                    <div class="setting-switch">
-                        <label class="switch">
-                            <input type="checkbox" id="notificationSound" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
                 </div>
             </div>
 
@@ -1570,6 +1608,8 @@
         let maxReconnectAttempts = 5;
         let reconnectTimer;
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let touchStartTime = 0;
+        let touchStartY = 0;
 
         // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
@@ -1617,9 +1657,15 @@
 
             // Different event handling for mobile vs desktop
             if (isMobile) {
-                talkButton.addEventListener('touchstart', startTalking);
-                talkButton.addEventListener('touchend', stopTalking);
-                talkButton.addEventListener('touchcancel', stopTalking);
+                // Use touch events for mobile with proper handling
+                talkButton.addEventListener('touchstart', handleTouchStart, { passive: false });
+                talkButton.addEventListener('touchend', handleTouchEnd, { passive: false });
+                talkButton.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
+                // Prevent scrolling when touching the talk button
+                talkButton.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
             } else {
                 talkButton.addEventListener('mousedown', startTalking);
                 talkButton.addEventListener('mouseup', stopTalking);
@@ -1670,7 +1716,42 @@
                     peer.destroy();
                 }
             });
+
+            // Prevent zoom on double tap for mobile
+            if (isMobile) {
+                let lastTouchEnd = 0;
+                document.addEventListener('touchend', (e) => {
+                    const now = Date.now();
+                    if (now - lastTouchEnd <= 300) {
+                        e.preventDefault();
+                    }
+                    lastTouchEnd = now;
+                }, false);
+            }
         });
+
+        // Handle touch start for mobile
+        function handleTouchStart(e) {
+            e.preventDefault();
+            touchStartTime = Date.now();
+            touchStartY = e.touches[0].clientY;
+            startTalking(e);
+        }
+
+        // Handle touch end for mobile
+        function handleTouchEnd(e) {
+            e.preventDefault();
+
+            // Check if this was a quick tap (not a scroll)
+            const touchDuration = Date.now() - touchStartTime;
+            const touchEndY = e.changedTouches[0].clientY;
+            const touchDistance = Math.abs(touchEndY - touchStartY);
+
+            // Only stop talking if it was a quick tap (not a scroll)
+            if (touchDuration < 500 && touchDistance < 10) {
+                stopTalking(e);
+            }
+        }
 
         // Handle page visibility change
         function handleVisibilityChange() {
