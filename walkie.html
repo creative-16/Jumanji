@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFest Walkie-Talkie - Pro Communication System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --dark-color: #0f172a;
+            --light-color: #f8fafc;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            opacity: 0.9;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--primary-color);
+            opacity: 0.1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.1;
+            }
+
+            25% {
+                transform: translateY(-100px) translateX(50px) scale(1.1);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: translateY(-50px) translateX(-30px) scale(0.9);
+                opacity: 0.15;
+            }
+
+            75% {
+                transform: translateY(-150px) translateX(20px) scale(1.05);
+                opacity: 0.1;
+            }
+        }
+
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: pulse 8s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            top: 10%;
+            left: 20%;
+            width: 300px;
+            height: 300px;
+            background: var(--primary-color);
+        }
+
+        .orb-2 {
+            bottom: 20%;
+            right: 15%;
+            width: 250px;
+            height: 250px;
+            background: var(--secondary-color);
+            animation-delay: 2s;
+        }
+
+        .orb-3 {
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            background: var(--accent-color);
+            animation-delay: 4s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.15;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.25;
+            }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--primary-color);
+            animation: spin 1.5s linear infinite;
+        }
+
+        .loader:nth-child(2) {
+            width: 80%;
+            height: 80%;
+            top: 10%;
+            left: 10%;
+            border-top-color: var(--secondary-color);
+            animation-duration: 1.2s;
+            animation-direction: reverse;
+        }
+
+        .loader:nth-child(3) {
+            width: 60%;
+            height: 60%;
+            top: 20%;
+            left: 20%;
+            border-top-color: var(--accent-color);
+            animation-duration: 0.9s;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            color: var(--light-color);
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .loading-dots {
+            display: inline-block;
+            width: 20px;
+            text-align: left;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-container {
+            margin-bottom: 3rem;
+            text-align: center;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .logo-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            background: var(--gradient-1);
+            border-radius: 30px;
+            opacity: 0.2;
+            filter: blur(20px);
+            animation: pulse 4s infinite ease-in-out;
+        }
+
+        .logo i {
+            font-size: 4rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .logo h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-left: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tagline {
+            color: #cbd5e1;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 800px;
+            animation: fadeInUp 0.8s ease-out 0.7s both;
+        }
+
+        .option-card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .option-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .option-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .option-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-1);
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s;
+        }
+
+        .option-card:hover .option-icon {
+            transform: rotate(10deg) scale(1.1);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .option-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .option-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.8rem;
+            color: white;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .option-card p {
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .input-group input::placeholder {
+            color: #64748b;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px 25px;
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:disabled::before {
+            display: none;
+        }
+
+        /* Walkie-Talkie Interface Styles */
+        .walkie-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .walkie-header {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .room-info i {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .room-name {
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success-color);
+            animation: blink 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background: var(--danger-color);
+            animation: none;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .walkie-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .participants-panel {
+            width: 100%;
+            max-width: 350px;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-title i {
+            color: var(--primary-color);
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .participant:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .participant-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: 600;
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 3px;
+        }
+
+        .participant-status {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .speaking-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #475569;
+            transition: all 0.3s;
+        }
+
+        .speaking-indicator.active {
+            background: var(--danger-color);
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .controls-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            position: relative;
+        }
+
+        .status-message {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            text-align: center;
+            min-height: 30px;
+            font-weight: 500;
+        }
+
+        .audio-visualizer {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 60px;
+            margin-bottom: 40px;
+        }
+
+        .audio-bar {
+            width: 5px;
+            background: var(--gradient-1);
+            border-radius: 3px;
+            transition: height 0.1s;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .talk-button {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .talk-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .talk-button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .talk-button i {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            z-index: 1;
+        }
+
+        .talk-button span {
+            z-index: 1;
+            letter-spacing: 2px;
+        }
+
+        .talk-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px rgba(99, 102, 241, 0.5);
+        }
+
+        .talk-button.active {
+            background: var(--gradient-2);
+            animation: pulse 1s infinite;
+            box-shadow: 0 25px 50px rgba(236, 72, 153, 0.5);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .volume-control i {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .volume-slider {
+            width: 150px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .control-button {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-button i {
+            font-size: 1.2rem;
+        }
+
+        .control-button.muted {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .control-button.recording {
+            background: var(--warning-color);
+            border-color: var(--warning-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .leave-button {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            transition: all 0.3s;
+        }
+
+        .leave-button:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 350px;
+            max-height: 400px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+            transform: translateY(calc(100% - 60px));
+        }
+
+        .chat-panel.expanded {
+            transform: translateY(0);
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .chat-header h3 {
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-header i {
+            color: var(--primary-color);
+        }
+
+        .chat-toggle {
+            color: #94a3b8;
+            transition: transform 0.3s;
+        }
+
+        .chat-panel.expanded .chat-toggle {
+            transform: rotate(180deg);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .chat-panel.expanded .chat-messages {
+            display: block;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .chat-message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .chat-message-author {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .chat-message-time {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .chat-message-content {
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .chat-panel.expanded .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .chat-input::placeholder {
+            color: #64748b;
+        }
+
+        .chat-send {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chat-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Emoji Reactions */
+        .emoji-reactions {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .emoji-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+        }
+
+        .emoji-button:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .emoji-button.active {
+            background: var(--gradient-1);
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: absolute;
+            top: 80px;
+            right: 30px;
+            width: 300px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            display: none;
+            z-index: 100;
+        }
+
+        .settings-panel.show {
+            display: block;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .settings-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-label {
+            color: #cbd5e1;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .setting-control {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .setting-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .setting-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo h1 {
+                font-size: 2.2rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .options-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+
+            .walkie-body {
+                flex-direction: column;
+            }
+
+            .participants-panel {
+                width: 100%;
+                max-width: none;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                max-height: 200px;
+            }
+
+            .talk-button {
+                width: 140px;
+                height: 140px;
+            }
+
+            .talk-button i {
+                font-size: 2.8rem;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .chat-panel {
+                width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
+            }
+
+            .emoji-reactions {
+                top: auto;
+                bottom: 100px;
+                right: 20px;
+            }
+
+            .settings-panel {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+        <div class="particles" id="particles"></div>
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader-container">
+            <div class="loader"></div>
+            <div class="loader"></div>
+            <div class="loader"></div>
+        </div>
+        <div class="loading-text">
+            Initializing TechFest Walkie<span class="loading-dots">...</span>
+        </div>
+    </div>
+
+    <!-- Landing Page -->
+    <div class="landing-page" id="landingPage">
+        <div class="container">
+            <div class="logo-container">
+                <div class="logo">
+                    <div class="logo-bg"></div>
+                    <i class="fas fa-walkie-talkie"></i>
+                    <h1>Creative Walkie</h1>
+                </div>
+                <p class="tagline"></p>
+            </div>
+
+            <div class="options-container">
+                <!-- Create Room Option -->
+                <div class="option-card">
+                    <div class="option-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h2>Create Room</h2>
+                    <p>Start a new conversation room for your team</p>
+                    <div class="input-group">
+                        <input type="text" id="createRoomName" placeholder="Your Name" maxlength="20">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="createRoomId" placeholder="Room ID (optional)" maxlength="10">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <button class="btn" id="createRoomBtn">Create Room</button>
+                </div>
+
+                <!-- Join Room Option -->
+                <div class="option-card">
+                    <div class="option-icon">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <h2>Join Room</h2>
+                    <p>Connect to an existing conversation room</p>
+                    <div class="input-group">
+                        <input type="text" id="joinRoomName" placeholder="Your Name" maxlength="20">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="joinRoomId" placeholder="Room ID" maxlength="10">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <button class="btn" id="joinRoomBtn">Join Room</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Walkie-Talkie Interface -->
+    <div class="walkie-container" id="walkieContainer">
+        <div class="walkie-header">
+            <div class="room-info">
+                <i class="fas fa-walkie-talkie"></i>
+                <span class="room-name" id="roomName">Room</span>
+            </div>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="connectionStatus">Connected</span>
+            </div>
+        </div>
+
+        <div class="walkie-body">
+            <div class="participants-panel">
+                <h3 class="panel-title">
+                    <i class="fas fa-users"></i>
+                    Participants
+                </h3>
+                <div id="participantsList">
+                    <!-- Participants will be added dynamically -->
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="status-message" id="statusMessage">Press and hold to talk</div>
+
+                <div class="audio-visualizer" id="audioVisualizer">
+                    <!-- Audio bars will be added dynamically -->
+                </div>
+
+                <button class="talk-button" id="talkButton">
+                    <i class="fas fa-microphone"></i>
+                    <span>TALK</span>
+                </button>
+
+                <div class="controls-row">
+                    <div class="volume-control">
+                        <i class="fas fa-volume-down"></i>
+                        <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+
+                    <button class="control-button" id="muteButton">
+                        <i class="fas fa-volume-mute"></i>
+                        <span>Mute</span>
+                    </button>
+
+                    <button class="control-button" id="recordButton">
+                        <i class="fas fa-record-vinyl"></i>
+                        <span>Record</span>
+                    </button>
+
+                    <button class="control-button" id="settingsButton">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emoji Reactions -->
+        <div class="emoji-reactions">
+            <div class="emoji-button" data-emoji="👍">👍</div>
+            <div class="emoji-button" data-emoji="👎">👎</div>
+            <div class="emoji-button" data-emoji="🎉">🎉</div>
+            <div class="emoji-button" data-emoji="❤️">❤️</div>
+            <div class="emoji-button" data-emoji="😂">😂</div>
+        </div>
+
+        <!-- Chat Panel -->
+        <div class="chat-panel" id="chatPanel">
+            <div class="chat-header" id="chatHeader">
+                <h3>
+                    <i class="fas fa-comments"></i>
+                    Team Chat
+                </h3>
+                <i class="fas fa-chevron-up chat-toggle"></i>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will be added dynamically -->
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type a message...">
+                <button class="chat-send" id="chatSend">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settingsPanel">
+            <h3 class="settings-title">Audio Settings</h3>
+
+            <div class="setting-item">
+                <label class="setting-label">Echo Cancellation</label>
+                <div class="setting-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="echoCancellation" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label class="setting-label">Noise Suppression</label>
+                <div class="setting-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="noiseSuppression" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label class="setting-label">Auto Gain Control</label>
+                <div class="setting-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="autoGainControl" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label class="setting-label">Notification Sound</label>
+                <div class="setting-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="notificationSound" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="leave-button" id="leaveButton">
+            <i class="fas fa-sign-out-alt"></i>
+            Leave Room
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script>
+        // Global variables
+        let localStream;
+        let isTalking = false;
+        let isMuted = false;
+        let isRecording = false;
+        let room;
+        let userName;
+        let peer;
+        let connections = {};
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+        let roomMembers = new Set();
+        let mediaRecorder;
+        let recordedChunks = [];
+        let notificationSound;
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const landingPage = document.getElementById('landingPage');
+        const walkieContainer = document.getElementById('walkieContainer');
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const talkButton = document.getElementById('talkButton');
+        const leaveButton = document.getElementById('leaveButton');
+        const muteButton = document.getElementById('muteButton');
+        const recordButton = document.getElementById('recordButton');
+        const settingsButton = document.getElementById('settingsButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const participantsList = document.getElementById('participantsList');
+        const roomNameDisplay = document.getElementById('roomName');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const statusDot = document.getElementById('statusDot');
+        const toast = document.getElementById('toast');
+        const audioVisualizer = document.getElementById('audioVisualizer');
+        const chatPanel = document.getElementById('chatPanel');
+        const chatHeader = document.getElementById('chatHeader');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const emojiButtons = document.querySelectorAll('.emoji-button');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create particles
+            createParticles();
+
+            // Initialize loading dots animation
+            animateLoadingDots();
+
+            // Hide loading screen after initialization
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 2000);
+
+            // Set up event listeners
+            createRoomBtn.addEventListener('click', createRoom);
+            joinRoomBtn.addEventListener('click', joinRoom);
+            talkButton.addEventListener('mousedown', startTalking);
+            talkButton.addEventListener('mouseup', stopTalking);
+            talkButton.addEventListener('touchstart', startTalking);
+            talkButton.addEventListener('touchend', stopTalking);
+            leaveButton.addEventListener('click', leaveRoom);
+            muteButton.addEventListener('click', toggleMute);
+            recordButton.addEventListener('click', toggleRecording);
+            settingsButton.addEventListener('click', toggleSettings);
+            volumeSlider.addEventListener('input', adjustVolume);
+
+            // Chat panel
+            chatHeader.addEventListener('click', toggleChat);
+            chatSend.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendChatMessage();
+                }
+            });
+
+            // Emoji reactions
+            emojiButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    sendEmojiReaction(button.dataset.emoji);
+                });
+            });
+
+            // Settings
+            document.getElementById('echoCancellation').addEventListener('change', updateAudioSettings);
+            document.getElementById('noiseSuppression').addEventListener('change', updateAudioSettings);
+            document.getElementById('autoGainControl').addEventListener('change', updateAudioSettings);
+
+            // Prevent context menu on long press for mobile
+            talkButton.addEventListener('contextmenu', e => e.preventDefault());
+
+            // Initialize audio visualizer
+            initializeAudioVisualizer();
+
+            // Create notification sound
+            createNotificationSound();
+        });
+
+        // Create particles for background
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Random size
+                const size = Math.random() * 5 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+
+                // Random animation duration and delay
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+
+                // Random color
+                const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = color;
+
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Animate loading dots
+        function animateLoadingDots() {
+            const dots = document.querySelector('.loading-dots');
+            let dotCount = 0;
+
+            setInterval(() => {
+                dotCount = (dotCount + 1) % 4;
+                dots.textContent = '.'.repeat(dotCount);
+            }, 500);
+        }
+
+        // Create notification sound
+        function createNotificationSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // Create oscillator for notification sound
+            notificationSound = {
+                play: function () {
+                    if (!document.getElementById('notificationSound').checked) return;
+
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }
+            };
+        }
+
+        // Show toast notification
+        function showToast(message, duration = 3000) {
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            notificationSound.play();
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Create a new room
+        async function createRoom() {
+            const nameInput = document.getElementById('createRoomName');
+            const roomIdInput = document.getElementById('createRoomId');
+
+            if (!nameInput.value.trim()) {
+                showToast('Please enter your name');
+                return;
+            }
+
+            userName = nameInput.value.trim();
+            room = roomIdInput.value.trim() || generateRoomId();
+
+            createRoomBtn.innerHTML = '<span class="loading"></span> Creating...';
+            createRoomBtn.disabled = true;
+
+            await initializeWalkieTalkie(true);
+
+            createRoomBtn.innerHTML = 'Create Room';
+            createRoomBtn.disabled = false;
+
+            showToast(`Room created with ID: ${room}`);
+        }
+
+        // Join an existing room
+        async function joinRoom() {
+            const nameInput = document.getElementById('joinRoomName');
+            const roomIdInput = document.getElementById('joinRoomId');
+
+            if (!nameInput.value.trim()) {
+                showToast('Please enter your name');
+                return;
+            }
+
+            if (!roomIdInput.value.trim()) {
+                showToast('Please enter a room ID');
+                return;
+            }
+
+            userName = nameInput.value.trim();
+            room = roomIdInput.value.trim();
+
+            joinRoomBtn.innerHTML = '<span class="loading"></span> Joining...';
+            joinRoomBtn.disabled = true;
+
+            await initializeWalkieTalkie(false);
+
+            joinRoomBtn.innerHTML = 'Join Room';
+            joinRoomBtn.disabled = false;
+
+            showToast(`Joined room: ${room}`);
+        }
+
+        // Generate a random room ID
+        function generateRoomId() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        // Initialize the walkie-talkie interface
+        async function initializeWalkieTalkie(isHost) {
+            // Hide landing page and show walkie interface
+            landingPage.style.display = 'none';
+            walkieContainer.style.display = 'flex';
+
+            // Update UI with user and room info
+            roomNameDisplay.textContent = `Room: ${room}`;
+
+            // Add current user to participants list
+            addParticipant(userName, true);
+            roomMembers.add(userName);
+
+            // Add system message to chat
+            addChatMessage('System', `Welcome to room ${room}!`, true);
+
+            // Initialize PeerJS
+            try {
+                peer = new Peer();
+
+                peer.on('open', (id) => {
+                    console.log('My peer ID is: ' + id);
+
+                    // Store room info in localStorage for other users to find
+                    const roomData = {
+                        roomId: room,
+                        hostId: id,
+                        hostName: userName,
+                        timestamp: Date.now()
+                    };
+
+                    if (isHost) {
+                        localStorage.setItem(`room_${room}`, JSON.stringify(roomData));
+                        startRoomHosting();
+                    } else {
+                        connectToRoom();
+                    }
+                });
+
+                peer.on('connection', (conn) => {
+                    handleConnection(conn);
+                });
+
+                peer.on('call', (call) => {
+                    call.answer(localStream);
+                    call.on('stream', (remoteStream) => {
+                        handleRemoteStream(call.peer, remoteStream);
+                    });
+                });
+
+            } catch (error) {
+                showToast('Failed to initialize peer connection');
+                console.error('PeerJS error:', error);
+            }
+
+            // Request microphone access
+            try {
+                const audioConstraints = {
+                    echoCancellation: document.getElementById('echoCancellation').checked,
+                    noiseSuppression: document.getElementById('noiseSuppression').checked,
+                    autoGainControl: document.getElementById('autoGainControl').checked
+                };
+
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    audio: audioConstraints
+                });
+
+                setupAudioProcessing();
+                showToast('Microphone access granted');
+            } catch (error) {
+                showToast('Microphone access denied');
+                console.error('Error accessing microphone:', error);
+            }
+        }
+
+        // Start hosting a room
+        function startRoomHosting() {
+            // Poll for new connections
+            setInterval(() => {
+                const roomData = localStorage.getItem(`room_${room}`);
+                if (roomData) {
+                    const data = JSON.parse(roomData);
+                    // Keep room alive
+                    data.timestamp = Date.now();
+                    localStorage.setItem(`room_${room}`, JSON.stringify(data));
+                }
+            }, 5000);
+        }
+
+        // Connect to an existing room
+        function connectToRoom() {
+            const roomData = localStorage.getItem(`room_${room}`);
+            if (roomData) {
+                const data = JSON.parse(roomData);
+                const conn = peer.connect(data.hostId);
+
+                conn.on('open', () => {
+                    conn.send({
+                        type: 'join',
+                        userName: userName
+                    });
+                });
+
+                handleConnection(conn);
+
+                // Make a call to the host
+                const call = peer.call(data.hostId, localStream);
+                call.on('stream', (remoteStream) => {
+                    handleRemoteStream(data.hostId, remoteStream);
+                });
+            } else {
+                showToast('Room not found or expired');
+                leaveRoom();
+            }
+        }
+
+        // Handle new peer connection
+        function handleConnection(conn) {
+            connections[conn.peer] = conn;
+
+            conn.on('data', (data) => {
+                if (data.type === 'join') {
+                    addParticipant(data.userName, false);
+                    roomMembers.add(data.userName);
+                    showToast(`${data.userName} joined the room`);
+                    addChatMessage('System', `${data.userName} joined the room`, true);
+
+                    // Notify all other participants
+                    Object.values(connections).forEach(c => {
+                        if (c !== conn) {
+                            c.send({
+                                type: 'userJoined',
+                                userName: data.userName
+                            });
+                        }
+                    });
+                } else if (data.type === 'userJoined') {
+                    addParticipant(data.userName, false);
+                    roomMembers.add(data.userName);
+                    showToast(`${data.userName} joined the room`);
+                    addChatMessage('System', `${data.userName} joined the room`, true);
+                } else if (data.type === 'talking') {
+                    updateSpeakingIndicator(data.userName, data.isTalking);
+                } else if (data.type === 'leave') {
+                    removeParticipant(data.userName);
+                    roomMembers.delete(data.userName);
+                    showToast(`${data.userName} left the room`);
+                    addChatMessage('System', `${data.userName} left the room`, true);
+                } else if (data.type === 'chat') {
+                    addChatMessage(data.userName, data.message);
+                } else if (data.type === 'emoji') {
+                    showEmojiReaction(data.userName, data.emoji);
+                }
+            });
+
+            conn.on('close', () => {
+                delete connections[conn.peer];
+            });
+        }
+
+        // Handle remote audio stream
+        function handleRemoteStream(peerId, stream) {
+            const audio = new Audio();
+            audio.srcObject = stream;
+            audio.play();
+
+            // Store audio element for volume control
+            if (!window.remoteAudio) {
+                window.remoteAudio = [];
+            }
+            window.remoteAudio.push(audio);
+        }
+
+        // Setup audio processing for visualizer
+        function setupAudioProcessing() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            microphone = audioContext.createMediaStreamSource(localStream);
+            javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+            analyser.smoothingTimeConstant = 0.8;
+            analyser.fftSize = 1024;
+
+            microphone.connect(analyser);
+            analyser.connect(javascriptNode);
+            javascriptNode.connect(audioContext.destination);
+
+            javascriptNode.onaudioprocess = function () {
+                if (isTalking) {
+                    const array = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(array);
+                    updateVisualizer(array);
+                }
+            };
+
+            // Setup media recorder for recording functionality
+            mediaRecorder = new MediaRecorder(localStream);
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `recording_${new Date().getTime()}.webm`;
+                a.click();
+                recordedChunks = [];
+            };
+        }
+
+        // Initialize audio visualizer
+        function initializeAudioVisualizer() {
+            for (let i = 0; i < 30; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'audio-bar';
+                bar.style.height = '5px';
+                audioVisualizer.appendChild(bar);
+            }
+        }
+
+        // Update audio visualizer
+        function updateVisualizer(dataArray) {
+            const bars = audioVisualizer.querySelectorAll('.audio-bar');
+            const step = Math.floor(dataArray.length / bars.length);
+
+            bars.forEach((bar, index) => {
+                const value = dataArray[index * step];
+                const height = Math.max(5, (value / 255) * 60);
+                bar.style.height = `${height}px`;
+            });
+        }
+
+        // Add a participant to the list
+        function addParticipant(name, isCurrentUser) {
+            const participant = document.createElement('div');
+            participant.className = 'participant';
+            participant.id = `participant-${name.replace(/\s+/g, '-')}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'participant-avatar';
+
+            // Generate random color for avatar
+            const colors = [
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
+            ];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            avatar.style.background = randomColor;
+
+            avatar.textContent = name.charAt(0).toUpperCase();
+
+            const info = document.createElement('div');
+            info.className = 'participant-info';
+
+            const nameElement = document.createElement('div');
+            nameElement.className = 'participant-name';
+            nameElement.textContent = name;
+
+            const status = document.createElement('div');
+            status.className = 'participant-status';
+            status.textContent = isCurrentUser ? 'You' : 'Connected';
+
+            const indicator = document.createElement('div');
+            indicator.className = 'speaking-indicator';
+            indicator.id = `indicator-${name.replace(/\s+/g, '-')}`;
+
+            info.appendChild(nameElement);
+            info.appendChild(status);
+
+            participant.appendChild(avatar);
+            participant.appendChild(info);
+            participant.appendChild(indicator);
+
+            participantsList.appendChild(participant);
+        }
+
+        // Remove a participant from the list
+        function removeParticipant(name) {
+            const participant = document.getElementById(`participant-${name.replace(/\s+/g, '-')}`);
+            if (participant) {
+                participant.remove();
+            }
+        }
+
+        // Update speaking indicator
+        function updateSpeakingIndicator(name, isSpeaking) {
+            const indicator = document.getElementById(`indicator-${name.replace(/\s+/g, '-')}`);
+            if (indicator) {
+                if (isSpeaking) {
+                    indicator.classList.add('active');
+                    statusMessage.textContent = `${name} is speaking...`;
+                } else {
+                    indicator.classList.remove('active');
+                    statusMessage.textContent = 'Press and hold to talk';
+                }
+            }
+        }
+
+        // Start talking
+        function startTalking(e) {
+            e.preventDefault();
+
+            if (!localStream || isMuted) {
+                showToast('Microphone is muted or not available');
+                return;
+            }
+
+            isTalking = true;
+            talkButton.classList.add('active');
+            statusMessage.textContent = 'Transmitting...';
+
+            // Show speaking indicator for current user
+            updateSpeakingIndicator(userName, true);
+
+            // Notify all connections
+            Object.values(connections).forEach(conn => {
+                conn.send({
+                    type: 'talking',
+                    userName: userName,
+                    isTalking: true
+                });
+            });
+
+            // Start sending audio to all connected peers
+            Object.keys(connections).forEach(peerId => {
+                const call = peer.call(peerId, localStream);
+                call.on('stream', (remoteStream) => {
+                    handleRemoteStream(peerId, remoteStream);
+                });
+            });
+        }
+
+        // Stop talking
+        function stopTalking(e) {
+            e.preventDefault();
+
+            isTalking = false;
+            talkButton.classList.remove('active');
+            statusMessage.textContent = 'Press and hold to talk';
+
+            // Hide speaking indicator for current user
+            updateSpeakingIndicator(userName, false);
+
+            // Notify all connections
+            Object.values(connections).forEach(conn => {
+                conn.send({
+                    type: 'talking',
+                    userName: userName,
+                    isTalking: false
+                });
+            });
+
+            // Reset visualizer
+            const bars = audioVisualizer.querySelectorAll('.audio-bar');
+            bars.forEach(bar => {
+                bar.style.height = '5px';
+            });
+        }
+
+        // Toggle mute
+        function toggleMute() {
+            isMuted = !isMuted;
+
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => {
+                    track.enabled = !isMuted;
+                });
+            }
+
+            if (isMuted) {
+                muteButton.classList.add('muted');
+                muteButton.innerHTML = '<i class="fas fa-volume-mute"></i><span>Unmute</span>';
+                showToast('Microphone muted');
+            } else {
+                muteButton.classList.remove('muted');
+                muteButton.innerHTML = '<i class="fas fa-volume-mute"></i><span>Mute</span>';
+                showToast('Microphone unmuted');
+            }
+        }
+
+        // Toggle recording
+        function toggleRecording() {
+            if (!mediaRecorder) {
+                showToast('Recording not available');
+                return;
+            }
+
+            if (isRecording) {
+                mediaRecorder.stop();
+                recordButton.classList.remove('recording');
+                recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i><span>Record</span>';
+                showToast('Recording saved');
+            } else {
+                mediaRecorder.start();
+                recordButton.classList.add('recording');
+                recordButton.innerHTML = '<i class="fas fa-stop"></i><span>Stop</span>';
+                showToast('Recording started');
+            }
+
+            isRecording = !isRecording;
+        }
+
+        // Toggle settings panel
+        function toggleSettings() {
+            settingsPanel.classList.toggle('show');
+        }
+
+        // Update audio settings
+        function updateAudioSettings() {
+            // This would require re-initializing the media stream with new constraints
+            // For simplicity, we'll just show a toast
+            showToast('Audio settings updated');
+        }
+
+        // Adjust volume
+        function adjustVolume() {
+            const volume = volumeSlider.value / 100;
+
+            if (window.remoteAudio) {
+                window.remoteAudio.forEach(audio => {
+                    audio.volume = volume;
+                });
+            }
+        }
+
+        // Toggle chat panel
+        function toggleChat() {
+            chatPanel.classList.toggle('expanded');
+        }
+
+        // Send chat message
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add message to local chat
+            addChatMessage(userName, message);
+
+            // Send message to all connections
+            Object.values(connections).forEach(conn => {
+                conn.send({
+                    type: 'chat',
+                    userName: userName,
+                    message: message
+                });
+            });
+
+            // Clear input
+            chatInput.value = '';
+        }
+
+        // Add chat message to UI
+        function addChatMessage(author, message, isSystem = false) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message';
+
+            const headerElement = document.createElement('div');
+            headerElement.className = 'chat-message-header';
+
+            const authorElement = document.createElement('div');
+            authorElement.className = 'chat-message-author';
+            authorElement.textContent = isSystem ? '🔔' : author;
+            if (isSystem) {
+                authorElement.style.color = '#f59e0b';
+            }
+
+            const timeElement = document.createElement('div');
+            timeElement.className = 'chat-message-time';
+            const now = new Date();
+            timeElement.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            const contentElement = document.createElement('div');
+            contentElement.className = 'chat-message-content';
+            contentElement.textContent = message;
+
+            headerElement.appendChild(authorElement);
+            headerElement.appendChild(timeElement);
+
+            messageElement.appendChild(headerElement);
+            messageElement.appendChild(contentElement);
+
+            chatMessages.appendChild(messageElement);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Send emoji reaction
+        function sendEmojiReaction(emoji) {
+            // Add reaction to local UI
+            showEmojiReaction(userName, emoji);
+
+            // Send reaction to all connections
+            Object.values(connections).forEach(conn => {
+                conn.send({
+                    type: 'emoji',
+                    userName: userName,
+                    emoji: emoji
+                });
+            });
+
+            // Add to chat
+            addChatMessage(userName, `Reacted with ${emoji}`);
+        }
+
+        // Show emoji reaction
+        function showEmojiReaction(userName, emoji) {
+            const reaction = document.createElement('div');
+            reaction.style.position = 'fixed';
+            reaction.style.top = '50%';
+            reaction.style.left = '50%';
+            reaction.style.transform = 'translate(-50%, -50%)';
+            reaction.style.fontSize = '5rem';
+            reaction.style.zIndex = '1000';
+            reaction.style.animation = 'fadeInOut 2s ease-out';
+            reaction.textContent = emoji;
+
+            document.body.appendChild(reaction);
+
+            setTimeout(() => {
+                reaction.remove();
+            }, 2000);
+        }
+
+        // Leave the room
+        function leaveRoom() {
+            // Notify all connections
+            Object.values(connections).forEach(conn => {
+                conn.send({
+                    type: 'leave',
+                    userName: userName
+                });
+                conn.close();
+            });
+
+            // Close peer connection
+            if (peer) {
+                peer.destroy();
+            }
+
+            // Stop all tracks
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            // Clean up room data if host
+            if (localStorage.getItem(`room_${room}`)) {
+                const roomData = JSON.parse(localStorage.getItem(`room_${room}`));
+                if (roomData.hostName === userName) {
+                    localStorage.removeItem(`room_${room}`);
+                }
+            }
+
+            // Reset UI
+            walkieContainer.style.display = 'none';
+            landingPage.style.display = 'flex';
+
+            // Clear participants list
+            participantsList.innerHTML = '';
+            roomMembers.clear();
+
+            // Clear chat
+            chatMessages.innerHTML = '';
+
+            // Reset form inputs
+            document.getElementById('createRoomName').value = '';
+            document.getElementById('createRoomId').value = '';
+            document.getElementById('joinRoomName').value = '';
+            document.getElementById('joinRoomId').value = '';
+
+            // Reset variables
+            connections = {};
+            isTalking = false;
+            isMuted = false;
+            isRecording = false;
+
+            showToast('You left the room');
+        }
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isTalking) {
+                stopTalking(new Event('mouseup'));
+            }
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (peer) {
+                peer.destroy();
+            }
+        });
+
+        // Add CSS animation for emoji reactions
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.5);
+                }
+                50% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1.2);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
