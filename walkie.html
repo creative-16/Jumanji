@@ -1454,6 +1454,64 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        /* QR Code Modal */
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .qr-modal.show {
+            display: flex;
+        }
+
+        .qr-content {
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .qr-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .qr-code-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-message {
+            color: #cbd5e1;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .qr-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
         /* Mobile Responsive Design */
         @media (max-width: 768px) {
             .logo h1 {
@@ -1565,17 +1623,20 @@
             }
 
             .connection-content,
-            .room-info-content {
+            .room-info-content,
+            .qr-content {
                 padding: 20px;
             }
 
             .connection-title,
-            .room-info-title {
+            .room-info-title,
+            .qr-title {
                 font-size: 1.3rem;
             }
 
             .connection-buttons,
-            .room-info-buttons {
+            .room-info-buttons,
+            .qr-buttons {
                 flex-direction: column;
             }
         }
@@ -1838,7 +1899,29 @@
                     <i class="fas fa-link"></i>
                     Copy Link
                 </button>
+                <button class="copy-button" id="showQRButton">
+                    <i class="fas fa-qrcode"></i>
+                    Show QR Code
+                </button>
                 <button class="close-button" id="closeRoomInfoButton">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div class="qr-modal" id="qrModal">
+        <div class="qr-content">
+            <h3 class="qr-title">Scan QR Code to Join</h3>
+            <div class="qr-code-container" id="qrCodeContainer">
+                <!-- QR code will be generated here -->
+            </div>
+            <p class="qr-message">Scan this QR code with your mobile device to quickly join the room.</p>
+            <div class="qr-buttons">
+                <button class="copy-button" id="downloadQRButton">
+                    <i class="fas fa-download"></i>
+                    Download QR Code
+                </button>
+                <button class="close-button" id="closeQRButton">Close</button>
             </div>
         </div>
     </div>
@@ -1847,6 +1930,7 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
         // Global variables
         let localStream;
@@ -1877,7 +1961,9 @@
         let roomData = null;
         let peerId = null;
         let connectionEstablished = false;
-        let signalingServer = 'wss://creativewalkie-signaling.herokuapp.com'; // Fallback signaling server
+        let signalingServer = null;
+        let ws = null;
+        let qrCode = null;
 
         // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
@@ -1912,7 +1998,12 @@
         const roomIdDisplay = document.getElementById('roomIdDisplay');
         const copyRoomIdButton = document.getElementById('copyRoomIdButton');
         const copyLinkButton = document.getElementById('copyLinkButton');
+        const showQRButton = document.getElementById('showQRButton');
         const closeRoomInfoButton = document.getElementById('closeRoomInfoButton');
+        const qrModal = document.getElementById('qrModal');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+        const downloadQRButton = document.getElementById('downloadQRButton');
+        const closeQRButton = document.getElementById('closeQRButton');
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
@@ -1991,6 +2082,9 @@
                 if (peer) {
                     peer.destroy();
                 }
+                if (ws) {
+                    ws.close();
+                }
             });
 
             // Prevent zoom on double tap for mobile
@@ -2023,8 +2117,15 @@
             // Room info modal buttons
             copyRoomIdButton.addEventListener('click', copyRoomId);
             copyLinkButton.addEventListener('click', copyRoomLink);
+            showQRButton.addEventListener('click', showQRCode);
             closeRoomInfoButton.addEventListener('click', () => {
                 roomInfoModal.classList.remove('show');
+            });
+
+            // QR modal buttons
+            downloadQRButton.addEventListener('click', downloadQRCode);
+            closeQRButton.addEventListener('click', () => {
+                qrModal.classList.remove('show');
             });
 
             // Check if there's a room ID in the URL
@@ -2230,6 +2331,64 @@
             });
         }
 
+        // Show QR code
+        function showQRCode() {
+            const roomLink = `${window.location.origin}${window.location.pathname}?room=${room}`;
+            
+            // Generate QR code
+            const typeNumber = 0;
+            const errorCorrectionLevel = 'L';
+            const qr = qrcode(typeNumber, errorCorrectionLevel);
+            qr.addData(roomLink);
+            qr.make();
+            
+            // Create QR code image
+            const size = 256;
+            const cellSize = size / qr.getModuleCount();
+            const margin = 4;
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Draw QR code
+            for (let row = 0; row < qr.getModuleCount(); row++) {
+                for (let col = 0; col < qr.getModuleCount(); col++) {
+                    ctx.fillStyle = qr.isDark(row, col) ? '#000000' : '#FFFFFF';
+                    ctx.fillRect(col * cellSize + margin, row * cellSize + margin, cellSize, cellSize);
+                }
+            }
+            
+            // Clear previous QR code
+            qrCodeContainer.innerHTML = '';
+            
+            // Add QR code image
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL();
+            img.style.width = '100%';
+            img.style.maxWidth = '256px';
+            qrCodeContainer.appendChild(img);
+            
+            // Store QR code for download
+            qrCode = canvas.toDataURL();
+            
+            // Show QR modal
+            qrModal.classList.add('show');
+        }
+
+        // Download QR code
+        function downloadQRCode() {
+            if (!qrCode) return;
+            
+            const link = document.createElement('a');
+            link.download = `creative-walkie-${room}.png`;
+            link.href = qrCode;
+            link.click();
+            
+            showToast('QR code downloaded');
+        }
+
         // Initialize the walkie-talkie interface
         async function initializeWalkieTalkie(host) {
             // Reset room initialization flag
@@ -2252,6 +2411,9 @@
 
             // Set connection status to connecting
             updateConnectionStatus('connecting');
+
+            // Initialize WebSocket signaling server
+            await initializeSignalingServer();
 
             // Request microphone access first
             try {
@@ -2330,18 +2492,8 @@
                             timestamp: Date.now()
                         };
 
-                        // Store room data in multiple places for better cross-device discovery
-                        localStorage.setItem(`room_${room}`, JSON.stringify(roomData));
-                        
-                        // Also store in sessionStorage as a fallback
-                        sessionStorage.setItem(`room_${room}`, JSON.stringify(roomData));
-                        
-                        // Create a global room registry in localStorage
-                        let roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
-                        roomRegistry[room] = roomData;
-                        localStorage.setItem('roomRegistry', JSON.stringify(roomRegistry));
-                        
-                        startRoomHosting();
+                        // Register room with signaling server
+                        registerRoomWithSignalingServer();
                     } else {
                         // Try to connect to existing room
                         connectToRoom();
@@ -2411,6 +2563,221 @@
             }
         }
 
+        // Initialize WebSocket signaling server
+        async function initializeSignalingServer() {
+            try {
+                // Try multiple signaling servers for better reliability
+                const signalingServers = [
+                    'wss://creativewalkie-signaling.herokuapp.com',
+                    'wss://webrtc-signaling-server.herokuapp.com',
+                    'wss://simple-peer-signaling.herokuapp.com'
+                ];
+
+                // Try each server until one connects
+                for (const server of signalingServers) {
+                    try {
+                        ws = new WebSocket(server);
+                        signalingServer = server;
+                        
+                        ws.onopen = () => {
+                            console.log('Connected to signaling server:', server);
+                        };
+                        
+                        ws.onmessage = (event) => {
+                            const data = JSON.parse(event.data);
+                            handleSignalingMessage(data);
+                        };
+                        
+                        ws.onerror = (error) => {
+                            console.error('WebSocket error:', error);
+                        };
+                        
+                        ws.onclose = () => {
+                            console.log('WebSocket connection closed');
+                            // Try to reconnect after a delay
+                            setTimeout(() => {
+                                if (roomInitialized) {
+                                    initializeSignalingServer();
+                                }
+                            }, 5000);
+                        };
+                        
+                        // Wait a bit to see if the connection succeeds
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                        if (ws.readyState === WebSocket.OPEN) {
+                            break; // Connected successfully
+                        }
+                    } catch (error) {
+                        console.error('Failed to connect to signaling server:', server, error);
+                    }
+                }
+                
+                // If no server connected, use a fallback mechanism
+                if (!ws || ws.readyState !== WebSocket.OPEN) {
+                    console.log('No signaling server available, using fallback mechanism');
+                    useFallbackSignaling();
+                }
+            } catch (error) {
+                console.error('Error initializing signaling server:', error);
+                useFallbackSignaling();
+            }
+        }
+
+        // Use fallback signaling mechanism
+        function useFallbackSignaling() {
+            // Create a simple polling mechanism as a fallback
+            const fallbackServer = 'https://creativewalkie-signaling.glitch.me';
+            
+            // Register room
+            if (isHost && roomData) {
+                fetch(`${fallbackServer}/register-room`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(roomData)
+                }).catch(error => {
+                    console.error('Failed to register room with fallback server:', error);
+                });
+            }
+            
+            // Poll for room updates
+            setInterval(() => {
+                if (!roomInitialized) return;
+                
+                if (isHost) {
+                    // Update room data
+                    fetch(`${fallbackServer}/update-room`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            ...roomData,
+                            timestamp: Date.now()
+                        })
+                    }).catch(error => {
+                        console.error('Failed to update room with fallback server:', error);
+                    });
+                } else {
+                    // Check for room
+                    fetch(`${fallbackServer}/get-room/${room}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.hostId) {
+                                hostPeerId = data.hostId;
+                                connectToHost();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Failed to get room from fallback server:', error);
+                        });
+                }
+            }, 5000);
+        }
+
+        // Register room with signaling server
+        function registerRoomWithSignalingServer() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                useFallbackSignaling();
+                return;
+            }
+            
+            ws.send(JSON.stringify({
+                type: 'register-room',
+                data: roomData
+            }));
+        }
+
+        // Handle signaling messages
+        function handleSignalingMessage(data) {
+            switch (data.type) {
+                case 'room-registered':
+                    console.log('Room registered successfully');
+                    break;
+                case 'room-found':
+                    if (data.data && data.data.hostId) {
+                        hostPeerId = data.data.hostId;
+                        connectToHost();
+                    }
+                    break;
+                case 'join-request':
+                    if (isHost && data.data && data.data.peerId) {
+                        // Accept the connection
+                        ws.send(JSON.stringify({
+                            type: 'accept-connection',
+                            data: {
+                                peerId: data.data.peerId,
+                                hostId: peerId
+                            }
+                        }));
+                    }
+                    break;
+                case 'connection-accepted':
+                    if (data.data && data.data.hostId) {
+                        hostPeerId = data.data.hostId;
+                        connectToHost();
+                    }
+                    break;
+            }
+        }
+
+        // Connect to host
+        function connectToHost() {
+            if (!hostPeerId || !peer) return;
+            
+            // Try to connect to the host
+            const conn = peer.connect(hostPeerId, {
+                reliable: true
+            });
+
+            conn.on('open', () => {
+                conn.send({
+                    type: 'join',
+                    userName: userName
+                });
+                connectionEstablished = true;
+            });
+
+            conn.on('error', (err) => {
+                console.error('Connection error:', err);
+                showConnectionModal();
+            });
+
+            handleConnection(conn);
+
+            // Make a call to the host
+            if (localStream) {
+                const call = peer.call(hostPeerId, localStream);
+                call.on('stream', (remoteStream) => {
+                    handleRemoteStream(hostPeerId, remoteStream);
+                });
+
+                call.on('error', (err) => {
+                    console.error('Call error:', err);
+                    // If the call fails, show the connection modal
+                    showConnectionModal();
+                });
+            }
+        }
+
+        // Connect to an existing room
+        function connectToRoom() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                useFallbackSignaling();
+                return;
+            }
+            
+            // Request room from signaling server
+            ws.send(JSON.stringify({
+                type: 'get-room',
+                data: {
+                    roomId: room
+                }
+            }));
+        }
+
         // Update connection status
         function updateConnectionStatus(status) {
             if (status === true) {
@@ -2435,90 +2802,6 @@
         // Show connection modal
         function showConnectionModal() {
             connectionModal.classList.add('show');
-        }
-
-        // Start hosting a room
-        function startRoomHosting() {
-            // Poll for new connections
-            setInterval(() => {
-                // Update room data in all storage locations
-                if (roomData) {
-                    roomData.timestamp = Date.now();
-                    localStorage.setItem(`room_${room}`, JSON.stringify(roomData));
-                    sessionStorage.setItem(`room_${room}`, JSON.stringify(roomData));
-                    
-                    let roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
-                    roomRegistry[room] = roomData;
-                    localStorage.setItem('roomRegistry', JSON.stringify(roomRegistry));
-                }
-            }, 5000);
-        }
-
-        // Connect to an existing room
-        function connectToRoom() {
-            // Try multiple methods to find the room
-            let roomData = null;
-            
-            // First try localStorage
-            roomData = JSON.parse(localStorage.getItem(`room_${room}`) || 'null');
-            
-            // If not found, try sessionStorage
-            if (!roomData) {
-                roomData = JSON.parse(sessionStorage.getItem(`room_${room}`) || 'null');
-            }
-            
-            // If still not found, try the room registry
-            if (!roomData) {
-                const roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
-                roomData = roomRegistry[room] || null;
-            }
-            
-            // If still not found, try to construct a direct connection using the room ID as the peer ID
-            if (!roomData) {
-                // Try to connect directly using the room ID as the peer ID
-                hostPeerId = room;
-            } else {
-                hostPeerId = roomData.hostId;
-            }
-
-            if (hostPeerId) {
-                // Try to connect to the host
-                const conn = peer.connect(hostPeerId, {
-                    reliable: true
-                });
-
-                conn.on('open', () => {
-                    conn.send({
-                        type: 'join',
-                        userName: userName
-                    });
-                    connectionEstablished = true;
-                });
-
-                conn.on('error', (err) => {
-                    console.error('Connection error:', err);
-                    showConnectionModal();
-                });
-
-                handleConnection(conn);
-
-                // Make a call to the host
-                if (localStream) {
-                    const call = peer.call(hostPeerId, localStream);
-                    call.on('stream', (remoteStream) => {
-                        handleRemoteStream(hostPeerId, remoteStream);
-                    });
-
-                    call.on('error', (err) => {
-                        console.error('Call error:', err);
-                        // If the call fails, show the connection modal
-                        showConnectionModal();
-                    });
-                }
-            } else {
-                showToast('Room not found or expired');
-                showConnectionModal();
-            }
         }
 
         // Handle new peer connection
@@ -2972,22 +3255,14 @@
                 peer.destroy();
             }
 
+            // Close WebSocket connection
+            if (ws) {
+                ws.close();
+            }
+
             // Stop all tracks
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
-            }
-
-            // Clean up room data if host
-            if (localStorage.getItem(`room_${room}`)) {
-                const roomData = JSON.parse(localStorage.getItem(`room_${room}`));
-                if (roomData.hostName === userName) {
-                    localStorage.removeItem(`room_${room}`);
-                    sessionStorage.removeItem(`room_${room}`);
-                    
-                    let roomRegistry = JSON.parse(localStorage.getItem('roomRegistry') || '{}');
-                    delete roomRegistry[room];
-                    localStorage.setItem('roomRegistry', JSON.stringify(roomRegistry));
-                }
             }
 
             // Reset UI
