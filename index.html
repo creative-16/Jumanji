@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jumanji: Designed to Survive</title>
+    <title>Jumanji: Digital Odyssey - Enter the Jungle</title>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -31,7 +31,7 @@
             --accent-red: #8b0000;
             --text-light: #f5f5dc;
             --text-dark: #333;
-            --jungle-pattern: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232d5016"/><path d="M0,50 Q25,30 50,50 T100,50" stroke="%234a7c2e" stroke-width="2" fill="none"/><path d="M0,20 Q25,0 50,20 T100,20" stroke="%234a7c2e" stroke-width="2" fill="none"/><path d="M0,80 Q25,60 50,80 T100,80" stroke="%234a7c2e" stroke-width="2" fill="none"/></svg>');
+
         }
 
         * {
@@ -42,14 +42,16 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--primary-green);
-            background-image: var(--jungle-pattern);
-            color: var(--text-light);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow-x: hidden;
+
+        }
+
+        p {
+            color: rgb(143, 139, 139);
         }
 
         body::before {
@@ -59,9 +61,31 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('https://picsum.photos/seed/jungle/1920/1080.jpg') center/cover no-repeat;
-            opacity: 0.2;
+            background: url('https://youtu.be/W5HtWdK6xLo?si=hAgHapoWGhY2lPgF');
+            opacity: 1;
             z-index: -1;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .video-background iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 220vh;
+            /* 100vh * (16 / 9) */
+            height: 120vh;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
         }
 
         header {
@@ -283,6 +307,7 @@
         .entry-option h3 {
             font-family: 'Permanent Marker', cursive;
             margin-bottom: 0.5rem;
+            color: white;
         }
 
         .entry-option p {
@@ -539,15 +564,20 @@
 </head>
 
 <body>
-    <div class="jungle-decoration jungle-1"></div>
-    <div class="jungle-decoration jungle-2"></div>
+    <div class="video-background">
+        <iframe
+            src="https://www.youtube.com/embed/4bHUsy74Fss?autoplay=1&mute=1&controls=0&loop=1&playlist=4bHUsy74Fss&start=12&end=96"
+            frameborder="0" allow="autoplay; fullscreen" allowfullscreen>
+        </iframe>
+    </div>
 
     <header>
-        <h1 class="logo">JUMANJI: DIGITAL ODYSSEY</h1>
-        <p class="tagline">Enter the Jungle. Face the Challenge. Find the Treasure.</p>
+        <h1 class="logo"><img src="./images/logo.png"></h1>
+        <p class="tagline">The Hunt Begins, Face your Fate</p>
     </header>
 
     <main>
+
         <!-- Step 1: Entry Options -->
         <div id="step1" class="card fade-in">
             <h2 class="card-title">
@@ -658,6 +688,26 @@
     </main>
 
     <div id="notification" class="notification"></div>
+    <!-- Hidden Audio Player -->
+    <audio id="bgm-player" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        function enableAudioOnInteraction() {
+            const audio = document.getElementById('bgm-player');
+            audio.play().catch(err => {
+                console.log("Autoplay blocked:", err);
+            });
+            document.removeEventListener('click', enableAudioOnInteraction);
+            document.removeEventListener('keydown', enableAudioOnInteraction);
+        }
+
+        // Attach on first interaction
+        document.addEventListener('click', enableAudioOnInteraction);
+        document.addEventListener('keydown', enableAudioOnInteraction);
+    </script>
 
     <script>
         // Initialize Firebase
@@ -1063,6 +1113,5 @@
         window.addEventListener('load', checkExistingSession);
     </script>
 </body>
-
 
 </html>
