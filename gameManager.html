@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumanji: Digital Odyssey - Game Manager</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Creepster&family=Permanent+Marker&family=Roboto:wght@400;500;700&family=Monoton&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-green: #2d5016;
+            --dark-green: #1a3009;
+            --light-green: #4a7c2e;
+            --accent-gold: #d4af37;
+            --accent-red: #8b0000;
+            --text-light: #f5f5dc;
+            --text-dark: #333;
+            --jungle-pattern: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232d5016"/><path d="M0,50 Q25,30 50,50 T100,50" stroke="%234a7c2e" stroke-width="2" fill="none"/><path d="M0,20 Q25,0 50,20 T100,20" stroke="%234a7c2e" stroke-width="2" fill="none"/><path d="M0,80 Q25,60 50,80 T100,80" stroke="%234a7c2e" stroke-width="2" fill="none"/></svg>');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--primary-green);
+            background-image: var(--jungle-pattern);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://picsum.photos/seed/jungle-admin/1920/1080.jpg') center/cover no-repeat;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        header {
+            background-color: rgba(26, 48, 9, 0.9);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid var(--accent-gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .logo {
+            font-family: 'Creepster', cursive;
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        main {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .card {
+            background-color: rgba(45, 80, 22, 0.9);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--light-green);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-gold), transparent, var(--accent-gold));
+            z-index: -1;
+            opacity: 0.5;
+            animation: borderGlow 3s infinite;
+        }
+
+        @keyframes borderGlow {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .card-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 5px;
+            border: 2px solid var(--light-green);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+        }
+
+        button {
+            background-color: var(--accent-gold);
+            color: var(--text-dark);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background-color: #b8941f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #6b0000;
+        }
+
+        .btn-copy {
+            background-color: var(--light-green);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 3px;
+        }
+
+        .btn-copy:hover {
+            background-color: #3a6324;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--light-green);
+        }
+
+        .tab {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-family: 'Permanent Marker', cursive;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .location-card {
+            background-color: rgba(26, 48, 9, 0.7);
+            border: 2px solid var(--light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .location-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .location-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .location-code {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        .location-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-ready {
+            background-color: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .status-team-arrived {
+            background-color: rgba(33, 150, 243, 0.3);
+            color: #2196F3;
+        }
+
+        .status-playing {
+            background-color: rgba(255, 152, 0, 0.3);
+            color: #FF9800;
+        }
+
+        .status-resetting {
+            background-color: rgba(156, 39, 176, 0.3);
+            color: #9C27B0;
+        }
+
+        .volunteer-card {
+            background-color: rgba(26, 48, 9, 0.7);
+            border: 2px solid var(--light-green);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .volunteer-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .volunteer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .volunteer-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .volunteer-location {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: #4CAF50;
+        }
+
+        .notification.error {
+            background-color: var(--accent-red);
+        }
+
+        .notification.info {
+            background-color: #2196F3;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--primary-green);
+            border: 2px solid var(--accent-gold);
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--accent-red);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .code-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .radio-option input[type="radio"] {
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+
+            .tagline {
+                font-size: 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="./images/logo.png" style="width: 200px;height: 70px">
+
+        <button id="logout-btn" class="logout-btn hidden">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </header>
+
+    <main>
+        <!-- Login Screen -->
+        <div id="login-screen" class="card fade-in">
+            <h2 class="card-title">
+                <i class="fas fa-lock"></i>
+                Admin Login
+            </h2>
+
+            <div class="form-group">
+                <label for="admin-email">Email</label>
+                <input type="email" id="admin-email" placeholder="Enter admin email">
+            </div>
+
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter admin password">
+            </div>
+
+            <button id="login-btn" class="btn-block">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </button>
+
+            <div style="margin-top: 1rem; text-align: center; font-size: 0.9rem; opacity: 0.7;">
+                <p>Demo Credentials:</p>
+                <p>Email: admin@jumanji.com</p>
+                <p>Password: jumanji123</p>
+            </div>
+        </div>
+
+        <!-- Game Manager Dashboard -->
+        <div id="game-manager-dashboard" class="hidden">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" data-tab="locations">Locations</div>
+                <div class="tab" data-tab="volunteers">Volunteers</div>
+                <div class="tab" data-tab="game-control">Game Control</div>
+            </div>
+
+            <!-- Locations Tab -->
+            <div class="tab-content active" id="locations-tab">
+                <div class="card fade-in">
+                    <h2 class="card-title">
+                        <i class="fas fa-map-marked-alt"></i>
+                        Location Management
+                    </h2>
+
+                    <button id="add-location-btn" class="btn-block">
+                        <i class="fas fa-plus-circle"></i>
+                        Add New Location
+                    </button>
+
+                    <div id="locations-list" style="margin-top: 1.5rem;">
+                        <!-- Locations will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volunteers Tab -->
+            <div class="tab-content" id="volunteers-tab">
+                <div class="card fade-in">
+                    <h2 class="card-title">
+                        <i class="fas fa-users"></i>
+                        Volunteer Management
+                    </h2>
+
+                    <button id="add-volunteer-btn" class="btn-block">
+                        <i class="fas fa-plus-circle"></i>
+                        Add New Volunteer
+                    </button>
+
+                    <div id="volunteers-list" style="margin-top: 1.5rem;">
+                        <!-- Volunteers will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Control Tab -->
+            <div class="tab-content" id="game-control-tab">
+                <div class="card fade-in">
+                    <h2 class="card-title">
+                        <i class="fas fa-gamepad"></i>
+                        Game Control
+                    </h2>
+
+                    <div class="form-group">
+                        <label for="maze-link">Maze Game Link</label>
+                        <input type="url" id="maze-link" placeholder="Enter the maze game URL">
+                    </div>
+
+                    <button id="update-maze-link-btn" class="btn-block">
+                        <i class="fas fa-save"></i>
+                        Update Maze Link
+                    </button>
+
+                    <div style="margin-top: 1.5rem;">
+                        <button id="start-game-btn" class="btn-block">
+                            <i class="fas fa-play"></i>
+                            Start Game
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <button id="stop-game-btn" class="btn-block btn-danger">
+                            <i class="fas fa-stop"></i>
+                            Stop Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Location Modal -->
+    <div id="location-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Location Details</h3>
+                <button class="close-modal" id="close-location-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="location-form">
+                <div class="form-group">
+                    <label for="location-name">Location Name</label>
+                    <input type="text" id="location-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location-number">Location Number</label>
+                    <input type="number" id="location-number" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location-hint">Location Hint</label>
+                    <textarea id="location-hint" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Location Type</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="physical-location" name="location-type" value="physical" checked>
+                            <label for="physical-location">Physical</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="virtual-location" name="location-type" value="virtual">
+                            <label for="virtual-location">Virtual</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="location-status">Venue Status</label>
+                    <select id="location-status">
+                        <option value="ready">Ready</option>
+                        <option value="team-arrived">Team Arrived</option>
+                        <option value="playing">Playing</option>
+                        <option value="venue-resetting">Venue Resetting</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Location Code</label>
+                    <div class="code-container">
+                        <input type="text" id="location-code" readonly>
+                        <button type="button" id="generate-code-btn" class="btn-copy">
+                            <i class="fas fa-sync-alt"></i> Generate
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-block">
+                    <i class="fas fa-save"></i>
+                    Save Location
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Volunteer Modal -->
+    <div id="volunteer-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Volunteer Details</h3>
+                <button class="close-modal" id="close-volunteer-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="volunteer-form">
+                <div class="form-group">
+                    <label for="volunteer-name">Volunteer Name</label>
+                    <input type="text" id="volunteer-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="volunteer-email">Email</label>
+                    <input type="email" id="volunteer-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="volunteer-phone">Phone</label>
+                    <input type="tel" id="volunteer-phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="volunteer-location">Assigned Location</label>
+                    <select id="volunteer-location">
+                        <option value="">Select a location</option>
+                        <!-- Locations will be dynamically added here -->
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-block">
+                    <i class="fas fa-save"></i>
+                    Save Volunteer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Initialize Firebase with the provided configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDeu-PF9W3fHf7shBV-_aVRCEZ6atBCJ5E",
+            authDomain: "jumanji-d14a9.firebaseapp.com",
+            projectId: "jumanji-d14a9",
+            storageBucket: "jumanji-d14a9.firebasestorage.app",
+            messagingSenderId: "1008263887985",
+            appId: "1:1008263887985:web:8be0e837e07bdecc9eafd0",
+            databaseURL: "https://jumanji-d14a9-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // DOM Elements
+        const loginScreen = document.getElementById('login-screen');
+        const gameManagerDashboard = document.getElementById('game-manager-dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const addLocationBtn = document.getElementById('add-location-btn');
+        const addVolunteerBtn = document.getElementById('add-volunteer-btn');
+        const updateMazeLinkBtn = document.getElementById('update-maze-link-btn');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const stopGameBtn = document.getElementById('stop-game-btn');
+        const locationModal = document.getElementById('location-modal');
+        const volunteerModal = document.getElementById('volunteer-modal');
+        const closeLocationModal = document.getElementById('close-location-modal');
+        const closeVolunteerModal = document.getElementById('close-volunteer-modal');
+        const locationForm = document.getElementById('location-form');
+        const volunteerForm = document.getElementById('volunteer-form');
+        const generateCodeBtn = document.getElementById('generate-code-btn');
+        const notification = document.getElementById('notification');
+
+        // Tab Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State
+        let currentUser = null;
+        let locations = {};
+        let volunteers = {};
+        let currentLocationId = null;
+        let currentVolunteerId = null;
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Generate unique location code
+        function generateLocationCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            return code;
+        }
+
+        // Admin login
+        async function adminLogin(email, password) {
+            try {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
+
+                // For demo purposes, we'll use a simple authentication
+                // In production, you would use Firebase Auth with proper admin accounts
+                if (email === 'admin@jumanji.com' && password === 'jumanji123') {
+                    // Create a mock admin user
+                    currentUser = {
+                        email: email,
+                        displayName: 'Jumanji Admin',
+                        uid: 'admin-uid'
+                    };
+
+                    // Store session in localStorage
+                    localStorage.setItem('jumanjiAdminSession', JSON.stringify(currentUser));
+
+                    showNotification('Login successful!', 'success');
+                    showGameManagerDashboard();
+                } else {
+                    showNotification('Invalid email or password', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Login failed. Please try again.', 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+            }
+        }
+
+        // Admin logout
+        function adminLogout() {
+            localStorage.removeItem('jumanjiAdminSession');
+            currentUser = null;
+
+            // Remove any real-time listeners
+            database.ref('locations').off();
+            database.ref('volunteers').off();
+            database.ref('gameState').off();
+
+            // Show login screen
+            loginScreen.classList.remove('hidden');
+            gameManagerDashboard.classList.add('hidden');
+            logoutBtn.classList.add('hidden');
+
+            showNotification('Logged out successfully', 'info');
+        }
+
+        // Show game manager dashboard
+        function showGameManagerDashboard() {
+            loginScreen.classList.add('hidden');
+            gameManagerDashboard.classList.remove('hidden');
+            gameManagerDashboard.classList.add('fade-in');
+            logoutBtn.classList.remove('hidden');
+
+            // Load data
+            loadLocationsData();
+            loadVolunteersData();
+            loadGameState();
+
+            // Set up real-time listeners
+            database.ref('locations').on('value', (snapshot) => {
+                locations = snapshot.val() || {};
+                updateLocationsDisplay();
+                updateVolunteerLocationOptions();
+            });
+
+            database.ref('volunteers').on('value', (snapshot) => {
+                volunteers = snapshot.val() || {};
+                updateVolunteersDisplay();
+            });
+
+            database.ref('gameState').on('value', (snapshot) => {
+                const gameState = snapshot.val() || {};
+                updateGameControls(gameState);
+            });
+        }
+
+        // Load locations data
+        function loadLocationsData() {
+            database.ref('locations').once('value', (snapshot) => {
+                locations = snapshot.val() || {};
+                updateLocationsDisplay();
+                updateVolunteerLocationOptions();
+            });
+        }
+
+        // Load volunteers data
+        function loadVolunteersData() {
+            database.ref('volunteers').once('value', (snapshot) => {
+                volunteers = snapshot.val() || {};
+                updateVolunteersDisplay();
+            });
+        }
+
+        // Load game state
+        function loadGameState() {
+            database.ref('gameState').once('value', (snapshot) => {
+                const gameState = snapshot.val() || {};
+                updateGameControls(gameState);
+            });
+        }
+
+        // Update locations display
+        function updateLocationsDisplay() {
+            const locationsList = document.getElementById('locations-list');
+            locationsList.innerHTML = '';
+
+            // Sort locations by number
+            const sortedLocations = Object.entries(locations).sort((a, b) => {
+                return (a[1].number || 0) - (b[1].number || 0);
+            });
+
+            if (sortedLocations.length === 0) {
+                locationsList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No locations added yet</p>';
+                return;
+            }
+
+            sortedLocations.forEach(([locationId, locationData]) => {
+                const locationCard = createLocationCard(locationId, locationData);
+                locationsList.appendChild(locationCard);
+            });
+
+            // Add event listeners to the new cards
+            document.querySelectorAll('.edit-location-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const locationId = e.target.getAttribute('data-location-id');
+                    editLocation(locationId);
+                });
+            });
+
+            document.querySelectorAll('.delete-location-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const locationId = e.target.getAttribute('data-location-id');
+                    deleteLocation(locationId);
+                });
+            });
+        }
+
+        // Create location card element
+        function createLocationCard(locationId, locationData) {
+            const locationCard = document.createElement('div');
+            locationCard.className = 'location-card';
+
+            const statusClass = `status-${locationData.status?.replace('_', '-') || 'ready'}`;
+            const statusText = locationData.status ?
+                locationData.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) :
+                'Ready';
+
+            locationCard.innerHTML = `
+                <div class="location-header">
+                    <div>
+                        <div class="location-name">${locationData.name || 'Unnamed Location'}</div>
+                        <div class="location-code">${locationData.code || 'No Code'}</div>
+                    </div>
+                    <div class="location-status ${statusClass}">${statusText}</div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <p><strong>Number:</strong> ${locationData.number || 'N/A'}</p>
+                    <p><strong>Type:</strong> ${locationData.type ? locationData.type.charAt(0).toUpperCase() + locationData.type.slice(1) : 'N/A'}</p>
+                    <p><strong>Hint:</strong> ${locationData.hint || 'No hint provided'}</p>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="edit-location-btn" data-location-id="${locationId}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="delete-location-btn" data-location-id="${locationId}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+
+            return locationCard;
+        }
+
+        // Update volunteers display
+        function updateVolunteersDisplay() {
+            const volunteersList = document.getElementById('volunteers-list');
+            volunteersList.innerHTML = '';
+
+            if (Object.keys(volunteers).length === 0) {
+                volunteersList.innerHTML = '<p style="text-align: center; opacity: 0.7;">No volunteers added yet</p>';
+                return;
+            }
+
+            Object.entries(volunteers).forEach(([volunteerId, volunteerData]) => {
+                const volunteerCard = createVolunteerCard(volunteerId, volunteerData);
+                volunteersList.appendChild(volunteerCard);
+            });
+
+            // Add event listeners to the new cards
+            document.querySelectorAll('.edit-volunteer-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const volunteerId = e.target.getAttribute('data-volunteer-id');
+                    editVolunteer(volunteerId);
+                });
+            });
+
+            document.querySelectorAll('.delete-volunteer-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const volunteerId = e.target.getAttribute('data-volunteer-id');
+                    deleteVolunteer(volunteerId);
+                });
+            });
+        }
+
+        // Create volunteer card element
+        function createVolunteerCard(volunteerId, volunteerData) {
+            const volunteerCard = document.createElement('div');
+            volunteerCard.className = 'volunteer-card';
+
+            const locationName = volunteerData.locationId && locations[volunteerData.locationId] ?
+                locations[volunteerData.locationId].name : 'Not assigned';
+
+            volunteerCard.innerHTML = `
+                <div class="volunteer-header">
+                    <div>
+                        <div class="volunteer-name">${volunteerData.name || 'Unnamed Volunteer'}</div>
+                        <div class="volunteer-location">${locationName}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <p><strong>Email:</strong> ${volunteerData.email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> ${volunteerData.phone || 'N/A'}</p>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="edit-volunteer-btn" data-volunteer-id="${volunteerId}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="delete-volunteer-btn" data-volunteer-id="${volunteerId}">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+
+            return volunteerCard;
+        }
+
+        // Update volunteer location options
+        function updateVolunteerLocationOptions() {
+            const volunteerLocationSelect = document.getElementById('volunteer-location');
+            volunteerLocationSelect.innerHTML = '<option value="">Select a location</option>';
+
+            Object.entries(locations).forEach(([locationId, locationData]) => {
+                const option = document.createElement('option');
+                option.value = locationId;
+                option.textContent = `${locationData.number || 'N/A'}: ${locationData.name || 'Unnamed Location'}`;
+                volunteerLocationSelect.appendChild(option);
+            });
+        }
+
+        // Update game controls
+        function updateGameControls(gameState) {
+            const mazeLinkInput = document.getElementById('maze-link');
+            mazeLinkInput.value = gameState.mazeLink || '';
+
+            if (gameState.isGameStarted) {
+                startGameBtn.disabled = true;
+                stopGameBtn.disabled = false;
+            } else {
+                startGameBtn.disabled = false;
+                stopGameBtn.disabled = true;
+            }
+        }
+
+        // Show location modal
+        function showLocationModal(locationId = null) {
+            currentLocationId = locationId;
+
+            if (locationId && locations[locationId]) {
+                // Edit mode
+                const locationData = locations[locationId];
+                document.getElementById('location-name').value = locationData.name || '';
+                document.getElementById('location-number').value = locationData.number || '';
+                document.getElementById('location-hint').value = locationData.hint || '';
+                document.getElementById('location-code').value = locationData.code || '';
+
+                if (locationData.type) {
+                    document.querySelector(`input[name="location-type"][value="${locationData.type}"]`).checked = true;
+                }
+
+                if (locationData.status) {
+                    document.getElementById('location-status').value = locationData.status;
+                }
+            } else {
+                // Add mode
+                locationForm.reset();
+                document.getElementById('location-code').value = generateLocationCode();
+            }
+
+            locationModal.classList.remove('hidden');
+        }
+
+        // Show volunteer modal
+        function showVolunteerModal(volunteerId = null) {
+            currentVolunteerId = volunteerId;
+
+            if (volunteerId && volunteers[volunteerId]) {
+                // Edit mode
+                const volunteerData = volunteers[volunteerId];
+                document.getElementById('volunteer-name').value = volunteerData.name || '';
+                document.getElementById('volunteer-email').value = volunteerData.email || '';
+                document.getElementById('volunteer-phone').value = volunteerData.phone || '';
+                document.getElementById('volunteer-location').value = volunteerData.locationId || '';
+            } else {
+                // Add mode
+                volunteerForm.reset();
+            }
+
+            volunteerModal.classList.remove('hidden');
+        }
+
+        // Edit location
+        function editLocation(locationId) {
+            showLocationModal(locationId);
+        }
+
+        // Delete location
+        async function deleteLocation(locationId) {
+            if (!confirm('Are you sure you want to delete this location?')) return;
+
+            try {
+                await database.ref(`locations/${locationId}`).remove();
+                showNotification('Location deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Error deleting location:', error);
+                showNotification('Failed to delete location. Please try again.', 'error');
+            }
+        }
+
+        // Edit volunteer
+        function editVolunteer(volunteerId) {
+            showVolunteerModal(volunteerId);
+        }
+
+        // Delete volunteer
+        async function deleteVolunteer(volunteerId) {
+            if (!confirm('Are you sure you want to delete this volunteer?')) return;
+
+            try {
+                await database.ref(`volunteers/${volunteerId}`).remove();
+                showNotification('Volunteer deleted successfully!', 'success');
+            } catch (error) {
+                console.error('Error deleting volunteer:', error);
+                showNotification('Failed to delete volunteer. Please try again.', 'error');
+            }
+        }
+
+        // Save location
+        async function saveLocation(e) {
+            e.preventDefault();
+
+            try {
+                const locationData = {
+                    name: document.getElementById('location-name').value,
+                    number: parseInt(document.getElementById('location-number').value),
+                    hint: document.getElementById('location-hint').value,
+                    code: document.getElementById('location-code').value,
+                    type: document.querySelector('input[name="location-type"]:checked').value,
+                    status: document.getElementById('location-status').value,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                if (currentLocationId) {
+                    // Update existing location
+                    await database.ref(`locations/${currentLocationId}`).update(locationData);
+                    showNotification('Location updated successfully!', 'success');
+                } else {
+                    // Add new location
+                    locationData.createdAt = firebase.database.ServerValue.TIMESTAMP;
+                    await database.ref('locations').push(locationData);
+                    showNotification('Location added successfully!', 'success');
+                }
+
+                locationModal.classList.add('hidden');
+            } catch (error) {
+                console.error('Error saving location:', error);
+                showNotification('Failed to save location. Please try again.', 'error');
+            }
+        }
+
+        // Save volunteer
+        async function saveVolunteer(e) {
+            e.preventDefault();
+
+            try {
+                const volunteerData = {
+                    name: document.getElementById('volunteer-name').value,
+                    email: document.getElementById('volunteer-email').value,
+                    phone: document.getElementById('volunteer-phone').value,
+                    locationId: document.getElementById('volunteer-location').value,
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                if (currentVolunteerId) {
+                    // Update existing volunteer
+                    await database.ref(`volunteers/${currentVolunteerId}`).update(volunteerData);
+                    showNotification('Volunteer updated successfully!', 'success');
+                } else {
+                    // Add new volunteer
+                    volunteerData.createdAt = firebase.database.ServerValue.TIMESTAMP;
+                    await database.ref('volunteers').push(volunteerData);
+                    showNotification('Volunteer added successfully!', 'success');
+                }
+
+                volunteerModal.classList.add('hidden');
+            } catch (error) {
+                console.error('Error saving volunteer:', error);
+                showNotification('Failed to save volunteer. Please try again.', 'error');
+            }
+        }
+
+        // Update maze link
+        async function updateMazeLink() {
+            try {
+                const mazeLink = document.getElementById('maze-link').value.trim();
+
+                if (!mazeLink) {
+                    showNotification('Please enter a valid maze game link', 'error');
+                    return;
+                }
+
+                await database.ref('gameState/mazeLink').set(mazeLink);
+                showNotification('Maze link updated successfully!', 'success');
+            } catch (error) {
+                console.error('Error updating maze link:', error);
+                showNotification('Failed to update maze link. Please try again.', 'error');
+            }
+        }
+
+        // Start game
+        async function startGame() {
+            try {
+                const mazeLink = document.getElementById('maze-link').value.trim();
+
+                if (!mazeLink) {
+                    showNotification('Please set the maze game link first', 'error');
+                    return;
+                }
+
+                await database.ref('gameState').update({
+                    isGameStarted: true,
+                    startedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Update all teams to redirect to maze
+                const teamsSnapshot = await database.ref('teams').once('value');
+                const teams = teamsSnapshot.val() || {};
+
+                Object.keys(teams).forEach(async (teamCode) => {
+                    await database.ref(`teams/${teamCode}`).update({
+                        status: 'in_maze',
+                        currentTask: mazeLink
+                    });
+                });
+
+                showNotification('Game started! All teams are being redirected to the maze.', 'success');
+            } catch (error) {
+                console.error('Error starting game:', error);
+                showNotification('Failed to start game. Please try again.', 'error');
+            }
+        }
+
+        // Stop game
+        async function stopGame() {
+            try {
+                await database.ref('gameState').update({
+                    isGameStarted: false,
+                    stoppedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                showNotification('Game stopped!', 'success');
+            } catch (error) {
+                console.error('Error stopping game:', error);
+                showNotification('Failed to stop game. Please try again.', 'error');
+            }
+        }
+
+        // Check for existing admin session
+        function checkAdminSession() {
+            const sessionData = localStorage.getItem('jumanjiAdminSession');
+
+            if (sessionData) {
+                try {
+                    currentUser = JSON.parse(sessionData);
+                    showGameManagerDashboard();
+                } catch (error) {
+                    console.error('Error parsing admin session:', error);
+                    localStorage.removeItem('jumanjiAdminSession');
+                }
+            }
+        }
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+
+                tab.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // Event Listeners
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value.trim();
+
+            if (!email || !password) {
+                showNotification('Please enter both email and password', 'error');
+                return;
+            }
+
+            adminLogin(email, password);
+        });
+
+        logoutBtn.addEventListener('click', adminLogout);
+        addLocationBtn.addEventListener('click', () => showLocationModal());
+        addVolunteerBtn.addEventListener('click', () => showVolunteerModal());
+        updateMazeLinkBtn.addEventListener('click', updateMazeLink);
+        startGameBtn.addEventListener('click', startGame);
+        stopGameBtn.addEventListener('click', stopGame);
+        generateCodeBtn.addEventListener('click', () => {
+            document.getElementById('location-code').value = generateLocationCode();
+        });
+
+        locationForm.addEventListener('submit', saveLocation);
+        volunteerForm.addEventListener('submit', saveVolunteer);
+
+        closeLocationModal.addEventListener('click', () => {
+            locationModal.classList.add('hidden');
+        });
+
+        closeVolunteerModal.addEventListener('click', () => {
+            volunteerModal.classList.add('hidden');
+        });
+
+        // Close modals when clicking outside
+        locationModal.addEventListener('click', (e) => {
+            if (e.target === locationModal) {
+                locationModal.classList.add('hidden');
+            }
+        });
+
+        volunteerModal.addEventListener('click', (e) => {
+            if (e.target === volunteerModal) {
+                volunteerModal.classList.add('hidden');
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure login screen is visible on page load
+            loginScreen.classList.remove('hidden');
+            gameManagerDashboard.classList.add('hidden');
+            locationModal.classList.add('hidden');
+            volunteerModal.classList.add('hidden');
+
+            // Check for existing session after a short delay
+            setTimeout(checkAdminSession, 100);
+        });
+    </script>
+</body>
+
+</html>
