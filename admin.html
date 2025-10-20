@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jumanji: Designed to Survive</title>
+    <title>Jumanji: Digital Odyssey - Admin Panel</title>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -608,7 +608,7 @@
 
 <body>
     <header>
-        <h1 class="logo">JUMANJI: DESIGNED TO SURVIVE</h1>
+        <h1 class="logo"><img src="./images/logo.png"></h1>
         <p class="tagline">Admin Control Center</p>
         <button id="logout-btn" class="logout-btn hidden">
             <i class="fas fa-sign-out-alt"></i> Logout
@@ -729,15 +729,17 @@
                 </h2>
 
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button id="start-game-btn" class="btn-block" style="flex: 1;">
-                        <i class="fas fa-play"></i>
-                        Start Game
-                    </button>
+                    <a href="gameManager.html" target="_blank"><button id="start-game-btn" class="btn-block"
+                            style="flex: 1;">
+                            <i class="fas fa-play"></i>
+                            Game Manager
+                        </button></a>
 
-                    <button id="reset-game-btn" class="btn-block btn-danger" style="flex: 1;">
-                        <i class="fas fa-redo"></i>
-                        Reset Game
-                    </button>
+                    <a href="gameController.html" target="_blank"><button id="reset-game-btn"
+                            class="btn-block btn-danger" style="flex: 1;">
+                            <i class="fas fa-play"></i>
+                            Game Controller
+                        </button></a>
                 </div>
             </div>
         </div>
@@ -783,8 +785,6 @@
         const loginBtn = document.getElementById('login-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const createTeamBtn = document.getElementById('create-team-btn');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const resetGameBtn = document.getElementById('reset-game-btn');
         const teamModal = document.getElementById('team-modal');
         const closeModal = document.getElementById('close-modal');
         const modalBody = document.getElementById('modal-body');
@@ -1162,56 +1162,7 @@
             onlinePlayersEl.textContent = onlinePlayers;
         }
 
-        // Start game
-        async function startGame() {
-            if (!confirm('Are you sure you want to start the game? This will notify all teams.')) return;
 
-            try {
-                startGameBtn.disabled = true;
-                startGameBtn.innerHTML = '<span class="loading"></span> Starting game...';
-
-                // Update game status in database
-                await database.ref('gameStatus').set({
-                    status: 'started',
-                    startedAt: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                showNotification('Game started successfully!', 'success');
-            } catch (error) {
-                console.error('Error starting game:', error);
-                showNotification('Failed to start game. Please try again.', 'error');
-            } finally {
-                startGameBtn.disabled = false;
-                startGameBtn.innerHTML = '<i class="fas fa-play"></i> Start Game';
-            }
-        }
-
-        // Reset game
-        async function resetGame() {
-            if (!confirm('Are you sure you want to reset the game? This will clear all team data.')) return;
-
-            try {
-                resetGameBtn.disabled = true;
-                resetGameBtn.innerHTML = '<span class="loading"></span> Resetting game...';
-
-                // Clear all teams
-                await database.ref('teams').remove();
-
-                // Reset game status
-                await database.ref('gameStatus').set({
-                    status: 'not_started',
-                    resetAt: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                showNotification('Game reset successfully!', 'success');
-            } catch (error) {
-                console.error('Error resetting game:', error);
-                showNotification('Failed to reset game. Please try again.', 'error');
-            } finally {
-                resetGameBtn.disabled = false;
-                resetGameBtn.innerHTML = '<i class="fas fa-redo"></i> Reset Game';
-            }
-        }
 
         // Check for existing admin session
         function checkAdminSession() {
@@ -1256,8 +1207,7 @@
 
         logoutBtn.addEventListener('click', adminLogout);
         createTeamBtn.addEventListener('click', createNewTeam);
-        startGameBtn.addEventListener('click', startGame);
-        resetGameBtn.addEventListener('click', resetGame);
+
 
         closeModal.addEventListener('click', () => {
             teamModal.classList.add('hidden');
@@ -1282,6 +1232,5 @@
         });
     </script>
 </body>
-
 
 </html>
