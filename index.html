@@ -270,6 +270,34 @@
             justify-content: center;
         }
 
+        .btn-hunt {
+            background-color: var(--accent-red);
+            color: white;
+            font-size: 1.5rem;
+            padding: 1rem 2rem;
+            margin: 2rem auto;
+            display: block;
+            animation: pulse 2s infinite;
+        }
+
+        .btn-hunt:hover {
+            background-color: #6b0000;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(139, 0, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(139, 0, 0, 0);
+            }
+        }
+
         .entry-options {
             display: flex;
             gap: 1rem;
@@ -535,6 +563,73 @@
             }
         }
 
+        .reconnect-banner {
+            background-color: rgba(255, 152, 0, 0.9);
+            color: white;
+            padding: 0.8rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            display: none;
+        }
+
+        .reconnect-banner.show {
+            display: block;
+        }
+
+        .game-start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+
+        .game-start-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .game-start-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+        .game-start-title {
+            font-family: 'Creepster', cursive;
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-start-message {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .countdown {
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            color: var(--accent-red);
+            margin-bottom: 2rem;
+        }
+
         @media (max-width: 768px) {
             .logo {
                 font-size: 2rem;
@@ -559,11 +654,27 @@
             .entry-options {
                 flex-direction: column;
             }
+
+            .game-start-title {
+                font-size: 2rem;
+            }
+
+            .game-start-message {
+                font-size: 1.2rem;
+            }
+
+            .countdown {
+                font-size: 3rem;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="reconnect-banner" id="reconnect-banner">
+        <i class="fas fa-wifi"></i> Connection lost. Attempting to reconnect...
+    </div>
+
     <div class="video-background">
         <iframe
             src="https://www.youtube.com/embed/4bHUsy74Fss?autoplay=1&mute=1&controls=0&loop=1&playlist=4bHUsy74Fss&start=12&end=96"
@@ -687,6 +798,18 @@
         </div>
     </main>
 
+    <!-- Game Start Overlay -->
+    <div class="game-start-overlay" id="game-start-overlay">
+        <div class="game-start-content">
+            <h2 class="game-start-title">The Hunt Begins!</h2>
+            <p class="game-start-message">Get ready to enter the world of Jumanji</p>
+            <div class="countdown" id="countdown">5</div>
+            <button id="lets-hunt-btn" class="btn-hunt">
+                <i class="fas fa-play"></i> Let's Hunt!
+            </button>
+        </div>
+    </div>
+
     <div id="notification" class="notification"></div>
     <!-- Hidden Audio Player -->
     <audio id="bgm-player" loop>
@@ -731,6 +854,10 @@
         const step3 = document.getElementById('step3');
         const step4 = document.getElementById('step4');
         const step5 = document.getElementById('step5');
+        const reconnectBanner = document.getElementById('reconnect-banner');
+        const gameStartOverlay = document.getElementById('game-start-overlay');
+        const countdown = document.getElementById('countdown');
+        const letsHuntBtn = document.getElementById('lets-hunt-btn');
 
         const codeEntryOption = document.getElementById('code-entry-option');
         const qrEntryOption = document.getElementById('qr-entry-option');
@@ -753,6 +880,52 @@
         let currentPlayer = null;
         let html5QrCode = null;
         let validatedTeamCode = null;
+        let teamListener = null;
+        let gameStateListener = null;
+        let connectionStatus = true;
+        let reconnectAttempts = 0;
+        let maxReconnectAttempts = 5;
+        let gameStarted = false;
+        let mazeUrl = null;
+        let countdownInterval = null;
+
+        // Connection monitoring
+        const connectedRef = database.ref('.info/connected');
+        connectedRef.on('value', (snap) => {
+            if (snap.val() === true) {
+                connectionStatus = true;
+                reconnectBanner.classList.remove('show');
+                reconnectAttempts = 0;
+
+                // If we have a session but no team data, try to reconnect
+                if (currentTeam && !teamListener) {
+                    displayTeamLobby(currentTeam);
+                }
+            } else {
+                connectionStatus = false;
+                reconnectBanner.classList.add('show');
+
+                // Try to reconnect
+                attemptReconnect();
+            }
+        });
+
+        function attemptReconnect() {
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                setTimeout(() => {
+                    if (!connectionStatus) {
+                        // Try to reconnect by re-establishing listeners
+                        if (currentTeam) {
+                            database.ref(`teams/${currentTeam}`).off();
+                            displayTeamLobby(currentTeam);
+                        }
+                    }
+                }, 2000 * reconnectAttempts); // Exponential backoff
+            } else {
+                showNotification('Connection lost. Please refresh the page.', 'error');
+            }
+        }
 
         // Notification system
         function showNotification(message, type = 'info') {
@@ -829,9 +1002,43 @@
                 }
 
                 // Check if player already in team
-                if (teamData.players && teamData.players.some(p => p.name === playerName)) {
-                    showNotification('You are already in this team.', 'error');
-                    return false;
+                const existingPlayerIndex = teamData.players ?
+                    teamData.players.findIndex(p => p.name.toLowerCase() === playerName.toLowerCase()) : -1;
+
+                if (existingPlayerIndex !== -1) {
+                    // Player already exists, check if they're rejoining
+                    const existingPlayer = teamData.players[existingPlayerIndex];
+
+                    // Update player status to online
+                    const updatedPlayers = [...teamData.players];
+                    updatedPlayers[existingPlayerIndex] = {
+                        ...existingPlayer,
+                        online: true,
+                        lastSeen: firebase.database.ServerValue.TIMESTAMP
+                    };
+
+                    // Update team in database
+                    await database.ref(`teams/${teamCode}`).update({
+                        players: updatedPlayers,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    // Store session info in both localStorage and sessionStorage
+                    const sessionData = {
+                        teamCode: teamCode,
+                        playerId: existingPlayer.id,
+                        playerName: playerName
+                    };
+
+                    localStorage.setItem('jumanjiSession', JSON.stringify(sessionData));
+                    sessionStorage.setItem('jumanjiSession', JSON.stringify(sessionData));
+
+                    // Update state
+                    currentTeam = teamCode;
+                    currentPlayer = existingPlayer;
+
+                    showNotification('Welcome back to the team!', 'success');
+                    return true;
                 }
 
                 // Create player object
@@ -839,7 +1046,8 @@
                     id: generateSessionToken(),
                     name: playerName,
                     joinedAt: firebase.database.ServerValue.TIMESTAMP,
-                    online: true
+                    online: true,
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP
                 };
 
                 // Add player to team
@@ -900,8 +1108,13 @@
                 teamLobby.appendChild(playerSlot);
             }
 
+            // Remove any existing listener
+            if (teamListener) {
+                database.ref(`teams/${teamCode}`).off('value', teamListener);
+            }
+
             // Listen for team updates
-            database.ref(`teams/${teamCode}`).on('value', (snapshot) => {
+            teamListener = database.ref(`teams/${teamCode}`).on('value', (snapshot) => {
                 const teamData = snapshot.val();
 
                 if (teamData && teamData.players) {
@@ -937,6 +1150,60 @@
             });
         }
 
+        // Listen for game state changes
+        function listenForGameStateChanges() {
+            if (gameStateListener) {
+                database.ref('gameState').off('value', gameStateListener);
+            }
+
+            gameStateListener = database.ref('gameState').on('value', (snapshot) => {
+                const gameState = snapshot.val() || {};
+
+                if (gameState.isGameStarted && !gameStarted) {
+                    // Game just started
+                    gameStarted = true;
+                    mazeUrl = gameState.mazeLink;
+
+                    // Show game start overlay
+                    showGameStartOverlay();
+                }
+            });
+        }
+
+        // Show game start overlay
+        function showGameStartOverlay() {
+            gameStartOverlay.classList.add('show');
+
+            // Start countdown
+            let count = 5;
+            countdown.textContent = count;
+
+            countdownInterval = setInterval(() => {
+                count--;
+                countdown.textContent = count;
+
+                if (count <= 0) {
+                    clearInterval(countdownInterval);
+                    countdown.style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        // Redirect to maze
+        function redirectToMaze() {
+            if (mazeUrl) {
+                // Update team's current location
+                database.ref(`teams/${currentTeam}`).update({
+                    currentLocation: mazeUrl,
+                    status: 'in_maze',
+                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Redirect to maze
+                window.location.href = mazeUrl;
+            }
+        }
+
         // QR Code Scanner
         function startQrScanner() {
             if (html5QrCode) {
@@ -952,7 +1219,18 @@
 
             Html5Qrcode.getCameras().then(devices => {
                 if (devices && devices.length) {
-                    const cameraId = devices[0].id;
+                    // Try to find the front camera (environment facing)
+                    let cameraId = devices[0].id;
+
+                    // Look for a camera with "environment" in its label (usually the back camera)
+                    const environmentCamera = devices.find(device =>
+                        device.label.toLowerCase().includes('environment')
+                    );
+
+                    // If found, use it; otherwise use the first camera
+                    if (environmentCamera) {
+                        cameraId = environmentCamera.id;
+                    }
 
                     html5QrCode.start(
                         cameraId,
@@ -977,6 +1255,7 @@
                     ).catch(err => {
                         console.error(`Unable to start scanning: ${err}`);
                         showNotification('Failed to start camera. Please try again.', 'error');
+                        showStep(1); // Go back to options
                     });
                 }
             }).catch(err => {
@@ -1006,6 +1285,15 @@
                             joinTeam(session.teamCode, session.playerName).then(joinSuccess => {
                                 if (joinSuccess) {
                                     displayTeamLobby(session.teamCode);
+
+                                    // Check if team has a current location and redirect if needed
+                                    database.ref(`teams/${session.teamCode}`).once('value').then(snapshot => {
+                                        const teamData = snapshot.val();
+                                        if (teamData && teamData.currentLocation && teamData.status === 'in_maze') {
+                                            // Team is already in the maze, redirect to current location
+                                            window.location.href = teamData.currentLocation;
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -1083,8 +1371,11 @@
 
             if (success) {
                 displayTeamLobby(validatedTeamCode);
+                listenForGameStateChanges();
             }
         });
+
+        letsHuntBtn.addEventListener('click', redirectToMaze);
 
         // Handle page visibility change to update online status
         document.addEventListener('visibilitychange', () => {
@@ -1098,6 +1389,30 @@
                         if (playerIndex !== -1) {
                             const updatedPlayers = [...teamData.players];
                             updatedPlayers[playerIndex].online = isOnline;
+                            updatedPlayers[playerIndex].lastSeen = firebase.database.ServerValue.TIMESTAMP;
+
+                            database.ref(`teams/${currentTeam}`).update({
+                                players: updatedPlayers,
+                                updatedAt: firebase.database.ServerValue.TIMESTAMP
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        // Handle page unload to update online status
+        window.addEventListener('beforeunload', () => {
+            if (currentTeam && currentPlayer) {
+                // Update player status to offline
+                database.ref(`teams/${currentTeam}/players`).once('value', (snapshot) => {
+                    const teamData = snapshot.val();
+                    if (teamData && teamData.players) {
+                        const playerIndex = teamData.players.findIndex(p => p.id === currentPlayer.id);
+                        if (playerIndex !== -1) {
+                            const updatedPlayers = [...teamData.players];
+                            updatedPlayers[playerIndex].online = false;
+                            updatedPlayers[playerIndex].lastSeen = firebase.database.ServerValue.TIMESTAMP;
 
                             database.ref(`teams/${currentTeam}`).update({
                                 players: updatedPlayers,
@@ -1110,9 +1425,11 @@
         });
 
         // Check for existing session on page load
-        window.addEventListener('load', checkExistingSession);
+        window.addEventListener('load', () => {
+            checkExistingSession();
+            listenForGameStateChanges();
+        });
     </script>
 </body>
 
 </html>
-
