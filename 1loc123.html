@@ -3,12 +3,1807 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jumanji - Color Match Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2d5016;
+            --secondary-color: #8B4513;
+            --accent-color: #DAA520;
+            --danger-color: #8B0000;
+            --success-color: #28a745;
+            --bg-color: #f5f5dc;
+            --card-bg: #f8f4e6;
+            --text-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, #0a3d0a, #1a6b1a);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Jungle decorations */
+        .jungle-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.2;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50,10 Q70,30 90,50 Q70,70 50,90 Q30,70 10,50 Q30,30 50,10" fill="%23228B22"/></svg>') no-repeat center center;
+            background-size: contain;
+        }
+
+        .leaf:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            transform: rotate(15deg);
+        }
+
+        .leaf:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            transform: rotate(-20deg);
+        }
+
+        .leaf:nth-child(3) {
+            bottom: 15%;
+            left: 8%;
+            transform: rotate(30deg);
+        }
+
+        .leaf:nth-child(4) {
+            bottom: 25%;
+            right: 5%;
+            transform: rotate(-10deg);
+        }
+
+        .leaf:nth-child(5) {
+            top: 40%;
+            left: 3%;
+            transform: rotate(5deg);
+        }
+
+        .leaf:nth-child(6) {
+            top: 60%;
+            right: 7%;
+            transform: rotate(-25deg);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid #3a7a3a;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            font-family: 'Bangers', cursive;
+        }
+
+        /* Team Info Section */
+        .team-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .team-info h3 {
+            margin-bottom: 10px;
+            color: var(--accent-color);
+            text-align: center;
+        }
+
+        .info-item {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+        }
+
+        /* Lobby Section */
+        .lobby-section {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid #3a7a3a;
+            margin-bottom: 20px;
+        }
+
+        .lobby-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .lobby-title {
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .players-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .players-container h3 {
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-align: center;
+        }
+
+        .player-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--accent-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .online {
+            background-color: var(--success-color);
+        }
+
+        .offline {
+            background-color: #dc3545;
+        }
+
+        .player-name {
+            font-weight: bold;
+        }
+
+        .player-status-text {
+            background-color: rgba(255, 204, 0, 0.2);
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            color: var(--accent-color);
+        }
+
+        .start-button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-start {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .btn-start:hover {
+            background-color: #e6c55a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start.show {
+            display: inline-block;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--accent-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Game Section */
+        .game-section {
+            display: none;
+        }
+
+        .game-header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-family: 'Bangers', cursive;
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .info-item {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .info-value i {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .game-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .message {
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            font-size: 1.1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message.success {
+            background: rgba(40, 167, 69, 0.3);
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.3);
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+        }
+
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+            position: relative;
+        }
+
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .timer.warning {
+            color: var(--danger-color);
+            background: rgba(220, 53, 69, 0.2);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), #10ac84);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .lives {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .heart {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .heart.lost {
+            color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.8);
+            animation: none;
+        }
+
+        .pattern-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .pattern-label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .view-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .view-toggle-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .view-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .view-toggle.active {
+            background: var(--accent-color);
+        }
+
+        .view-toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .view-toggle.active .view-toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-tile {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-tile:active {
+            cursor: grabbing;
+        }
+
+        .color-tile.dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+            z-index: 1000;
+        }
+
+        .color-tile.drag-over {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .color-tile.red {
+            background: linear-gradient(135deg, #ee5a24, #c44569);
+        }
+
+        .color-tile.blue {
+            background: linear-gradient(135deg, #0abde3, #006ba6);
+        }
+
+        .color-tile.green {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        }
+
+        .color-tile.yellow {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+
+        .color-tile.purple {
+            background: linear-gradient(135deg, #5f27cd, #341f97);
+        }
+
+        .color-tile.orange {
+            background: linear-gradient(135deg, #ff9f43, #ee5a24);
+        }
+
+        .color-tile.cyan {
+            background: linear-gradient(135deg, #00d2d3, #01a3a4);
+        }
+
+        .color-tile.pink {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modal p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .waiting-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .waiting-title {
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+
+        .waiting-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .players-status {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .player-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-status-item:last-child {
+            border-bottom: none;
+        }
+
+        .player-status-name {
+            font-weight: bold;
+        }
+
+        .player-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.completed {
+            background-color: var(--success-color);
+        }
+
+        .status-dot.waiting {
+            background-color: var(--accent-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+        }
+
+        /* Mobile-friendly pattern switcher */
+        .pattern-switcher {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 0.25rem;
+            position: relative;
+        }
+
+        .pattern-option {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pattern-option.active {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .pattern-option:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.5rem;
+            }
+
+            .pattern-grid {
+                grid-gap: 8px;
+                padding: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.8rem;
+                font-size: 1rem;
+            }
+
+            .timer {
+                font-size: 1.5rem;
+                padding: 0.4rem 1rem;
+            }
+
+            .view-toggle-container {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-end;
+            }
+
+            .pattern-switcher {
+                flex-direction: column;
+                border-radius: 15px;
+                padding: 0.5rem;
+            }
+
+            .pattern-option {
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+                border-radius: 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Location 1</h1>
+    <!-- Jungle decorations -->
+    <div class="jungle-decoration">
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+    </div>
+
+    <!-- Lobby Section -->
+    <div id="lobbySection" class="lobby-section">
+        <div class="lobby-header">
+            <h1 class="lobby-title">JUMANJI COLOR MATCH</h1>
+        </div>
+
+        <div class="team-info">
+            <h3>Team Information</h3>
+            <div class="info-item">
+                <span class="info-label">Team Code:</span>
+                <span class="info-value" id="team-code">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Team Name:</span>
+                <span class="info-value" id="team-name">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Your Name:</span>
+                <span class="info-value" id="player-name">-</span>
+            </div>
+        </div>
+
+        <div class="players-container">
+            <h3>Team Members (<span id="player-count">0</span>/4)</h3>
+            <div id="players-list"></div>
+        </div>
+
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner"></div>
+            <p>Preparing game...</p>
+        </div>
+
+        <div class="start-button-container">
+            <button id="start-game-btn" class="btn-start">
+                <i class="fas fa-play"></i> Start Game
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Section -->
+    <div id="gameSection" class="game-section">
+        <div class="container">
+            <div class="team-info">
+                <h3>Team Information</h3>
+                <div class="info-item">
+                    <span class="info-label">Team Code:</span>
+                    <span class="info-value" id="team-code-game">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Player Name:</span>
+                    <span class="info-value" id="player-name-game">-</span>
+                </div>
+            </div>
+
+            <div class="game-header">
+                <h1 class="game-title">JUMANJI COLOR MATCH</h1>
+            </div>
+
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">Level</div>
+                    <div class="info-value">
+                        <i class="fas fa-layer-group"></i>
+                        <span id="level">1</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Score</div>
+                    <div class="info-value">
+                        <i class="fas fa-star"></i>
+                        <span id="score">0</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">High Score</div>
+                    <div class="info-value">
+                        <i class="fas fa-trophy"></i>
+                        <span id="highScore">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <div class="game-container">
+                    <div class="message" id="message">Press Start to begin!</div>
+
+                    <div class="timer-container">
+                        <div class="timer" id="timer">
+                            <i class="fas fa-clock"></i>
+                            <span id="timerValue">60</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+
+                    <div class="lives" id="lives">
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                        <span class="heart">❤️</span>
+                    </div>
+
+                    <div class="pattern-container">
+                        <div class="pattern-header">
+                            <div class="pattern-label" id="patternLabel">Target Pattern</div>
+                            <div class="pattern-switcher">
+                                <div class="pattern-option active" id="targetPatternBtn">
+                                    Target
+                                </div>
+                                <div class="pattern-option" id="yourPatternBtn">
+                                    Your Pattern
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pattern-grid" id="patternGrid">
+                            <!-- Tiles will be generated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn btn-primary" id="startBtn">
+                            <i class="fas fa-play"></i>
+                            Start Game
+                        </button>
+                        <button class="btn btn-secondary" id="resetBtn">
+                            <i class="fas fa-redo"></i>
+                            Reset Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Waiting Screen -->
+    <div id="waitingScreen" class="waiting-screen" style="display: none;">
+        <div class="container">
+            <h2 class="waiting-title">Waiting for Teammates</h2>
+            <p class="waiting-message">You've completed the challenge! Waiting for your teammates to finish...</p>
+
+            <div class="players-status">
+                <h3>Team Status</h3>
+                <div id="team-status-list"></div>
+            </div>
+
+            <div class="loading-spinner active">
+                <div class="spinner"></div>
+                <p>Waiting for other players...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Game Over!</h2>
+            <p id="modalMessage">Your final score: <span id="finalScore">0</span></p>
+            <button class="btn btn-primary" id="playAgainBtn">
+                <i class="fas fa-redo"></i>
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDeu-PF9W3fHf7shBV-_aVRCEZ6atBCJ5E",
+                authDomain: "jumanji-d14a9.firebaseapp.com",
+                databaseURL: "https://jumanji-d14a9-default-rtdb.asia-southeast1.firebasedatabase.app/",
+                projectId: "jumanji-d14a9",
+                storageBucket: "jumanji-d14a9.firebasestorage.app",
+                messagingSenderId: "1008263887985",
+                appId: "1:1008263887985:web:8be0e837e07bdecc9eafd0"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // DOM Elements - Lobby
+            const lobbySection = document.getElementById('lobbySection');
+            const gameSection = document.getElementById('gameSection');
+            const waitingScreen = document.getElementById('waitingScreen');
+            const teamCodeDisplay = document.getElementById('team-code');
+            const teamNameDisplay = document.getElementById('team-name');
+            const playerNameDisplay = document.getElementById('player-name');
+            const playerCountDisplay = document.getElementById('player-count');
+            const playersList = document.getElementById('players-list');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const startGameBtn = document.getElementById('start-game-btn');
+
+            // DOM Elements - Game
+            const teamCodeDisplayGame = document.getElementById('team-code-game');
+            const playerNameDisplayGame = document.getElementById('player-name-game');
+            const patternGridElement = document.getElementById('patternGrid');
+            const startBtn = document.getElementById('startBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const messageElement = document.getElementById('message');
+            const levelElement = document.getElementById('level');
+            const scoreElement = document.getElementById('score');
+            const highScoreElement = document.getElementById('highScore');
+            const livesElement = document.getElementById('lives');
+            const gameOverModal = document.getElementById('gameOverModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const finalScoreElement = document.getElementById('finalScore');
+            const playAgainBtn = document.getElementById('playAgainBtn');
+            const patternLabel = document.getElementById('patternLabel');
+            const targetPatternBtn = document.getElementById('targetPatternBtn');
+            const yourPatternBtn = document.getElementById('yourPatternBtn');
+            const progressFill = document.getElementById('progressFill');
+            const timerElement = document.getElementById('timer');
+            const timerValue = document.getElementById('timerValue');
+            const teamStatusList = document.getElementById('team-status-list');
+
+            // Game state
+            const gridSize = 16;
+            const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'cyan', 'pink'];
+            let targetPattern = [];
+            let playerPattern = [];
+            let level = 1;
+            let score = 0;
+            let lives = 3;
+            let isPlaying = false;
+            let highScore = localStorage.getItem('colorMatchHighScore') || 0;
+            let currentView = 'target'; // 'target' or 'player'
+            let tiles = [];
+            let draggedElement = null;
+            let draggedIndex = null;
+
+            // Timer properties
+            let timeLeft = 60;
+            let timerInterval = null;
+            let baseTime = 60;
+
+            // Team state
+            let teamId = null;
+            let playerId = null;
+            let playerName = null;
+            let teamLobbyRef = null;
+            let gameRef = null;
+            let playerStatusRef = null;
+
+            // Get player info from localStorage
+            function getPlayerInfo() {
+                teamId = localStorage.getItem('teamId');
+                playerId = localStorage.getItem('playerId');
+                playerName = localStorage.getItem('playerName');
+
+                if (!teamId || !playerId || !playerName) {
+                    // Redirect to index.html if player info is missing
+                    window.location.href = 'index.html';
+                    return false;
+                }
+
+                // Update team info display
+                database.ref(`teams/${teamId}`).once('value').then(snapshot => {
+                    const team = snapshot.val();
+                    if (team) {
+                        teamCodeDisplay.textContent = team.teamCode;
+                        teamCodeDisplayGame.textContent = team.teamCode;
+                        teamNameDisplay.textContent = team.teamName;
+                    }
+                });
+
+                playerNameDisplay.textContent = playerName;
+                playerNameDisplayGame.textContent = playerName;
+
+                return true;
+            }
+
+            // Initialize the game
+            function initGame() {
+                if (!getPlayerInfo()) return;
+
+                // Set up team-specific lobby reference
+                teamLobbyRef = database.ref(`colorMatchLobby/${teamId}`);
+
+                // Add player to lobby
+                teamLobbyRef.child(`players/${playerId}`).set({
+                    playerId: playerId,
+                    playerName: playerName,
+                    isOnline: true,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Set up listeners for this team's lobby
+                setupLobbyListeners();
+
+                // Update player status when they leave
+                window.addEventListener('beforeunload', () => {
+                    teamLobbyRef.child(`players/${playerId}`).update({
+                        isOnline: false
+                    });
+                });
+
+                // Handle page visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // Page is hidden, update player status to offline
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: false
+                        });
+                    } else {
+                        // Page is visible, update player status to online
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: true,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                });
+            }
+
+            function setupLobbyListeners() {
+                // Listen for players in the lobby
+                teamLobbyRef.child('players').on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    updatePlayersList(players);
+
+                    // Check if all 4 players have joined
+                    const playerCount = Object.keys(players).length;
+                    if (playerCount === 4) {
+                        startGameBtn.classList.add('show');
+                    }
+                });
+
+                // Listen for game start
+                teamLobbyRef.child('gameStarted').on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        startColorMatchGame();
+                    }
+                });
+            }
+
+            function updatePlayersList(players) {
+                let html = '';
+                let playerCount = 0;
+
+                Object.keys(players).forEach(id => {
+                    const player = players[id];
+                    playerCount++;
+
+                    html += `
+                        <div class="player-card">
+                            <div class="player-info">
+                                <div class="player-status ${player.isOnline ? 'online' : 'offline'}"></div>
+                                <span class="player-name">${player.playerName} ${id === playerId ? '(You)' : ''}</span>
+                            </div>
+                            <div class="player-status-text">Waiting...</div>
+                        </div>
+                    `;
+                });
+
+                playersList.innerHTML = html;
+                playerCountDisplay.textContent = playerCount;
+            }
+
+            // Start game button click handler
+            startGameBtn.addEventListener('click', () => {
+                teamLobbyRef.child('gameStarted').set(true);
+            });
+
+            function startColorMatchGame() {
+                // Hide lobby and show game
+                lobbySection.style.display = 'none';
+                gameSection.style.display = 'block';
+
+                // Set up team-specific game reference
+                gameRef = database.ref(`teams/${teamId}/colorMatchGame`);
+                playerStatusRef = database.ref(`teams/${teamId}/colorMatchGame/players/${playerId}`);
+
+                // Initialize game
+                createGrid();
+                updateDisplay();
+
+                // Set up game listeners
+                setupGameListeners();
+            }
+
+            function setupGameListeners() {
+                // Listen for game state changes
+                gameRef.on('value', (snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState) return;
+
+                    // Check if all players have completed the game
+                    if (gameState.players && gameState.players[playerId] && gameState.players[playerId].completed) {
+                        showWaitingScreen();
+                    }
+                });
+            }
+
+            function showWaitingScreen() {
+                gameSection.style.display = 'none';
+                waitingScreen.style.display = 'flex';
+
+                // Update player status to completed
+                playerStatusRef.update({
+                    completed: true,
+                    completedAt: firebase.database.ServerValue.TIMESTAMP,
+                    score: score
+                });
+
+                // Listen for all players to complete
+                gameRef.child('players').on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    let html = '';
+                    let allCompleted = true;
+
+                    Object.keys(players).forEach(id => {
+                        const player = players[id];
+                        const isCompleted = player.completed || false;
+
+                        if (!isCompleted) allCompleted = false;
+
+                        html += `
+                            <div class="player-status-item">
+                                <span class="player-status-name">${player.playerName}</span>
+                                <div class="player-status-indicator">
+                                    <div class="status-dot ${isCompleted ? 'completed' : 'waiting'}"></div>
+                                    <span class="status-text">${isCompleted ? 'Completed' : 'Playing'}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    teamStatusList.innerHTML = html;
+
+                    // If all players have completed, redirect to loading page
+                    if (allCompleted && Object.keys(players).length >= 4) {
+                        setTimeout(() => {
+                            database.ref(`teams/${teamId}`).update({
+                                status: 'loading',
+                                currentLocation: 'loading.html'
+                            }).then(() => {
+                                window.location.href = 'loading.html';
+                            });
+                        }, 2000);
+                    }
+                });
+            }
+
+            function createGrid() {
+                patternGridElement.innerHTML = '';
+
+                for (let i = 0; i < gridSize; i++) {
+                    const tile = document.createElement('div');
+                    tile.classList.add('color-tile');
+                    tile.dataset.index = i;
+                    tile.draggable = true;
+
+                    // Add drag event listeners
+                    tile.addEventListener('dragstart', (e) => handleDragStart(e));
+                    tile.addEventListener('dragover', (e) => handleDragOver(e));
+                    tile.addEventListener('drop', (e) => handleDrop(e));
+                    tile.addEventListener('dragend', (e) => handleDragEnd(e));
+                    tile.addEventListener('dragenter', (e) => handleDragEnter(e));
+                    tile.addEventListener('dragleave', (e) => handleDragLeave(e));
+
+                    // Add touch event listeners for mobile
+                    tile.addEventListener('touchstart', (e) => handleTouchStart(e), { passive: false });
+                    tile.addEventListener('touchmove', (e) => handleTouchMove(e), { passive: false });
+                    tile.addEventListener('touchend', (e) => handleTouchEnd(e));
+
+                    patternGridElement.appendChild(tile);
+                }
+
+                tiles = document.querySelectorAll('.color-tile');
+            }
+
+            function startGame() {
+                if (isPlaying) return;
+
+                isPlaying = true;
+                startBtn.disabled = true;
+                showMessage('Match the target pattern!', 'normal');
+
+                // Reset timer
+                timeLeft = baseTime;
+                updateTimerDisplay();
+                startTimer();
+
+                setTimeout(() => {
+                    nextRound();
+                }, 1000);
+            }
+
+            function startTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+
+                    // Add warning class when time is running out
+                    if (timeLeft <= 10) {
+                        timerElement.classList.add('warning');
+                    } else {
+                        timerElement.classList.remove('warning');
+                    }
+
+                    // Check if time is up
+                    if (timeLeft <= 0) {
+                        timeUp();
+                    }
+                }, 1000);
+            }
+
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+
+            function updateTimerDisplay() {
+                timerValue.textContent = timeLeft;
+            }
+
+            function timeUp() {
+                stopTimer();
+                lives--;
+                updateLives();
+
+                if (lives <= 0) {
+                    gameOver();
+                } else {
+                    showMessage(`Time's up! ${lives} lives remaining`, 'error');
+
+                    // Reset timer but keep the same patterns
+                    timeLeft = baseTime;
+                    updateTimerDisplay();
+                    startTimer();
+                }
+            }
+
+            function nextRound() {
+                // Only generate new patterns if this is the first round
+                if (targetPattern.length === 0) {
+                    generatePatterns();
+                }
+
+                updateProgress();
+
+                // Show target pattern initially
+                switchToTargetView();
+
+                // Auto-switch to player view after a delay
+                setTimeout(() => {
+                    if (isPlaying) {
+                        switchToPlayerView();
+                    }
+                }, 3000);
+            }
+
+            function generatePatterns() {
+                targetPattern = [];
+                playerPattern = [];
+                const colorCount = 4; // Fixed color count for this game
+
+                // Create a balanced pattern with equal number of each color
+                const colorCounts = {};
+                for (let i = 0; i < colorCount; i++) {
+                    colorCounts[colors[i]] = Math.floor(gridSize / colorCount);
+                }
+
+                // Distribute remaining tiles
+                let remaining = gridSize % colorCount;
+                for (let i = 0; i < remaining; i++) {
+                    colorCounts[colors[i]]++;
+                }
+
+                // Create target pattern with balanced colors
+                for (const color in colorCounts) {
+                    for (let i = 0; i < colorCounts[color]; i++) {
+                        targetPattern.push(color);
+                    }
+                }
+
+                // Shuffle target pattern
+                shuffleArray(targetPattern);
+
+                // Create player pattern with the same color counts but shuffled
+                playerPattern = [...targetPattern];
+                shuffleArray(playerPattern);
+
+                // Display the current view
+                if (currentView === 'target') {
+                    displayTargetPattern();
+                } else {
+                    displayPlayerPattern();
+                }
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function displayTargetPattern() {
+                tiles.forEach((tile, index) => {
+                    tile.className = 'color-tile ' + targetPattern[index];
+                    tile.draggable = false;
+                });
+            }
+
+            function displayPlayerPattern() {
+                tiles.forEach((tile, index) => {
+                    tile.className = 'color-tile ' + playerPattern[index];
+                    tile.draggable = isPlaying;
+                });
+            }
+
+            function switchToTargetView() {
+                currentView = 'target';
+                targetPatternBtn.classList.add('active');
+                yourPatternBtn.classList.remove('active');
+                patternLabel.textContent = 'Target Pattern';
+                displayTargetPattern();
+            }
+
+            function switchToPlayerView() {
+                currentView = 'player';
+                targetPatternBtn.classList.remove('active');
+                yourPatternBtn.classList.add('active');
+                patternLabel.textContent = 'Your Pattern';
+                displayPlayerPattern();
+            }
+
+            // Pattern switcher event listeners
+            targetPatternBtn.addEventListener('click', switchToTargetView);
+            yourPatternBtn.addEventListener('click', switchToPlayerView);
+
+            function handleDragStart(e) {
+                if (!isPlaying || currentView !== 'player') return;
+
+                draggedElement = e.target;
+                draggedIndex = parseInt(e.target.dataset.index);
+                e.target.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', e.target.innerHTML);
+            }
+
+            function handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            }
+
+            function handleDragEnter(e) {
+                if (!isPlaying || currentView !== 'player') return;
+
+                if (e.target.classList.contains('color-tile')) {
+                    e.target.classList.add('drag-over');
+                }
+            }
+
+            function handleDragLeave(e) {
+                if (e.target.classList.contains('color-tile')) {
+                    e.target.classList.remove('drag-over');
+                }
+            }
+
+            function handleDrop(e) {
+                if (!isPlaying || currentView !== 'player') return;
+
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+
+                if (draggedElement !== e.target && e.target.classList.contains('color-tile')) {
+                    const targetIndex = parseInt(e.target.dataset.index);
+
+                    // Swap colors in the pattern array
+                    const tempColor = playerPattern[draggedIndex];
+                    playerPattern[draggedIndex] = playerPattern[targetIndex];
+                    playerPattern[targetIndex] = tempColor;
+
+                    // Update the visual tiles
+                    displayPlayerPattern();
+
+                    // Check if pattern matches
+                    checkPattern();
+                }
+
+                return false;
+            }
+
+            function handleDragEnd(e) {
+                const tiles = document.querySelectorAll('.color-tile');
+                tiles.forEach(tile => {
+                    tile.classList.remove('dragging');
+                    tile.classList.remove('drag-over');
+                });
+            }
+
+            // Touch events for mobile
+            function handleTouchStart(e) {
+                if (!isPlaying || currentView !== 'player') return;
+
+                const touch = e.touches[0];
+                draggedElement = e.target;
+                draggedIndex = parseInt(e.target.dataset.index);
+                e.target.classList.add('dragging');
+                e.preventDefault();
+            }
+
+            function handleTouchMove(e) {
+                if (!isPlaying || !draggedElement || currentView !== 'player') return;
+
+                const touch = e.touches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                if (elementBelow && elementBelow.classList.contains('color-tile') && elementBelow !== draggedElement) {
+                    // Remove previous highlight
+                    document.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+
+                    // Add highlight to the element below
+                    elementBelow.classList.add('drag-over');
+                }
+
+                e.preventDefault();
+            }
+
+            function handleTouchEnd(e) {
+                if (!isPlaying || !draggedElement || currentView !== 'player') return;
+
+                const touch = e.changedTouches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                if (elementBelow && elementBelow.classList.contains('color-tile') && elementBelow !== draggedElement) {
+                    const targetIndex = parseInt(elementBelow.dataset.index);
+
+                    // Swap colors in the pattern array
+                    const tempColor = playerPattern[draggedIndex];
+                    playerPattern[draggedIndex] = playerPattern[targetIndex];
+                    playerPattern[targetIndex] = tempColor;
+
+                    // Update the visual tiles
+                    displayPlayerPattern();
+
+                    // Check if pattern matches
+                    checkPattern();
+                }
+
+                // Clean up
+                draggedElement.classList.remove('dragging');
+                document.querySelectorAll('.drag-over').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+
+                draggedElement = null;
+                draggedIndex = null;
+                e.preventDefault();
+            }
+
+            function checkPattern() {
+                let matches = 0;
+                for (let i = 0; i < gridSize; i++) {
+                    if (targetPattern[i] === playerPattern[i]) {
+                        matches++;
+                    }
+                }
+
+                // Update progress bar
+                const progress = (matches / gridSize) * 100;
+                progressFill.style.width = `${progress}%`;
+
+                if (matches === gridSize) {
+                    handleCorrectPattern();
+                }
+            }
+
+            function handleCorrectPattern() {
+                // Stop timer when level is completed
+                stopTimer();
+
+                // Bonus points for time left
+                const timeBonus = timeLeft * 2;
+                const levelScore = level * 10;
+                score += levelScore + timeBonus;
+                const completedLevel = level;
+                level++;
+                updateDisplay();
+
+                // Show completion message
+                showMessage(`Level ${completedLevel} completed! Time bonus: ${timeBonus}`, 'success');
+
+                // Load next level after delay
+                setTimeout(() => {
+                    generatePatterns(); // Generate new patterns for the next level
+                    nextRound();
+
+                    // Reset timer for the new level
+                    timeLeft = baseTime;
+                    updateTimerDisplay();
+                    startTimer();
+                }, 2000);
+            }
+
+            function updateProgress() {
+                // Reset progress bar
+                progressFill.style.width = '0%';
+            }
+
+            function updateLives() {
+                const hearts = livesElement.querySelectorAll('.heart');
+                hearts.forEach((heart, index) => {
+                    if (index >= lives) {
+                        heart.classList.add('lost');
+                    } else {
+                        heart.classList.remove('lost');
+                    }
+                });
+            }
+
+            function updateDisplay() {
+                levelElement.textContent = level;
+                scoreElement.textContent = score;
+                highScoreElement.textContent = highScore;
+            }
+
+            function showMessage(text, type = 'normal') {
+                messageElement.textContent = text;
+                messageElement.className = 'message';
+                if (type !== 'normal') {
+                    messageElement.classList.add(type);
+                }
+            }
+
+            function gameOver() {
+                isPlaying = false;
+                startBtn.disabled = false;
+                stopTimer();
+
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('colorMatchHighScore', highScore);
+                    updateDisplay();
+                    modalTitle.textContent = 'New High Score!';
+                } else {
+                    modalTitle.textContent = 'Game Over!';
+                }
+
+                finalScoreElement.textContent = score;
+                gameOverModal.classList.add('active');
+
+                // Reset progress bar
+                progressFill.style.width = '0%';
+            }
+
+            function resetGame() {
+                stopTimer();
+                targetPattern = [];
+                playerPattern = [];
+                level = 1;
+                score = 0;
+                lives = 3;
+                isPlaying = false;
+                startBtn.disabled = false;
+
+                // Reset timer
+                timeLeft = baseTime;
+                updateTimerDisplay();
+                timerElement.classList.remove('warning');
+
+                // Clear the grid
+                tiles.forEach(tile => {
+                    tile.className = 'color-tile';
+                    tile.draggable = false;
+                });
+
+                updateDisplay();
+                updateLives();
+                showMessage('Press Start to begin!', 'normal');
+
+                // Reset progress bar
+                progressFill.style.width = '0%';
+
+                // Reset view
+                switchToTargetView();
+            }
+
+            // Button event handlers
+            startBtn.addEventListener('click', startGame);
+            resetBtn.addEventListener('click', resetGame);
+            playAgainBtn.addEventListener('click', () => {
+                gameOverModal.classList.remove('active');
+                resetGame();
+                startGame();
+            });
+
+            // Initialize the game
+            initGame();
+        });
+    </script>
 </body>
 
 </html>
