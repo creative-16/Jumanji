@@ -608,6 +608,28 @@
             animation: none;
         }
 
+        .hint-box {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-left: 4px solid var(--accent-color);
+            font-style: italic;
+            text-align: left;
+        }
+
+        .hint-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hint-title i {
+            color: var(--accent-color);
+        }
+
         @media (max-width: 480px) {
             h1 {
                 font-size: 1.5rem;
@@ -772,6 +794,15 @@
             <h2>Congratulations!</h2>
             <p>You've completed all levels!</p>
             <p>Your final score: <span id="finalScoreCongrats">0</span></p>
+            
+            <div class="hint-box">
+                <div class="hint-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Hint to Next Location
+                </div>
+                <p>Robots Gaurds this building</p>
+            </div>
+            
             <button class="btn btn-primary" id="playAgainCongratsBtn">
                 <i class="fas fa-redo"></i>
                 Play Again
