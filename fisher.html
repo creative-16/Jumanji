@@ -4,12 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hunt the Prey</title>
+    <title>Code Quest - Challenge</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Crimson+Text:wght@400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -30,7 +29,7 @@
             overflow-x: hidden;
         }
 
-        body.hint-page {
+        body.success-page {
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
         }
 
@@ -72,7 +71,7 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
             padding: 50px;
             width: 100%;
-            max-width: 550px;
+            max-width: 650px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -137,73 +136,101 @@
         h1 {
             font-family: 'Crimson Text', serif;
             color: #1e3c72;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             font-weight: 600;
             font-size: 36px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .scanner-container {
-            margin: 30px 0;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            background: #f8f9fa;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #qr-reader {
-            width: 100%;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .scanner-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        .scanner-placeholder i {
-            font-size: 60px;
-            margin-bottom: 20px;
-            color: #3498db;
-        }
-
-        .manual-entry-container {
-            margin-top: 20px;
-            padding: 20px;
+        .instructions {
             background: rgba(52, 152, 219, 0.1);
             border-radius: 15px;
-            display: none;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
         }
 
-        .manual-entry-container.active {
-            display: block;
-        }
-
-        .manual-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 15px;
+        .instructions h2 {
+            font-family: 'Crimson Text', serif;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 24px;
             text-align: center;
-            font-weight: 600;
         }
 
-        .manual-input:focus {
+        .instructions ol {
+            padding-left: 25px;
+        }
+
+        .instructions li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .instructions li:last-child {
+            margin-bottom: 0;
+        }
+
+        .instructions li strong {
+            color: #2980b9;
+        }
+
+        .code-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 40px 0;
+        }
+
+        .code-input {
+            width: 60px;
+            height: 70px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-input:focus {
             border-color: #3498db;
             outline: none;
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2), 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .code-input.error {
+            border-color: #e74c3c;
+            animation: shake 0.6s;
+            background: #ffeaea;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-8px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(8px);
+            }
         }
 
         .btn {
@@ -219,7 +246,6 @@
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin: 10px;
         }
 
         .btn:hover {
@@ -238,15 +264,6 @@
 
         .btn.hint-btn:hover {
             box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.3);
-        }
-
-        .btn.secondary:hover {
-            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
         }
 
         .message {
@@ -351,13 +368,15 @@
             letter-spacing: 2px;
         }
 
-        .hint-text {
-            font-family: 'Crimson Text', serif;
-            font-size: 26px;
-            line-height: 1.6;
+        .hint-image {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 1;
-            font-style: italic;
         }
 
         .mystery-symbol {
@@ -468,37 +487,13 @@
             text-transform: uppercase;
         }
 
-        .tab-container {
-            display: flex;
+        .hint-text {
+            font-family: 'Crimson Text', serif;
+            font-size: 18px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
             margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            background: rgba(52, 152, 219, 0.1);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #7f8c8d;
-            transition: all 0.3s ease;
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
         }
     </style>
 </head>
@@ -507,156 +502,62 @@
     <div class="mystery-bg"></div>
 
     <div class="container">
-        <h1>Hunt the Prey</h1>
+        <h1>Code Quest Challenge</h1>
 
-        <i class="fas fa-key mystery-symbol top-left"></i>
-        <i class="fas fa-lock mystery-symbol bottom-right"></i>
+        <i class="fas fa-map-marked-alt mystery-symbol top-left"></i>
+        <i class="fas fa-puzzle-piece mystery-symbol bottom-right"></i>
 
         <!-- Code Entry Section -->
         <div id="codeSection" class="code-section">
-            <div class="mystery-text" style="color: black;">Scan or Enter Code</div>
+            <div class="mystery-text" style="color: black;">Follow the Clues</div>
 
-            <div class="tab-container">
-                <button class="tab active" id="scannerTab">QR Scanner</button>
-                <button class="tab" id="manualTab">Manual Entry</button>
+            <div class="instructions">
+                <h2>Instructions</h2>
+                <ol>
+                    <li>Visit the first website (college website) and go to the <strong>"Contact Us"</strong> page. Note
+                        the first contact number.</li>
+                    <li>Visit the second website (CSD Tantra Game Grid copy) and go to the <strong>"Contact Us"</strong>
+                        page. Note the first contact number.</li>
+                    <li>Subtract the college number from the CSD number.</li>
+                    <li>Enter the result to check if your answer is right.</li>
+                </ol>
             </div>
 
-            <!-- QR Scanner Tab -->
-            <div id="scannerTabContent" class="tab-content active">
-                <div class="scanner-container">
-                    <div id="qr-reader"></div>
-                    <div class="scanner-placeholder" id="scannerPlaceholder">
-                        <i class="fas fa-qrcode"></i>
-                        <p>Click "Start Scanner" to begin</p>
-                    </div>
+            <form id="codeForm">
+                <div class="code-container">
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
+                    <input type="text" class="code-input" maxlength="1" pattern="[0-9]" required>
                 </div>
-                <button id="startScanner" class="btn">Start Scanner</button>
-                <button id="stopScanner" class="btn secondary" style="display: none;">Stop Scanner</button>
-            </div>
 
-            <!-- Manual Entry Tab -->
-            <div id="manualTabContent" class="tab-content">
-                <div class="manual-entry-container active">
-                    <input type="text" id="manualCodeInput" class="manual-input" placeholder="Enter the 4-digit code"
-                        maxlength="4">
-                    <button id="verifyManualCode" class="btn">Verify Code</button>
+                <button type="submit" class="btn">Submit Answer</button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 15px; color: #666;">Verifying your answer...</p>
                 </div>
-            </div>
 
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p style="margin-top: 15px; color: #666;">Verifying the code...</p>
-            </div>
+                <div id="message" class="message"></div>
 
-            <div id="message" class="message"></div>
-
-            <div class="attempts" id="attempts">Attempts remaining: 3</div>
+                <div class="attempts" id="attempts">Attempts remaining: 3</div>
+            </form>
         </div>
 
         <!-- Hint Display Section -->
         <div id="hintSection" class="hint-section">
-            <i class="fas fa-unlock-alt success-icon"></i>
-            <h1>Mystery Solved!</h1>
-            <p>You've successfully cracked the code and found the hint.</p>
+            <i class="fas fa-trophy success-icon"></i>
+            <h1>Congratulations!</h1>
+            <p>You've successfully solved the puzzle and found the next location.</p>
 
             <div class="hint-container">
-                <div class="hint-title" style="color: white;">Next Location Hint</div>
-                <p class="hint-text" style="color: white;">Here's your clue to the next location:</p>
-                <img src="./images/exam.jpg" alt="Location Hint" class="hint-image" id="hintImage">
+                <div class="hint-title">Next Location Hint</div>
+                <p class="hint-text">Here's your clue to the next location:</p>
+                <img src="./images/location.jpg" alt="Location Hint" class="hint-image" id="hintImage">
             </div>
-            <style>
-                /* Hint Container Styles */
-                .hint-container {
-                    background-color: rgba(255, 255, 255, 0.95);
-                    border-radius: 12px;
-                    padding: 20px;
-                    margin: 15px 0;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                    text-align: center;
-                    max-width: 100%;
-                    width: 100%;
-                }
-
-                .hint-title {
-                    font-size: 1.3rem;
-                    font-weight: bold;
-                    color: #2c3e50;
-                    margin-bottom: 12px;
-                }
-
-                .hint-text {
-                    font-size: 1rem;
-                    color: #555;
-                    margin-bottom: 15px;
-                    line-height: 1.4;
-                }
-
-                .hint-image {
-                    width: 100%;
-                    max-width: 100%;
-                    height: auto;
-                    max-height: 60vh;
-                    object-fit: contain;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-                    display: block;
-                    margin: 0 auto;
-                }
-
-                /* Mobile-specific adjustments */
-                @media (max-width: 768px) {
-                    .hint-container {
-                        padding: 15px;
-                        margin: 10px 0;
-                    }
-
-                    .hint-title {
-                        font-size: 1.1rem;
-                        margin-bottom: 10px;
-                    }
-
-                    .hint-text {
-                        font-size: 0.9rem;
-                        margin-bottom: 12px;
-                    }
-
-                    .hint-image {
-                        max-height: 50vh;
-                        border-radius: 6px;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .hint-container {
-                        padding: 12px;
-                        margin: 8px 0;
-                    }
-
-                    .hint-title {
-                        font-size: 1rem;
-                    }
-
-                    .hint-text {
-                        font-size: 0.85rem;
-                    }
-
-                    .hint-image {
-                        max-height: 45vh;
-                        border-radius: 4px;
-                    }
-                }
-
-                /* Small mobile screens */
-                @media (max-width: 360px) {
-                    .hint-container {
-                        padding: 10px;
-                    }
-
-                    .hint-image {
-                        max-height: 40vh;
-                    }
-                }
-            </style>
 
             <button class="btn hint-btn">JUMANJI</button>
         </div>
@@ -666,129 +567,72 @@
 
     <script>
         let attempts = 3;
-        const correctCode = '7259';
-        let html5QrCode = null;
-        let isScanning = false;
+        const correctCode = '1435721';
 
         document.addEventListener('DOMContentLoaded', function () {
+            const codeInputs = document.querySelectorAll('.code-input');
+            const form = document.getElementById('codeForm');
             const message = document.getElementById('message');
             const loading = document.getElementById('loading');
             const codeSection = document.getElementById('codeSection');
             const hintSection = document.getElementById('hintSection');
             const attemptsDisplay = document.getElementById('attempts');
-            const scannerTab = document.getElementById('scannerTab');
-            const manualTab = document.getElementById('manualTab');
-            const scannerTabContent = document.getElementById('scannerTabContent');
-            const manualTabContent = document.getElementById('manualTabContent');
-            const startScannerBtn = document.getElementById('startScanner');
-            const stopScannerBtn = document.getElementById('stopScanner');
-            const scannerPlaceholder = document.getElementById('scannerPlaceholder');
-            const manualCodeInput = document.getElementById('manualCodeInput');
-            const verifyManualCodeBtn = document.getElementById('verifyManualCode');
 
-            // Tab switching
-            scannerTab.addEventListener('click', function () {
-                scannerTab.classList.add('active');
-                manualTab.classList.remove('active');
-                scannerTabContent.classList.add('active');
-                manualTabContent.classList.remove('active');
-            });
-
-            manualTab.addEventListener('click', function () {
-                manualTab.classList.add('active');
-                scannerTab.classList.remove('active');
-                manualTabContent.classList.add('active');
-                scannerTabContent.classList.remove('active');
-
-                // Stop scanner if it's running
-                if (isScanning) {
-                    stopScanner();
-                }
-            });
-
-            // QR Scanner functionality
-            startScannerBtn.addEventListener('click', startScanner);
-            stopScannerBtn.addEventListener('click', stopScanner);
-
-            function startScanner() {
-                html5QrCode = new Html5Qrcode("qr-reader");
-
-                // This method will trigger user permissions
-                Html5Qrcode.getCameras().then(devices => {
-                    if (devices && devices.length) {
-                        const cameraId = devices[0].id;
-
-                        html5QrCode.start(
-                            cameraId,
-                            {
-                                fps: 10,
-                                qrbox: { width: 250, height: 250 }
-                            },
-                            (decodedText, decodedResult) => {
-                                // QR Code scanned successfully
-                                handleCodeVerification(decodedText);
-                                stopScanner();
-                            },
-                            (errorMessage) => {
-                                // Parse error, ignore it
-                            }
-                        ).then(() => {
-                            isScanning = true;
-                            scannerPlaceholder.style.display = 'none';
-                            startScannerBtn.style.display = 'none';
-                            stopScannerBtn.style.display = 'inline-block';
-                        }).catch((err) => {
-                            showMessage(`Unable to start scanning: ${err}`, 'error');
-                        });
+            // Auto-focus next input
+            codeInputs.forEach((input, index) => {
+                input.addEventListener('input', function () {
+                    if (this.value.length === 1 && index < codeInputs.length - 1) {
+                        codeInputs[index + 1].focus();
                     }
-                }).catch(err => {
-                    showMessage(`Unable to access camera: ${err}`, 'error');
                 });
-            }
 
-            function stopScanner() {
-                if (html5QrCode && isScanning) {
-                    html5QrCode.stop().then(() => {
-                        isScanning = false;
-                        scannerPlaceholder.style.display = 'flex';
-                        startScannerBtn.style.display = 'inline-block';
-                        stopScannerBtn.style.display = 'none';
-                    }).catch((err) => {
-                        showMessage(`Failed to stop scanning: ${err}`, 'error');
+                // Allow backspace to move to previous input
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                        codeInputs[index - 1].focus();
+                    }
+                });
+
+                // Only allow numbers
+                input.addEventListener('input', function () {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Collect the code from all inputs
+                let code = '';
+                codeInputs.forEach(input => {
+                    code += input.value;
+                });
+
+                // Check if all inputs are filled
+                if (code.length !== 7) {
+                    showMessage('Please enter all 7 digits of the code', 'error');
+                    codeInputs.forEach(input => {
+                        if (!input.value) {
+                            input.classList.add('error');
+                            setTimeout(() => input.classList.remove('error'), 600);
+                        }
                     });
-                }
-            }
-
-            // Manual code verification
-            verifyManualCodeBtn.addEventListener('click', function () {
-                const code = manualCodeInput.value.trim();
-
-                if (code.length !== 4) {
-                    showMessage('Please enter a 4-digit code', 'error');
                     return;
                 }
 
-                handleCodeVerification(code);
-            });
-
-            // Only allow numbers in manual input
-            manualCodeInput.addEventListener('input', function () {
-                this.value = this.value.replace(/[^0-9]/g, '');
-            });
-
-            function handleCodeVerification(code) {
                 // Show loading state
                 loading.classList.add('active');
+                form.querySelector('.btn').disabled = true;
 
                 // Simulate verification delay
                 setTimeout(() => {
                     // Verify the code
                     if (code === correctCode) {
-                        showMessage('Mystery unlocked! Revealing the secret...', 'success');
+                        showMessage('Correct! Revealing the next location...', 'success');
 
                         setTimeout(() => {
                             // Change background
-                            document.body.classList.add('hint-page');
+                            document.body.classList.add('success-page');
 
                             // Switch to hint section
                             codeSection.classList.add('hidden');
@@ -802,22 +646,49 @@
                         attemptsDisplay.textContent = `Attempts remaining: ${attempts}`;
 
                         if (attempts > 0) {
-                            showMessage(`Incorrect code. The mystery remains unsolved.`, 'error');
-                        } else {
-                            showMessage('No attempts remaining. The mystery remains locked forever...', 'error');
-                            verifyManualCodeBtn.disabled = true;
-                            startScannerBtn.disabled = true;
+                            showMessage(`Incorrect code. Please try again.`, 'error');
 
+                            // Show a subtle hint based on how many digits are correct
+                            let correctDigits = 0;
+                            for (let i = 0; i < 7; i++) {
+                                if (code[i] === correctCode[i]) {
+                                    correctDigits++;
+                                }
+                            }
+
+                            if (correctDigits > 0) {
+                                setTimeout(() => {
+                                    showMessage(`You have ${correctDigits} digit${correctDigits > 1 ? 's' : ''} in the correct position.`, 'error');
+                                }, 2000);
+                            }
+                        } else {
+                            showMessage('No attempts remaining. The puzzle remains unsolved...', 'error');
+                            form.querySelector('.btn').disabled = true;
                             setTimeout(() => {
-                                showMessage('The code is 6325', 'error');
+                                showMessage('The correct code is 1435721', 'error');
                             }, 2000);
                         }
+
+                        codeInputs.forEach(input => {
+                            input.classList.add('error');
+                            setTimeout(() => input.classList.remove('error'), 600);
+                        });
+
+                        // Clear inputs after error
+                        setTimeout(() => {
+                            if (attempts > 0) {
+                                codeInputs[0].focus();
+                            }
+                        }, 700);
                     }
 
                     // Hide loading state
                     loading.classList.remove('active');
+                    if (attempts > 0 || code === correctCode) {
+                        form.querySelector('.btn').disabled = false;
+                    }
                 }, 2000);
-            }
+            });
 
             function showMessage(text, type) {
                 message.textContent = text;
@@ -834,32 +705,31 @@
         function resetToCodeEntry() {
             const codeSection = document.getElementById('codeSection');
             const hintSection = document.getElementById('hintSection');
-            const manualCodeInput = document.getElementById('manualCodeInput');
+            const codeInputs = document.querySelectorAll('.code-input');
             const message = document.getElementById('message');
             const attemptsDisplay = document.getElementById('attempts');
-            const verifyManualCodeBtn = document.getElementById('verifyManualCode');
-            const startScannerBtn = document.getElementById('startScanner');
 
             // Reset attempts
             attempts = 3;
             attemptsDisplay.textContent = `Attempts remaining: ${attempts}`;
 
             // Reset background
-            document.body.classList.remove('hint-page');
+            document.body.classList.remove('success-page');
 
-            // Clear manual input
-            manualCodeInput.value = '';
+            // Clear inputs
+            codeInputs.forEach(input => {
+                input.value = '';
+            });
 
             // Clear message
             message.className = 'message';
 
-            // Enable buttons
-            verifyManualCodeBtn.disabled = false;
-            startScannerBtn.disabled = false;
-
             // Switch back to code section
             hintSection.classList.remove('active');
             codeSection.classList.remove('hidden');
+
+            // Focus first input
+            codeInputs[0].focus();
 
             // Clear particles
             document.getElementById('particles').innerHTML = '';
