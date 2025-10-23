@@ -750,42 +750,48 @@
             switchCameraBtn.addEventListener('click', switchCamera);
 
             function startScanner() {
+                // Clear any existing scanner
+                if (html5QrCode) {
+                    html5QrCode.clear().catch(() => {});
+                }
+
                 html5QrCode = new Html5Qrcode("qr-reader");
 
-                // This method will trigger user permissions
+                // Try to get cameras and start with back camera
                 Html5QrCode.getCameras().then(devices => {
                     if (devices && devices.length) {
                         availableCameras = devices;
                         
-                        // Default to the back camera (usually the last one in the list)
-                        // If there's only one camera, use it
-                        if (devices.length === 1) {
-                            currentCameraIndex = 0;
-                        } else {
-                            // Try to find a back camera by checking the label
-                            let foundBackCamera = false;
-                            for (let i = 0; i < devices.length; i++) {
-                                if (devices[i].label && (
-                                    devices[i].label.toLowerCase().includes('back') ||
-                                    devices[i].label.toLowerCase().includes('environment') ||
-                                    devices[i].label.toLowerCase().includes('rear')
-                                )) {
-                                    currentCameraIndex = i;
-                                    foundBackCamera = true;
-                                    break;
-                                }
-                            }
-                            
-                            // If no back camera found by label, use the last camera (usually back on mobile)
-                            if (!foundBackCamera) {
-                                currentCameraIndex = devices.length - 1;
+                        // Default to back camera (environment camera)
+                        let selectedCameraId = null;
+                        
+                        // First try to find environment camera
+                        for (let i = 0; i < devices.length; i++) {
+                            if (devices[i].label && devices[i].label.toLowerCase().includes('environment')) {
+                                selectedCameraId = devices[i].id;
+                                currentCameraIndex = i;
+                                break;
                             }
                         }
                         
-                        const cameraId = devices[currentCameraIndex].id;
-                        const cameraLabel = devices[currentCameraIndex].label || `Camera ${currentCameraIndex + 1}`;
+                        // If no environment camera found, try to find back camera
+                        if (!selectedCameraId) {
+                            for (let i = 0; i < devices.length; i++) {
+                                if (devices[i].label && devices[i].label.toLowerCase().includes('back')) {
+                                    selectedCameraId = devices[i].id;
+                                    currentCameraIndex = i;
+                                    break;
+                                }
+                            }
+                        }
                         
-                        // Update camera info
+                        // If still no back camera found, use the last camera (usually back on mobile)
+                        if (!selectedCameraId) {
+                            selectedCameraId = devices[devices.length - 1].id;
+                            currentCameraIndex = devices.length - 1;
+                        }
+                        
+                        const cameraLabel = devices[currentCameraIndex].label || `Camera ${currentCameraIndex + 1}`;
                         cameraInfo.textContent = `Using: ${cameraLabel}`;
                         
                         // Show switch camera button if there are multiple cameras
@@ -793,8 +799,9 @@
                             switchCameraBtn.style.display = 'inline-block';
                         }
 
+                        // Start scanning
                         html5QrCode.start(
-                            cameraId,
+                            selectedCameraId,
                             {
                                 fps: 10,
                                 qrbox: { width: 250, height: 250 }
@@ -813,10 +820,43 @@
                             startScannerBtn.style.display = 'none';
                             stopScannerBtn.style.display = 'inline-block';
                         }).catch((err) => {
+                            console.error('Scanner error:', err);
                             showMessage(`Unable to start scanning: ${err}`, 'error');
+                            // Fallback: try with any camera
+                            if (devices.length > 0) {
+                                html5QrCode.start(
+                                    devices[0].id,
+                                    {
+                                        fps: 10,
+                                        qrbox: { width: 250, height: 250 }
+                                    },
+                                    (decodedText, decodedResult) => {
+                                        handleCodeVerification(decodedText);
+                                        stopScanner();
+                                    },
+                                    (errorMessage) => {
+                                        // Parse error, ignore it
+                                    }
+                                ).then(() => {
+                                    isScanning = true;
+                                    scannerPlaceholder.style.display = 'none';
+                                    startScannerBtn.style.display = 'none';
+                                    stopScannerBtn.style.display = 'inline-block';
+                                    cameraInfo.textContent = `Using: ${devices[0].label || 'Default Camera'}`;
+                                    if (devices.length > 1) {
+                                        switchCameraBtn.style.display = 'inline-block';
+                                    }
+                                }).catch((fallbackErr) => {
+                                    console.error('Fallback scanner error:', fallbackErr);
+                                    showMessage(`Camera access denied. Please check permissions.`, 'error');
+                                });
+                            }
                         });
+                    } else {
+                        showMessage('No cameras found on this device.', 'error');
                     }
                 }).catch(err => {
+                    console.error('Camera access error:', err);
                     showMessage(`Unable to access camera: ${err}`, 'error');
                 });
             }
@@ -831,6 +871,7 @@
                         switchCameraBtn.style.display = 'none';
                         cameraInfo.textContent = '';
                     }).catch((err) => {
+                        console.error('Stop scanner error:', err);
                         showMessage(`Failed to stop scanning: ${err}`, 'error');
                     });
                 }
@@ -864,11 +905,15 @@
                         (errorMessage) => {
                             // Parse error, ignore it
                         }
-                    ).catch((err) => {
+                    ).then(() => {
+                        console.log('Camera switched successfully');
+                    }).catch((err) => {
+                        console.error('Switch camera error:', err);
                         showMessage(`Unable to switch camera: ${err}`, 'error');
                     });
                 }).catch((err) => {
-                    showMessage(`Failed to stop scanner for camera switch: ${err}`, 'error');
+                    console.error('Stop scanner for switch error:', err);
+                    showMessage(`Failed to switch camera: ${err}`, 'error');
                 });
             }
 
