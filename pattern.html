@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Color Match Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a3a5f;
+            --secondary-color: #0d2341;
+            --accent-color: #4d7ea8;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --text-color: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a3a5f 0%, #0d2341 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background elements */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .bg-shape:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            left: 10%;
+            background: rgba(77, 126, 168, 0.1);
+            animation-duration: 20s;
+            animation-delay: 0s;
+        }
+
+        .bg-shape:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            left: 80%;
+            background: rgba(77, 126, 168, 0.1);
+            animation-duration: 25s;
+            animation-delay: 2s;
+        }
+
+        .bg-shape:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            top: 80%;
+            left: 20%;
+            background: rgba(77, 126, 168, 0.1);
+            animation-duration: 18s;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.1;
+            }
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 0.2;
+            }
+        }
+
+        header {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            margin: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .info-item {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .info-value i {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .message {
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 15px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            font-size: 1.1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            background: rgba(40, 167, 69, 0.3);
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.3);
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+        }
+
+        .view-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .view-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 25px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .view-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .view-btn.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 15px rgba(77, 126, 168, 0.4);
+        }
+
+        .pattern-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .pattern-label {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-gap: 10px;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+        }
+
+        .pattern-grid.level-1 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .pattern-grid.level-2 {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .pattern-grid.level-3 {
+            grid-template-columns: repeat(6, 1fr);
+        }
+
+        .color-tile {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-tile:active {
+            cursor: grabbing;
+        }
+
+        .color-tile.dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+            z-index: 1000;
+        }
+
+        .color-tile.drag-over {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .color-tile.red {
+            background: linear-gradient(135deg, #ee5a24, #c44569);
+        }
+
+        .color-tile.blue {
+            background: linear-gradient(135deg, #0abde3, #006ba6);
+        }
+
+        .color-tile.green {
+            background: linear-gradient(135deg, #1dd1a1, #10ac84);
+        }
+
+        .color-tile.yellow {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+
+        .color-tile.purple {
+            background: linear-gradient(135deg, #5f27cd, #341f97);
+        }
+
+        .color-tile.orange {
+            background: linear-gradient(135deg, #ff9f43, #ee5a24);
+        }
+
+        .color-tile.cyan {
+            background: linear-gradient(135deg, #00d2d3, #01a3a4);
+        }
+
+        .color-tile.pink {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-color), #3a6ea5);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h2 {
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .modal p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .level-complete-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level-complete-modal.active {
+            display: flex;
+        }
+
+        .level-complete-content {
+            background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .level-complete-content h2 {
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .level-complete-content p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .level-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .level-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: iconBounce 1.5s infinite alternate;
+        }
+
+        .level-icon:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .level-icon:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes iconBounce {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 1rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), #1e7e34);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .lives {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .heart {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            transition: all 0.3s ease;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .heart.lost {
+            color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.8);
+            animation: none;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .pattern-grid {
+                grid-gap: 8px;
+                padding: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.8rem;
+                font-size: 1rem;
+            }
+
+            .view-controls {
+                gap: 0.5rem;
+            }
+
+            .view-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="bg-shape"></div>
+        <div class="bg-shape"></div>
+        <div class="bg-shape"></div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-palette"></i>
+                <h1>Color Match Challenge</h1>
+            </div>
+        </div>
+    </header>
+
+    <section class="game-info">
+        <div class="info-item">
+            <div class="info-label">Level</div>
+            <div class="info-value">
+                <i class="fas fa-layer-group"></i>
+                <span id="level">1</span>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Score</div>
+            <div class="info-value">
+                <i class="fas fa-star"></i>
+                <span id="score">0</span>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">High Score</div>
+            <div class="info-value">
+                <i class="fas fa-trophy"></i>
+                <span id="highScore">0</span>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <div class="game-container">
+            <div class="message" id="message">Press Start to begin!</div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="lives" id="lives">
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+            </div>
+
+            <div class="view-controls">
+                <button class="view-btn active" id="targetViewBtn">
+                    <i class="fas fa-eye"></i>
+                    Target Pattern
+                </button>
+                <button class="view-btn" id="playerViewBtn">
+                    <i class="fas fa-hand-pointer"></i>
+                    Your Pattern
+                </button>
+            </div>
+
+            <div class="pattern-container">
+                <div class="pattern-header">
+                    <div class="pattern-label" id="patternLabel">Target Pattern</div>
+                </div>
+                <div class="pattern-grid level-1" id="patternGrid">
+                    <!-- Tiles will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="startBtn">
+                    <i class="fas fa-play"></i>
+                    Start Game
+                </button>
+                <button class="btn btn-secondary" id="resetBtn">
+                    <i class="fas fa-redo"></i>
+                    Reset Game
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Game Over!</h2>
+            <p id="modalMessage">Your final score: <span id="finalScore">0</span></p>
+            <button class="btn btn-primary" id="playAgainBtn">
+                <i class="fas fa-redo"></i>
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <div class="level-complete-modal" id="levelCompleteModal">
+        <div class="level-complete-content">
+            <h2>Level Complete!</h2>
+            <p id="levelCompleteMessage">Level 1 completed successfully!</p>
+
+            <div class="level-icons">
+                <div class="level-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="level-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="level-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-value" id="levelScore">0</div>
+                    <div class="stat-label">Level Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalScore">0</div>
+                    <div class="stat-label">Total Score</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="nextLevelBtn">
+                <i class="fas fa-arrow-right"></i>
+                Next Level
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="congratsModal">
+        <div class="modal-content">
+            <h2>Congratulations!</h2>
+            <p>You've completed all levels!</p>
+            <p>Your final score: <span id="finalScoreCongrats">0</span></p>
+            <button class="btn btn-primary" id="playAgainCongratsBtn">
+                <i class="fas fa-redo"></i>
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class ColorMatchGame {
+            constructor() {
+                this.levels = [
+                    { gridSize: 16, colorCount: 3, name: "Level 1" },
+                    { gridSize: 25, colorCount: 4, name: "Level 2" },
+                    { gridSize: 36, colorCount: 5, name: "Level 3" }
+                ];
+                
+                this.currentLevel = 0;
+                this.gridSize = this.levels[this.currentLevel].gridSize;
+                this.colorCount = this.levels[this.currentLevel].colorCount;
+                
+                this.colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'cyan', 'pink'];
+                this.targetPattern = [];
+                this.playerPattern = [];
+                this.level = 1;
+                this.score = 0;
+                this.lives = 3;
+                this.isPlaying = false;
+                this.highScore = localStorage.getItem('colorMatchHighScore') || 0;
+                this.draggedElement = null;
+                this.draggedIndex = null;
+                this.currentView = 'target'; // 'target' or 'player'
+
+                this.initElements();
+                this.initEventListeners();
+                this.createGrid();
+                this.updateDisplay();
+            }
+
+            initElements() {
+                this.patternGridElement = document.getElementById('patternGrid');
+                this.startBtn = document.getElementById('startBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.messageElement = document.getElementById('message');
+                this.levelElement = document.getElementById('level');
+                this.scoreElement = document.getElementById('score');
+                this.highScoreElement = document.getElementById('highScore');
+                this.livesElement = document.getElementById('lives');
+                this.gameOverModal = document.getElementById('gameOverModal');
+                this.modalTitle = document.getElementById('modalTitle');
+                this.modalMessage = document.getElementById('modalMessage');
+                this.finalScoreElement = document.getElementById('finalScore');
+                this.playAgainBtn = document.getElementById('playAgainBtn');
+                this.targetViewBtn = document.getElementById('targetViewBtn');
+                this.playerViewBtn = document.getElementById('playerViewBtn');
+                this.patternLabel = document.getElementById('patternLabel');
+                this.levelCompleteModal = document.getElementById('levelCompleteModal');
+                this.levelCompleteMessage = document.getElementById('levelCompleteMessage');
+                this.levelScoreElement = document.getElementById('levelScore');
+                this.totalScoreElement = document.getElementById('totalScore');
+                this.nextLevelBtn = document.getElementById('nextLevelBtn');
+                this.congratsModal = document.getElementById('congratsModal');
+                this.finalScoreCongratsElement = document.getElementById('finalScoreCongrats');
+                this.playAgainCongratsBtn = document.getElementById('playAgainCongratsBtn');
+                this.progressFill = document.getElementById('progressFill');
+            }
+
+            initEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startGame());
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                this.playAgainBtn.addEventListener('click', () => {
+                    this.gameOverModal.classList.remove('active');
+                    this.resetGame();
+                    this.startGame();
+                });
+                
+                this.playAgainCongratsBtn.addEventListener('click', () => {
+                    this.congratsModal.classList.remove('active');
+                    this.resetGame();
+                    this.startGame();
+                });
+
+                // View button controls
+                this.targetViewBtn.addEventListener('click', () => this.switchToTargetView());
+                this.playerViewBtn.addEventListener('click', () => this.switchToPlayerView());
+                
+                this.nextLevelBtn.addEventListener('click', () => {
+                    this.levelCompleteModal.classList.remove('active');
+                    this.nextLevel();
+                });
+            }
+
+            switchToTargetView() {
+                this.currentView = 'target';
+                this.targetViewBtn.classList.add('active');
+                this.playerViewBtn.classList.remove('active');
+                this.patternLabel.textContent = 'Target Pattern';
+                this.displayTargetPattern();
+            }
+
+            switchToPlayerView() {
+                this.currentView = 'player';
+                this.targetViewBtn.classList.remove('active');
+                this.playerViewBtn.classList.add('active');
+                this.patternLabel.textContent = 'Your Pattern';
+                this.displayPlayerPattern();
+            }
+
+            createGrid() {
+                this.patternGridElement.innerHTML = '';
+
+                for (let i = 0; i < this.gridSize; i++) {
+                    const tile = document.createElement('div');
+                    tile.classList.add('color-tile');
+                    tile.dataset.index = i;
+                    tile.draggable = true;
+
+                    // Add drag event listeners
+                    tile.addEventListener('dragstart', (e) => this.handleDragStart(e));
+                    tile.addEventListener('dragover', (e) => this.handleDragOver(e));
+                    tile.addEventListener('drop', (e) => this.handleDrop(e));
+                    tile.addEventListener('dragend', (e) => this.handleDragEnd(e));
+                    tile.addEventListener('dragenter', (e) => this.handleDragEnter(e));
+                    tile.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+
+                    // Add touch event listeners for mobile
+                    tile.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                    tile.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                    tile.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+
+                    this.patternGridElement.appendChild(tile);
+                }
+
+                this.tiles = document.querySelectorAll('.color-tile');
+            }
+
+            startGame() {
+                if (this.isPlaying) return;
+
+                this.isPlaying = true;
+                this.startBtn.disabled = true;
+                this.showMessage('Match the target pattern!', 'normal');
+
+                setTimeout(() => {
+                    this.nextRound();
+                }, 1000);
+            }
+
+            nextRound() {
+                // Only generate new patterns if this is the first round
+                if (this.targetPattern.length === 0) {
+                    this.generatePatterns();
+                }
+
+                this.updateProgress();
+
+                // Show target pattern initially
+                this.switchToTargetView();
+
+                // Auto-switch to player view after a delay
+                setTimeout(() => {
+                    if (this.isPlaying) {
+                        this.switchToPlayerView();
+                    }
+                }, 3000);
+            }
+
+            generatePatterns() {
+                this.targetPattern = [];
+                this.playerPattern = [];
+                const availableColors = this.colors.slice(0, this.colorCount);
+
+                // Create a balanced pattern with equal number of each color
+                const colorCounts = {};
+                availableColors.forEach(color => {
+                    colorCounts[color] = Math.floor(this.gridSize / this.colorCount);
+                });
+
+                // Distribute remaining tiles
+                let remaining = this.gridSize % this.colorCount;
+                for (let i = 0; i < remaining; i++) {
+                    colorCounts[availableColors[i]]++;
+                }
+
+                // Create target pattern with balanced colors
+                for (const color in colorCounts) {
+                    for (let i = 0; i < colorCounts[color]; i++) {
+                        this.targetPattern.push(color);
+                    }
+                }
+
+                // Shuffle target pattern
+                this.shuffleArray(this.targetPattern);
+
+                // Create player pattern with the same color counts but shuffled
+                this.playerPattern = [...this.targetPattern];
+                this.shuffleArray(this.playerPattern);
+
+                // Display the current view
+                if (this.currentView === 'target') {
+                    this.displayTargetPattern();
+                } else {
+                    this.displayPlayerPattern();
+                }
+            }
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            displayTargetPattern() {
+                this.tiles.forEach((tile, index) => {
+                    tile.className = 'color-tile ' + this.targetPattern[index];
+                    tile.draggable = false;
+                });
+            }
+
+            displayPlayerPattern() {
+                this.tiles.forEach((tile, index) => {
+                    tile.className = 'color-tile ' + this.playerPattern[index];
+                    tile.draggable = this.isPlaying;
+                });
+            }
+
+            handleDragStart(e) {
+                if (!this.isPlaying || this.currentView !== 'player') return;
+
+                this.draggedElement = e.target;
+                this.draggedIndex = parseInt(e.target.dataset.index);
+                e.target.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', e.target.innerHTML);
+            }
+
+            handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            }
+
+            handleDragEnter(e) {
+                if (!this.isPlaying || this.currentView !== 'player') return;
+
+                if (e.target.classList.contains('color-tile')) {
+                    e.target.classList.add('drag-over');
+                }
+            }
+
+            handleDragLeave(e) {
+                if (e.target.classList.contains('color-tile')) {
+                    e.target.classList.remove('drag-over');
+                }
+            }
+
+            handleDrop(e) {
+                if (!this.isPlaying || this.currentView !== 'player') return;
+
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+
+                if (this.draggedElement !== e.target && e.target.classList.contains('color-tile')) {
+                    const targetIndex = parseInt(e.target.dataset.index);
+
+                    // Swap colors in the pattern array
+                    const tempColor = this.playerPattern[this.draggedIndex];
+                    this.playerPattern[this.draggedIndex] = this.playerPattern[targetIndex];
+                    this.playerPattern[targetIndex] = tempColor;
+
+                    // Update the visual tiles
+                    this.displayPlayerPattern();
+
+                    // Check if pattern matches
+                    this.checkPattern();
+                }
+
+                return false;
+            }
+
+            handleDragEnd(e) {
+                const tiles = document.querySelectorAll('.color-tile');
+                tiles.forEach(tile => {
+                    tile.classList.remove('dragging');
+                    tile.classList.remove('drag-over');
+                });
+            }
+
+            // Touch events for mobile
+            handleTouchStart(e) {
+                if (!this.isPlaying || this.currentView !== 'player') return;
+
+                const touch = e.touches[0];
+                this.draggedElement = e.target;
+                this.draggedIndex = parseInt(e.target.dataset.index);
+
+                e.target.classList.add('dragging');
+                e.preventDefault();
+            }
+
+            handleTouchMove(e) {
+                if (!this.isPlaying || !this.draggedElement || this.currentView !== 'player') return;
+
+                const touch = e.touches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                if (elementBelow && elementBelow.classList.contains('color-tile') && elementBelow !== this.draggedElement) {
+                    // Remove previous highlight
+                    document.querySelectorAll('.drag-over').forEach(el => {
+                        el.classList.remove('drag-over');
+                    });
+
+                    // Add highlight to the element below
+                    elementBelow.classList.add('drag-over');
+                }
+
+                e.preventDefault();
+            }
+
+            handleTouchEnd(e) {
+                if (!this.isPlaying || !this.draggedElement || this.currentView !== 'player') return;
+
+                const touch = e.changedTouches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+                if (elementBelow && elementBelow.classList.contains('color-tile') && elementBelow !== this.draggedElement) {
+                    const targetIndex = parseInt(elementBelow.dataset.index);
+
+                    // Swap colors in the pattern array
+                    const tempColor = this.playerPattern[this.draggedIndex];
+                    this.playerPattern[this.draggedIndex] = this.playerPattern[targetIndex];
+                    this.playerPattern[targetIndex] = tempColor;
+
+                    // Update the visual tiles
+                    this.displayPlayerPattern();
+
+                    // Check if pattern matches
+                    this.checkPattern();
+                }
+
+                // Clean up
+                this.draggedElement.classList.remove('dragging');
+                document.querySelectorAll('.drag-over').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+
+                this.draggedElement = null;
+                this.draggedIndex = null;
+                e.preventDefault();
+            }
+
+            checkPattern() {
+                let matches = 0;
+                for (let i = 0; i < this.gridSize; i++) {
+                    if (this.targetPattern[i] === this.playerPattern[i]) {
+                        matches++;
+                    }
+                }
+
+                // Update progress bar
+                const progress = (matches / this.gridSize) * 100;
+                this.progressFill.style.width = `${progress}%`;
+
+                if (matches === this.gridSize) {
+                    this.handleCorrectPattern();
+                }
+            }
+
+            handleCorrectPattern() {
+                // Calculate score
+                const levelScore = this.level * 10;
+                this.score += levelScore;
+                this.updateDisplay();
+
+                // Show level completion modal
+                this.showLevelComplete(levelScore);
+            }
+
+            showLevelComplete(levelScore) {
+                this.levelCompleteMessage.textContent = `${this.levels[this.currentLevel].name} completed successfully!`;
+                this.levelScoreElement.textContent = levelScore;
+                this.totalScoreElement.textContent = this.score;
+
+                this.levelCompleteModal.classList.add('active');
+            }
+
+            nextLevel() {
+                // Move to the next level
+                this.currentLevel++;
+                
+                if (this.currentLevel >= this.levels.length) {
+                    // All levels completed
+                    this.gameComplete();
+                    return;
+                }
+                
+                // Update level properties
+                this.level++;
+                this.gridSize = this.levels[this.currentLevel].gridSize;
+                this.colorCount = this.levels[this.currentLevel].colorCount;
+                
+                // Update grid class for styling
+                this.patternGridElement.className = `pattern-grid level-${this.level}`;
+                
+                // Create new grid with updated size
+                this.createGrid();
+                
+                // Reset patterns
+                this.targetPattern = [];
+                this.playerPattern = [];
+                
+                // Update display
+                this.updateDisplay();
+                
+                // Start next round
+                this.nextRound();
+            }
+
+            gameComplete() {
+                this.isPlaying = false;
+                this.startBtn.disabled = false;
+                
+                this.finalScoreCongratsElement.textContent = this.score;
+                this.congratsModal.classList.add('active');
+                
+                // Check for high score
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('colorMatchHighScore', this.highScore);
+                    this.updateDisplay();
+                }
+            }
+
+            updateProgress() {
+                // Reset progress bar
+                this.progressFill.style.width = '0%';
+            }
+
+            updateLives() {
+                const hearts = this.livesElement.querySelectorAll('.heart');
+                hearts.forEach((heart, index) => {
+                    if (index >= this.lives) {
+                        heart.classList.add('lost');
+                    } else {
+                        heart.classList.remove('lost');
+                    }
+                });
+            }
+
+            updateDisplay() {
+                this.levelElement.textContent = this.level;
+                this.scoreElement.textContent = this.score;
+                this.highScoreElement.textContent = this.highScore;
+            }
+
+            showMessage(text, type = 'normal') {
+                this.messageElement.textContent = text;
+                this.messageElement.className = 'message';
+                if (type !== 'normal') {
+                    this.messageElement.classList.add(type);
+                }
+            }
+
+            gameOver() {
+                this.isPlaying = false;
+                this.startBtn.disabled = false;
+
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('colorMatchHighScore', this.highScore);
+                    this.updateDisplay();
+                    this.modalTitle.textContent = 'New High Score!';
+                } else {
+                    this.modalTitle.textContent = 'Game Over!';
+                }
+
+                this.finalScoreElement.textContent = this.score;
+                this.gameOverModal.classList.add('active');
+
+                // Reset progress bar
+                this.progressFill.style.width = '0%';
+            }
+
+            resetGame() {
+                this.targetPattern = [];
+                this.playerPattern = [];
+                this.currentLevel = 0;
+                this.level = 1;
+                this.score = 0;
+                this.lives = 3;
+                this.isPlaying = false;
+                this.startBtn.disabled = false;
+                
+                // Reset grid size and color count
+                this.gridSize = this.levels[this.currentLevel].gridSize;
+                this.colorCount = this.levels[this.currentLevel].colorCount;
+                
+                // Update grid class for styling
+                this.patternGridElement.className = `pattern-grid level-1`;
+                
+                // Recreate grid
+                this.createGrid();
+
+                // Clear the grid
+                this.tiles.forEach(tile => {
+                    tile.className = 'color-tile';
+                    tile.draggable = false;
+                });
+
+                // Reset to target view
+                this.switchToTargetView();
+
+                this.updateDisplay();
+                this.updateLives();
+                this.showMessage('Press Start to begin!', 'normal');
+
+                // Reset progress bar
+                this.progressFill.style.width = '0%';
+            }
+        }
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ColorMatchGame();
+        });
+    </script>
+</body>
+</html>
