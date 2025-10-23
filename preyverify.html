@@ -249,6 +249,18 @@
             box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
         }
 
+        .btn.camera-btn {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            box-shadow: 0 6px 20px rgba(155, 89, 182, 0.3);
+            padding: 12px 25px;
+            font-size: 14px;
+            margin: 5px;
+        }
+
+        .btn.camera-btn:hover {
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
+        }
+
         .message {
             margin-top: 25px;
             padding: 15px;
@@ -500,6 +512,20 @@
             display: block;
             animation: fadeIn 0.5s ease;
         }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .camera-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
     </style>
 </head>
 
@@ -530,8 +556,16 @@
                         <p>Click "Start Scanner" to begin</p>
                     </div>
                 </div>
-                <button id="startScanner" class="btn">Start Scanner</button>
-                <button id="stopScanner" class="btn secondary" style="display: none;">Stop Scanner</button>
+                
+                <div class="camera-controls">
+                    <button id="startScanner" class="btn">Start Scanner</button>
+                    <button id="stopScanner" class="btn secondary" style="display: none;">Stop Scanner</button>
+                    <button id="switchCamera" class="btn camera-btn" style="display: none;">
+                        <i class="fas fa-sync-alt"></i> Switch Camera
+                    </button>
+                </div>
+                
+                <div class="camera-info" id="cameraInfo"></div>
             </div>
 
             <!-- Manual Entry Tab -->
@@ -669,6 +703,8 @@
         const correctCode = '7259';
         let html5QrCode = null;
         let isScanning = false;
+        let availableCameras = [];
+        let currentCameraIndex = 0;
 
         document.addEventListener('DOMContentLoaded', function () {
             const message = document.getElementById('message');
@@ -682,7 +718,9 @@
             const manualTabContent = document.getElementById('manualTabContent');
             const startScannerBtn = document.getElementById('startScanner');
             const stopScannerBtn = document.getElementById('stopScanner');
+            const switchCameraBtn = document.getElementById('switchCamera');
             const scannerPlaceholder = document.getElementById('scannerPlaceholder');
+            const cameraInfo = document.getElementById('cameraInfo');
             const manualCodeInput = document.getElementById('manualCodeInput');
             const verifyManualCodeBtn = document.getElementById('verifyManualCode');
 
@@ -709,14 +747,51 @@
             // QR Scanner functionality
             startScannerBtn.addEventListener('click', startScanner);
             stopScannerBtn.addEventListener('click', stopScanner);
+            switchCameraBtn.addEventListener('click', switchCamera);
 
             function startScanner() {
                 html5QrCode = new Html5Qrcode("qr-reader");
 
                 // This method will trigger user permissions
-                Html5Qrcode.getCameras().then(devices => {
+                Html5QrCode.getCameras().then(devices => {
                     if (devices && devices.length) {
-                        const cameraId = devices[0].id;
+                        availableCameras = devices;
+                        
+                        // Default to the back camera (usually the last one in the list)
+                        // If there's only one camera, use it
+                        if (devices.length === 1) {
+                            currentCameraIndex = 0;
+                        } else {
+                            // Try to find a back camera by checking the label
+                            let foundBackCamera = false;
+                            for (let i = 0; i < devices.length; i++) {
+                                if (devices[i].label && (
+                                    devices[i].label.toLowerCase().includes('back') ||
+                                    devices[i].label.toLowerCase().includes('environment') ||
+                                    devices[i].label.toLowerCase().includes('rear')
+                                )) {
+                                    currentCameraIndex = i;
+                                    foundBackCamera = true;
+                                    break;
+                                }
+                            }
+                            
+                            // If no back camera found by label, use the last camera (usually back on mobile)
+                            if (!foundBackCamera) {
+                                currentCameraIndex = devices.length - 1;
+                            }
+                        }
+                        
+                        const cameraId = devices[currentCameraIndex].id;
+                        const cameraLabel = devices[currentCameraIndex].label || `Camera ${currentCameraIndex + 1}`;
+                        
+                        // Update camera info
+                        cameraInfo.textContent = `Using: ${cameraLabel}`;
+                        
+                        // Show switch camera button if there are multiple cameras
+                        if (devices.length > 1) {
+                            switchCameraBtn.style.display = 'inline-block';
+                        }
 
                         html5QrCode.start(
                             cameraId,
@@ -753,10 +828,48 @@
                         scannerPlaceholder.style.display = 'flex';
                         startScannerBtn.style.display = 'inline-block';
                         stopScannerBtn.style.display = 'none';
+                        switchCameraBtn.style.display = 'none';
+                        cameraInfo.textContent = '';
                     }).catch((err) => {
                         showMessage(`Failed to stop scanning: ${err}`, 'error');
                     });
                 }
+            }
+
+            function switchCamera() {
+                if (!isScanning || availableCameras.length <= 1) return;
+                
+                // Stop current scanner
+                html5QrCode.stop().then(() => {
+                    // Switch to next camera
+                    currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+                    const cameraId = availableCameras[currentCameraIndex].id;
+                    const cameraLabel = availableCameras[currentCameraIndex].label || `Camera ${currentCameraIndex + 1}`;
+                    
+                    // Update camera info
+                    cameraInfo.textContent = `Using: ${cameraLabel}`;
+                    
+                    // Start scanner with new camera
+                    html5QrCode.start(
+                        cameraId,
+                        {
+                            fps: 10,
+                            qrbox: { width: 250, height: 250 }
+                        },
+                        (decodedText, decodedResult) => {
+                            // QR Code scanned successfully
+                            handleCodeVerification(decodedText);
+                            stopScanner();
+                        },
+                        (errorMessage) => {
+                            // Parse error, ignore it
+                        }
+                    ).catch((err) => {
+                        showMessage(`Unable to switch camera: ${err}`, 'error');
+                    });
+                }).catch((err) => {
+                    showMessage(`Failed to stop scanner for camera switch: ${err}`, 'error');
+                });
             }
 
             // Manual code verification
