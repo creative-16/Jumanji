@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jumanji - Maze Challenge</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -48,41 +46,12 @@
             background-size: contain;
         }
 
-        .leaf:nth-child(1) {
-            top: 10%;
-            left: 5%;
-            transform: rotate(15deg);
-        }
-
-        .leaf:nth-child(2) {
-            top: 20%;
-            right: 10%;
-            transform: rotate(-20deg);
-        }
-
-        .leaf:nth-child(3) {
-            bottom: 15%;
-            left: 8%;
-            transform: rotate(30deg);
-        }
-
-        .leaf:nth-child(4) {
-            bottom: 25%;
-            right: 5%;
-            transform: rotate(-10deg);
-        }
-
-        .leaf:nth-child(5) {
-            top: 40%;
-            left: 3%;
-            transform: rotate(5deg);
-        }
-
-        .leaf:nth-child(6) {
-            top: 60%;
-            right: 7%;
-            transform: rotate(-25deg);
-        }
+        .leaf:nth-child(1) { top: 10%; left: 5%; transform: rotate(15deg); }
+        .leaf:nth-child(2) { top: 20%; right: 10%; transform: rotate(-20deg); }
+        .leaf:nth-child(3) { bottom: 15%; left: 8%; transform: rotate(30deg); }
+        .leaf:nth-child(4) { bottom: 25%; right: 5%; transform: rotate(-10deg); }
+        .leaf:nth-child(5) { top: 40%; left: 3%; transform: rotate(5deg); }
+        .leaf:nth-child(6) { top: 60%; right: 7%; transform: rotate(-25deg); }
 
         .container {
             width: 100%;
@@ -229,6 +198,139 @@
             color: #e0e0e0;
         }
 
+        /* Lobby Section */
+        .lobby-section {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid #3a7a3a;
+            margin-bottom: 20px;
+        }
+
+        .lobby-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .lobby-title {
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .players-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .players-container h3 {
+            margin-bottom: 15px;
+            color: #ffcc00;
+            text-align: center;
+        }
+
+        .player-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #ffcc00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .online {
+            background-color: #28a745;
+        }
+
+        .offline {
+            background-color: #dc3545;
+        }
+
+        .player-name {
+            font-weight: bold;
+        }
+
+        .player-role {
+            background-color: rgba(255, 204, 0, 0.2);
+            border: 1px solid #ffcc00;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            color: #ffcc00;
+        }
+
+        .start-button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-start {
+            background-color: #ffcc00;
+            color: #0a3d0a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .btn-start:hover {
+            background-color: #ffdd44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start.show {
+            display: inline-block;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffcc00;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Maze Viewer Screen */
         .maze-container {
             display: flex;
@@ -321,11 +423,9 @@
             0% {
                 box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
             }
-
             70% {
                 box-shadow: 0 0 0 8px rgba(255, 204, 0, 0);
             }
-
             100% {
                 box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
             }
@@ -469,21 +569,6 @@
             max-width: 400px;
         }
 
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ffcc00;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
         .room-info {
             background-color: rgba(0, 0, 0, 0.5);
             padding: 0.75rem;
@@ -563,7 +648,6 @@
         }
     </style>
 </head>
-
 <body>
     <!-- Jungle decorations -->
     <div class="jungle-decoration">
@@ -575,7 +659,12 @@
         <div class="leaf"></div>
     </div>
 
-    <div class="container">
+    <!-- Lobby Section -->
+    <div id="lobbySection" class="lobby-section">
+        <div class="lobby-header">
+            <h1 class="lobby-title">JUMANJI MAZE LOBBY</h1>
+        </div>
+        
         <div class="team-info">
             <h3>Team Information</h3>
             <div class="info-item">
@@ -583,12 +672,46 @@
                 <span class="info-value" id="team-code">-</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Player Name:</span>
+                <span class="info-label">Team Name:</span>
+                <span class="info-value" id="team-name">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Your Name:</span>
                 <span class="info-value" id="player-name">-</span>
+            </div>
+        </div>
+        
+        <div class="players-container">
+            <h3>Team Members (<span id="player-count">0</span>/4)</h3>
+            <div id="players-list"></div>
+        </div>
+        
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner"></div>
+            <p>Assigning roles...</p>
+        </div>
+        
+        <div class="start-button-container">
+            <button id="start-game-btn" class="btn-start">
+                <i class="fas fa-play"></i> Start Game
+            </button>
+        </div>
+    </div>
+
+    <div class="container" id="gameContainer" style="display: none;">
+        <div class="team-info">
+            <h3>Team Information</h3>
+            <div class="info-item">
+                <span class="info-label">Team Code:</span>
+                <span class="info-value" id="team-code-game">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Player Name:</span>
+                <span class="info-value" id="player-name-game">-</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Player Role:</span>
-                <span class="info-value" id="player-role">-</span>
+                <span class="info-value" id="player-role-game">-</span>
             </div>
         </div>
 
@@ -667,8 +790,7 @@
                 <div id="left-right-screen" class="game-screen hidden">
                     <div class="controller-container">
                         <div class="player-info">
-                            <div class="player-position"><span>Position: </span><span
-                                    id="position-text-lr">Unknown</span>
+                            <div class="player-position"><span>Position: </span><span id="position-text-lr">Unknown</span>
                             </div>
                             <div class="jungle-noise">
                                 <div class="noise-indicator"></div><span>Listening to the jungle...</span>
@@ -693,8 +815,7 @@
                 <div id="instructor-screen" class="game-screen hidden">
                     <div class="instructor-container">
                         <div class="player-info">
-                            <div class="player-position"><span>Position: </span><span
-                                    id="position-text-inst">Unknown</span>
+                            <div class="player-position"><span>Position: </span><span id="position-text-inst">Unknown</span>
                             </div>
                             <div class="jungle-noise">
                                 <div class="noise-indicator"></div><span>Guiding through the jungle...</span>
@@ -717,7 +838,7 @@
                 </div>
 
                 <!-- Waiting Screen -->
-                <div id="waiting-screen" class="game-screen">
+                <div id="waiting-screen" class="game-screen hidden">
                     <div class="jungle-animation">
                         <div class="jungle-bg"></div>
                         <div class="jungle-overlay">
@@ -767,7 +888,18 @@
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
 
-            // Game elements
+            // DOM Elements - Lobby
+            const lobbySection = document.getElementById('lobbySection');
+            const gameContainer = document.getElementById('gameContainer');
+            const teamCodeDisplay = document.getElementById('team-code');
+            const teamNameDisplay = document.getElementById('team-name');
+            const playerNameDisplay = document.getElementById('player-name');
+            const playerCountDisplay = document.getElementById('player-count');
+            const playersList = document.getElementById('players-list');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const startGameBtn = document.getElementById('start-game-btn');
+
+            // DOM Elements - Game
             const mazeViewerScreen = document.getElementById('maze-viewer-screen');
             const forwardBackwardScreen = document.getElementById('forward-backward-screen');
             const leftRightScreen = document.getElementById('left-right-screen');
@@ -783,9 +915,9 @@
             const roomCodeElement = document.getElementById('room-code');
 
             // Team info elements
-            const teamCodeDisplay = document.getElementById('team-code');
-            const playerNameDisplay = document.getElementById('player-name');
-            const playerRoleDisplay = document.getElementById('player-role');
+            const teamCodeDisplayGame = document.getElementById('team-code-game');
+            const playerNameDisplayGame = document.getElementById('player-name-game');
+            const playerRoleDisplayGame = document.getElementById('player-role-game');
 
             const mazeCanvas = document.getElementById('maze-canvas');
             const ctx = mazeCanvas ? mazeCanvas.getContext('2d') : null;
@@ -816,49 +948,206 @@
             let teamId = null;
             let playerId = null;
             let playerName = null;
+            let teamLobbyRef = null;
+            let rolesAssigned = false;
 
             // Get player info from localStorage
             function getPlayerInfo() {
                 teamId = localStorage.getItem('teamId');
                 playerId = localStorage.getItem('playerId');
                 playerName = localStorage.getItem('playerName');
-
+                
                 if (!teamId || !playerId || !playerName) {
                     // Redirect to index.html if player info is missing
                     window.location.href = 'index.html';
                     return false;
                 }
-
+                
                 // Update team info display
                 database.ref(`teams/${teamId}`).once('value').then(snapshot => {
                     const team = snapshot.val();
                     if (team) {
                         teamCodeDisplay.textContent = team.teamCode;
+                        teamCodeDisplayGame.textContent = team.teamCode;
+                        teamNameDisplay.textContent = team.teamName;
                         roomCodeElement.textContent = team.teamCode;
                     }
                 });
-
+                
                 playerNameDisplay.textContent = playerName;
-
+                playerNameDisplayGame.textContent = playerName;
+                
                 return true;
             }
 
             // Initialize the game
             function initGame() {
                 if (!getPlayerInfo()) return;
+                
+                // Set up team-specific lobby reference
+                teamLobbyRef = database.ref(`mazeLobby/${teamId}`);
+                
+                // Add player to lobby
+                teamLobbyRef.child(`players/${playerId}`).set({
+                    playerId: playerId,
+                    playerName: playerName,
+                    isOnline: true,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Set up listeners for this team's lobby
+                setupLobbyListeners();
+                
+                // Update player status when they leave
+                window.addEventListener('beforeunload', () => {
+                    teamLobbyRef.child(`players/${playerId}`).update({
+                        isOnline: false
+                    });
+                });
+                
+                // Handle page visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // Page is hidden, update player status to offline
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: false
+                        });
+                    } else {
+                        // Page is visible, update player status to online
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: true,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                });
+            }
 
+            function setupLobbyListeners() {
+                // Listen for players in the lobby
+                teamLobbyRef.child('players').on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    updatePlayersList(players);
+                    
+                    // Check if all 4 players have joined
+                    const playerCount = Object.keys(players).length;
+                    if (playerCount === 4 && !rolesAssigned) {
+                        assignRoles();
+                    }
+                });
+                
+                // Listen for role assignments
+                teamLobbyRef.child('roles').on('value', (snapshot) => {
+                    const roles = snapshot.val() || {};
+                    if (roles[playerId]) {
+                        playerRole = roles[playerId];
+                        playerRoleDisplayGame.textContent = getRoleDisplayName(playerRole);
+                        
+                        // Show start button if all roles are assigned
+                        if (Object.keys(roles).length === 4) {
+                            startGameBtn.classList.add('show');
+                        }
+                    }
+                });
+                
+                // Listen for game start
+                teamLobbyRef.child('gameStarted').on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        startMazeGame();
+                    }
+                });
+            }
+
+            function updatePlayersList(players) {
+                let html = '';
+                let playerCount = 0;
+                
+                Object.keys(players).forEach(id => {
+                    const player = players[id];
+                    playerCount++;
+                    
+                    html += `
+                        <div class="player-card">
+                            <div class="player-info">
+                                <div class="player-status ${player.isOnline ? 'online' : 'offline'}"></div>
+                                <span class="player-name">${player.playerName} ${id === playerId ? '(You)' : ''}</span>
+                            </div>
+                            <div class="player-role" id="role-${id}">Waiting for role...</div>
+                        </div>
+                    `;
+                });
+                
+                playersList.innerHTML = html;
+                playerCountDisplay.textContent = playerCount;
+            }
+
+            function assignRoles() {
+                rolesAssigned = true;
+                loadingSpinner.style.display = 'flex';
+                
+                // Get all player IDs
+                teamLobbyRef.child('players').once('value').then(snapshot => {
+                    const players = snapshot.val() || {};
+                    const playerIds = Object.keys(players);
+                    
+                    // Shuffle the player IDs for random role assignment
+                    const shuffledIds = [...playerIds].sort(() => Math.random() - 0.5);
+                    
+                    // Define the roles
+                    const roles = ['mazeViewer', 'forwardBackward', 'leftRight', 'instructor'];
+                    
+                    // Assign roles to players
+                    const roleAssignments = {};
+                    shuffledIds.forEach((id, index) => {
+                        roleAssignments[id] = roles[index];
+                    });
+                    
+                    // Save role assignments to Firebase
+                    teamLobbyRef.child('roles').set(roleAssignments).then(() => {
+                        // Update UI with role assignments
+                        Object.keys(roleAssignments).forEach(id => {
+                            const roleElement = document.getElementById(`role-${id}`);
+                            if (roleElement) {
+                                roleElement.textContent = getRoleDisplayName(roleAssignments[id]);
+                            }
+                        });
+                        
+                        loadingSpinner.style.display = 'none';
+                    });
+                });
+            }
+
+            function getRoleDisplayName(role) {
+                switch(role) {
+                    case 'mazeViewer': return 'Maze Viewer';
+                    case 'forwardBackward': return 'Forward/Backward Controller';
+                    case 'leftRight': return 'Left/Right Controller';
+                    case 'instructor': return 'Instructor';
+                    default: return 'Unknown';
+                }
+            }
+
+            // Start game button click handler
+            startGameBtn.addEventListener('click', () => {
+                teamLobbyRef.child('gameStarted').set(true);
+            });
+
+            function startMazeGame() {
+                // Hide lobby and show game
+                lobbySection.style.display = 'none';
+                gameContainer.style.display = 'block';
+                
                 // Generate a unique ID for this player in the maze game
                 myPlayerId = 'maze_' + Math.random().toString(36).substr(2, 9);
-
+                
                 // Set up team-specific game reference
                 gameRef = database.ref(`teams/${teamId}/mazeGame`);
                 playersRef = database.ref(`teams/${teamId}/mazeGame/players`);
-
+                
                 // Set up listeners for this team's game
                 setupGameListeners();
-
-                // Assign player role
-                assignPlayerRole();
+                
+                // Assign player role in the game
+                assignPlayerRoleInGame();
             }
 
             function setupGameListeners() {
@@ -940,45 +1229,16 @@
                 });
             }
 
-            // Assign player role
-            function assignPlayerRole() {
+            // Assign player role in the game
+            function assignPlayerRoleInGame() {
                 playersRef.once('value').then((snapshot) => {
                     const players = snapshot.val() || {};
-                    if (!players.mazeViewer) {
-                        playerRole = 'mazeViewer';
+                    if (!players[playerRole]) {
                         playersRef.child(playerRole).set({
                             playerId: playerId,
                             playerName: playerName,
                             connected: true
                         });
-                        playerRoleDisplay.textContent = 'Maze Viewer';
-                    } else if (!players.forwardBackward) {
-                        playerRole = 'forwardBackward';
-                        playersRef.child(playerRole).set({
-                            playerId: playerId,
-                            playerName: playerName,
-                            connected: true
-                        });
-                        playerRoleDisplay.textContent = 'Forward/Backward Controller';
-                    } else if (!players.leftRight) {
-                        playerRole = 'leftRight';
-                        playersRef.child(playerRole).set({
-                            playerId: playerId,
-                            playerName: playerName,
-                            connected: true
-                        });
-                        playerRoleDisplay.textContent = 'Left/Right Controller';
-                    } else if (!players.instructor) {
-                        playerRole = 'instructor';
-                        playersRef.child(playerRole).set({
-                            playerId: playerId,
-                            playerName: playerName,
-                            connected: true
-                        });
-                        playerRoleDisplay.textContent = 'Instructor';
-                    } else {
-                        playerRole = 'spectator';
-                        playerRoleDisplay.textContent = 'Spectator';
                     }
                 });
             }
@@ -1228,38 +1488,9 @@
                 });
             });
 
-            // Handle page unload - remove player from the game
-            window.addEventListener('beforeunload', () => {
-                if (playersRef && playerRole) {
-                    playersRef.child(playerRole).remove();
-                }
-
-                // Update player status to offline
-                database.ref(`teams/${teamId}/players/${playerId}`).update({
-                    isOnline: false
-                });
-            });
-
-            // Handle page visibility change
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    // Page is hidden, update player status to offline
-                    database.ref(`teams/${teamId}/players/${playerId}`).update({
-                        isOnline: false
-                    });
-                } else {
-                    // Page is visible, update player status to online
-                    database.ref(`teams/${teamId}/players/${playerId}`).update({
-                        isOnline: true,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    });
-                }
-            });
-
             // Initialize the game
             initGame();
         });
     </script>
 </body>
-
 </html>
