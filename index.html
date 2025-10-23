@@ -4,836 +4,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jumanji: The Hunt Begins</title>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-
-    <!-- QR Code Scanner Library -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Creepster&family=Permanent+Marker&family=Roboto:wght@400;500;700&display=swap"
-        rel="stylesheet">
-
+    <title>Jumanji Treasure Hunt - Join Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-green: #2d5016;
-            --dark-green: #1a3009;
-            --light-green: #4a7c2e;
-            --accent-gold: #d4af37;
-            --accent-red: #8b0000;
-            --text-light: #f5f5dc;
-            --text-dark: #333;
-
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary-color: #2d5016;
+            --secondary-color: #8B4513;
+            --accent-color: #DAA520;
+            --danger-color: #8B0000;
+            --bg-color: #f5f5dc;
+            --card-bg: #f8f4e6;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background-color: var(--bg-color);
+            font-family: 'Georgia', serif;
+            background-image: url('./images/2.jpg');
+            background-size: cover;
+            background-attachment: fixed;
             position: relative;
-            overflow-x: hidden;
-
-        }
-
-        p {
-            color: rgb(143, 139, 139);
+            min-height: 100vh;
         }
 
         body::before {
             content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://youtu.be/W5HtWdK6xLo?si=hAgHapoWGhY2lPgF');
-            opacity: 1;
-            z-index: -1;
-        }
-
-        .video-background {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
             z-index: -1;
-            pointer-events: none;
-            overflow: hidden;
         }
 
-        .video-background iframe {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 220vh;
-            /* 100vh * (16 / 9) */
-            height: 120vh;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-
-        header {
-            background-color: rgba(26, 48, 9, 0.9);
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            border-bottom: 3px solid var(--accent-gold);
-            position: relative;
-            overflow: hidden;
-        }
-
-        header::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% {
-                transform: translateX(-100%);
-            }
-
-            100% {
-                transform: translateX(100%);
-            }
-        }
-
-        .logo {
-            font-family: 'Creepster', cursive;
-            font-size: 2.5rem;
-            color: var(--accent-gold);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            margin-bottom: 0.5rem;
-            letter-spacing: 2px;
-        }
-
-        .tagline {
-            font-family: 'Permanent Marker', cursive;
-            font-size: 1.2rem;
-            color: var(--text-light);
-        }
-
-        main {
-            flex: 1;
-            padding: 1.5rem;
-            max-width: 800px;
+        .container {
+            max-width: 900px;
             margin: 0 auto;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #fff;
         }
 
         .card {
-            background-color: rgba(45, 80, 22, 0.9);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            background-color: var(--card-bg);
+            border: 2px solid var(--secondary-color);
+            border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            border: 2px solid var(--light-green);
-            position: relative;
+            margin-bottom: 20px;
             overflow: hidden;
         }
 
-        .card::before {
-            content: "";
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--accent-gold), transparent, var(--accent-gold));
-            z-index: -1;
-            opacity: 0.5;
-            animation: borderGlow 3s infinite;
-        }
-
-        @keyframes borderGlow {
-
-            0%,
-            100% {
-                opacity: 0.3;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        .card-title {
-            font-family: 'Permanent Marker', cursive;
-            font-size: 1.5rem;
-            color: var(--accent-gold);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 0.8rem;
-            border-radius: 5px;
-            border: 2px solid var(--light-green);
-            background-color: rgba(255, 255, 255, 0.9);
-            color: var(--text-dark);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-        }
-
-        button {
-            background-color: var(--accent-gold);
-            color: var(--text-dark);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 5px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'Permanent Marker', cursive;
-            font-size: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            background-color: #b8941f;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        button:disabled {
-            background-color: #666;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-block {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .btn-hunt {
-            background-color: var(--accent-red);
+        .card-header {
+            background-color: var(--primary-color);
             color: white;
-            font-size: 1.5rem;
-            padding: 1rem 2rem;
-            margin: 2rem auto;
-            display: block;
-            animation: pulse 2s infinite;
+            font-weight: bold;
+            padding: 15px;
+            border-bottom: 2px solid var(--secondary-color);
         }
 
-        .btn-hunt:hover {
-            background-color: #6b0000;
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(139, 0, 0, 0.7);
-            }
-
-            70% {
-                box-shadow: 0 0 0 15px rgba(139, 0, 0, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(139, 0, 0, 0);
-            }
+        .btn-primary:hover {
+            background-color: #3a6218;
+            border-color: #3a6218;
         }
 
-        .entry-options {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
         }
 
-        .entry-option {
-            flex: 1;
-            padding: 1.5rem;
-            background-color: rgba(26, 48, 9, 0.7);
-            border: 2px solid var(--light-green);
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .jungle-border {
+            border: 2px solid var(--secondary-color);
             border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
         }
 
-        .entry-option:hover {
-            border-color: var(--accent-gold);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .player-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--accent-color);
         }
 
-        .entry-option.active {
-            background-color: rgba(74, 124, 46, 0.7);
-            border-color: var(--accent-gold);
-        }
-
-        .entry-option i {
-            font-size: 2rem;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .entry-option h3 {
-            font-family: 'Permanent Marker', cursive;
-            margin-bottom: 0.5rem;
-            color: white;
-        }
-
-        .entry-option p {
-            font-size: 0.9rem;
-        }
-
-        .team-lobby {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .player-slot {
-            background-color: rgba(26, 48, 9, 0.7);
-            border: 2px dashed var(--light-green);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            min-height: 100px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .player-slot.filled {
-            border-style: solid;
-            background-color: rgba(74, 124, 46, 0.5);
-            animation: playerJoined 0.5s ease;
-        }
-
-        @keyframes playerJoined {
-            0% {
-                transform: scale(0.9);
-                opacity: 0.7;
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .player-avatar {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .player-name {
-            font-weight: 500;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 5px;
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transform: translateX(150%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            max-width: 300px;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            background-color: #4CAF50;
-        }
-
-        .notification.error {
-            background-color: var(--accent-red);
-        }
-
-        .notification.info {
-            background-color: #2196F3;
-        }
-
-        #qr-reader {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .jungle-decoration {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            z-index: -1;
-            opacity: 0.7;
-        }
-
-        .jungle-1 {
-            top: 10%;
-            left: 5%;
-            background-image: url('https://picsum.photos/seed/leaf1/100/100.jpg');
-            transform: rotate(-15deg);
-        }
-
-        .jungle-2 {
-            bottom: 10%;
-            right: 5%;
-            background-image: url('https://picsum.photos/seed/leaf2/100/100.jpg');
-            transform: rotate(15deg);
-        }
-
-        .status-indicator {
+        .player-status {
             display: inline-block;
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-right: 0.5rem;
+            margin-right: 10px;
         }
 
-        .status-indicator.online {
-            background-color: #4CAF50;
-            animation: pulse 2s infinite;
+        .online {
+            background-color: #28a745;
         }
 
-        .status-indicator.offline {
-            background-color: #F44336;
+        .offline {
+            background-color: #dc3545;
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-            }
-
-            70% {
-                box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-            }
+        .tab-content {
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 0 0 15px 15px;
         }
 
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .step {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 5px;
-            position: relative;
-        }
-
-        .step.active {
-            background-color: var(--accent-gold);
-            color: var(--text-dark);
-        }
-
-        .step.completed {
-            background-color: #4CAF50;
-        }
-
-        .step:not(:last-child)::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 100%;
-            width: 10px;
-            height: 2px;
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .step.completed:not(:last-child)::after {
-            background-color: #4CAF50;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .reconnect-banner {
-            background-color: rgba(255, 152, 0, 0.9);
+        .nav-tabs .nav-link {
+            background-color: var(--secondary-color);
             color: white;
-            padding: 0.8rem;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1001;
-            display: none;
+            border: none;
+            margin-right: 5px;
         }
 
-        .reconnect-banner.show {
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner.active {
             display: block;
         }
 
-        .game-start-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.5s, visibility 0.5s;
+        .team-info {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
 
-        .game-start-overlay.show {
-            opacity: 1;
-            visibility: visible;
+        .hunt-section {
+            display: none;
+            margin-top: 20px;
         }
 
-        .game-start-content {
-            text-align: center;
-            max-width: 600px;
-            padding: 2rem;
+        .hunt-section.active {
+            display: block;
         }
 
-        .game-start-title {
-            font-family: 'Creepster', cursive;
-            font-size: 3rem;
-            color: var(--accent-gold);
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        .btn-hunt {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
-        .game-start-message {
-            font-family: 'Permanent Marker', cursive;
-            font-size: 1.5rem;
-            color: var(--text-light);
-            margin-bottom: 2rem;
+        .btn-hunt:hover {
+            background-color: #e6c55a;
+            border-color: #e6c55a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .countdown {
-            font-family: 'Orbitron', monospace;
-            font-size: 4rem;
-            color: var(--accent-red);
-            margin-bottom: 2rem;
+        .jungle-leaf {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-image: url('./images/leaf.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            z-index: -1;
         }
 
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 2rem;
-            }
+        .leaf1 {
+            top: 10%;
+            left: 5%;
+            transform: rotate(45deg);
+        }
 
-            .tagline {
-                font-size: 1rem;
-            }
+        .leaf2 {
+            bottom: 10%;
+            right: 5%;
+            transform: rotate(-30deg);
+        }
 
-            .team-lobby {
-                grid-template-columns: 1fr;
-            }
-
-            main {
-                padding: 1rem;
-            }
-
-            .card {
-                padding: 1rem;
-            }
-
-            .entry-options {
-                flex-direction: column;
-            }
-
-            .game-start-title {
-                font-size: 2rem;
-            }
-
-            .game-start-message {
-                font-size: 1.2rem;
-            }
-
-            .countdown {
-                font-size: 3rem;
-            }
+        .rejoin-message {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #0c5460;
         }
     </style>
 </head>
 
 <body>
-    <div class="reconnect-banner" id="reconnect-banner">
-        <i class="fas fa-wifi"></i> Connection lost. Attempting to reconnect...
-    </div>
 
-    <div class="video-background">
-        <iframe
-            src="https://www.youtube.com/embed/4bHUsy74Fss?autoplay=1&mute=1&controls=0&loop=1&playlist=4bHUsy74Fss&start=12&end=96"
-            frameborder="0" allow="autoplay; fullscreen" allowfullscreen>
-        </iframe>
-    </div>
 
-    <header>
-        <h1 class="logo"><img src="./images/logo.png"></h1>
-        <p class="tagline">The Hunt Begins, Face your Fate</p>
-    </header>
+    <div class="container">
+        <div class="header">
+            <img src="./images/logo.png" style="width: 317px; height: 89px;">
+            <p>The Hunt Begins, Face your Fate</p>
+        </div>
 
-    <main>
+        <div id="loginSection" class="card">
+            <div class="card-header">
+                <i class="fas fa-sign-in-alt"></i> Join Game
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="loginTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="join-tab" data-bs-toggle="tab" data-bs-target="#join"
+                            type="button" role="tab" aria-controls="join" aria-selected="true">
+                            <i class="fas fa-user-plus"></i> Join Team
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejoin-tab" data-bs-toggle="tab" data-bs-target="#rejoin"
+                            type="button" role="tab" aria-controls="rejoin" aria-selected="false">
+                            <i class="fas fa-redo"></i> Rejoin Game
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="loginTabsContent">
+                    <div class="tab-pane fade show active" id="join" role="tabpanel" aria-labelledby="join-tab">
+                        <div class="jungle-border">
+                            <h5>Enter Team Code</h5>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="teamCode"
+                                    placeholder="Enter your team code">
+                            </div>
+                            <button class="btn btn-primary w-100" id="joinTeam">
+                                <i class="fas fa-arrow-right"></i> Join Team
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="rejoin" role="tabpanel" aria-labelledby="rejoin-tab">
+                        <div class="jungle-border">
+                            <h5>Rejoin with Player ID</h5>
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="playerId"
+                                    placeholder="Enter your player ID">
+                            </div>
+                            <button class="btn btn-primary w-100" id="rejoinGame">
+                                <i class="fas fa-arrow-right"></i> Rejoin Game
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Step 1: Entry Options -->
-        <div id="step1" class="card fade-in">
-            <h2 class="card-title">
-                <i class="fas fa-map-signs"></i>
-                Choose Your Entry Path
-            </h2>
+        <div id="playerInfoSection" class="card" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-user"></i> Player Information
+            </div>
+            <div class="card-body">
+                <div class="jungle-border">
+                    <h5>Enter Your Name</h5>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="playerName" placeholder="Enter your name">
+                    </div>
+                    <button class="btn btn-primary w-100" id="savePlayerInfo">
+                        <i class="fas fa-save"></i> Save & Continue
+                    </button>
+                </div>
+            </div>
+        </div>
 
-            <div class="entry-options">
-                <div class="entry-option" id="code-entry-option">
-                    <i class="fas fa-keyboard"></i>
-                    <h3>Enter Code</h3>
-                    <p>Type in your team's unique code</p>
+        <div id="lobbySection" class="card" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-users"></i> Team Lobby
+            </div>
+            <div class="card-body">
+                <div class="team-info">
+                    <h5>Team: <span id="teamName"></span></h5>
+                    <p>Code: <strong id="teamCodeDisplay"></strong></p>
+                    <p>Status: <span id="teamStatus"></span></p>
                 </div>
 
-                <div class="entry-option" id="qr-entry-option">
-                    <i class="fas fa-qrcode"></i>
-                    <h3>Scan QR</h3>
-                    <p>Use your camera to scan the QR code</p>
+                <div class="jungle-border">
+                    <h5>Team Members</h5>
+                    <div id="playersList"></div>
+                </div>
+
+                <div class="hunt-section" id="huntSection">
+                    <div class="text-center">
+                        <button class="btn btn-hunt" id="letsHuntBtn">
+                            <i class="fas fa-compass"></i> Let's Hunt...
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Step 2: Code Entry -->
-        <div id="step2" class="card hidden">
-            <h2 class="card-title">
-                <i class="fas fa-keyboard"></i>
-                Enter Team Code
-            </h2>
-
-            <div class="form-group">
-                <label for="team-code">Team Code</label>
-                <input type="text" id="team-code" placeholder="Enter 4-character team code" maxlength="4">
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-
-            <button id="validate-code-btn" class="btn-block">
-                <i class="fas fa-check-circle"></i>
-                Validate Code
-            </button>
-
-            <button id="back-to-options-btn" class="btn-block" style="margin-top: 1rem; background-color: #666;">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </button>
-        </div>
-
-        <!-- Step 3: QR Scanner -->
-        <div id="step3" class="card hidden">
-            <h2 class="card-title">
-                <i class="fas fa-qrcode"></i>
-                Scan QR Code
-            </h2>
-
-            <div id="qr-reader"></div>
-
-            <button id="back-to-options-from-qr-btn" class="btn-block"
-                style="margin-top: 1rem; background-color: #666;">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </button>
-        </div>
-
-        <!-- Step 4: Player Name -->
-        <div id="step4" class="card hidden">
-            <h2 class="card-title">
-                <i class="fas fa-user-plus"></i>
-                Enter Your Name
-            </h2>
-
-            <div class="form-group">
-                <label for="player-name">Your Jungle Name</label>
-                <input type="text" id="player-name" placeholder="Enter your name">
-            </div>
-
-            <button id="join-team-btn" class="btn-block">
-                <i class="fas fa-sign-in-alt"></i>
-                Join Team
-            </button>
-        </div>
-
-        <!-- Step 5: Team Lobby -->
-        <div id="step5" class="card hidden">
-            <h2 class="card-title">
-                <i class="fas fa-campground"></i>
-                Team Lobby
-                <span class="status-indicator online"></span>
-            </h2>
-
-            <div class="step-indicator">
-                <div class="step completed">1</div>
-                <div class="step completed">2</div>
-                <div class="step active">3</div>
-            </div>
-
-            <div id="team-info">
-                <p>Team Code: <strong id="display-team-code"></strong></p>
-                <p>Players: <span id="player-count">0</span>/4</p>
-            </div>
-
-            <div class="team-lobby" id="team-lobby">
-                <!-- Player slots will be dynamically added here -->
-            </div>
-
-            <div id="waiting-message" style="text-align: center; margin-top: 1.5rem;">
-                <p>Waiting for other players to join...</p>
-                <div class="loading" style="margin: 1rem auto;"></div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Game Start Overlay -->
-    <div class="game-start-overlay" id="game-start-overlay">
-        <div class="game-start-content">
-            <h2 class="game-start-title">The Hunt Begins!</h2>
-            <p class="game-start-message">Get ready to enter the world of Jumanji</p>
-            <div class="countdown" id="countdown">5</div>
-            <button id="lets-hunt-btn" class="btn-hunt">
-                <i class="fas fa-play"></i> Let's Hunt!
-            </button>
         </div>
     </div>
 
-    <div id="notification" class="notification"></div>
-    <!-- Hidden Audio Player -->
-    <audio id="bgm-player" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+    <!-- Toast Notification -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Jumanji Treasure Hunt</strong>
+                <small>just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Operation completed successfully!
+            </div>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        function enableAudioOnInteraction() {
-            const audio = document.getElementById('bgm-player');
-            audio.play().catch(err => {
-                console.log("Autoplay blocked:", err);
-            });
-            document.removeEventListener('click', enableAudioOnInteraction);
-            document.removeEventListener('keydown', enableAudioOnInteraction);
-        }
-
-        // Attach on first interaction
-        document.addEventListener('click', enableAudioOnInteraction);
-        document.addEventListener('keydown', enableAudioOnInteraction);
-    </script>
-
-    <script>
-        // Initialize Firebase
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDeu-PF9W3fHf7shBV-_aVRCEZ6atBCJ5E",
             authDomain: "jumanji-d14a9.firebaseapp.com",
@@ -844,591 +365,411 @@
             appId: "1:1008263887985:web:8be0e837e07bdecc9eafd0"
         };
 
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
 
         // DOM Elements
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const step3 = document.getElementById('step3');
-        const step4 = document.getElementById('step4');
-        const step5 = document.getElementById('step5');
-        const reconnectBanner = document.getElementById('reconnect-banner');
-        const gameStartOverlay = document.getElementById('game-start-overlay');
-        const countdown = document.getElementById('countdown');
-        const letsHuntBtn = document.getElementById('lets-hunt-btn');
+        const loginSection = document.getElementById('loginSection');
+        const playerInfoSection = document.getElementById('playerInfoSection');
+        const lobbySection = document.getElementById('lobbySection');
+        const teamCodeInput = document.getElementById('teamCode');
+        const joinTeamBtn = document.getElementById('joinTeam');
+        const playerIdInput = document.getElementById('playerId');
+        const rejoinGameBtn = document.getElementById('rejoinGame');
+        const playerNameInput = document.getElementById('playerName');
+        const savePlayerInfoBtn = document.getElementById('savePlayerInfo');
+        const teamNameSpan = document.getElementById('teamName');
+        const teamCodeDisplay = document.getElementById('teamCodeDisplay');
+        const teamStatusSpan = document.getElementById('teamStatus');
+        const playersListDiv = document.getElementById('playersList');
+        const huntSection = document.getElementById('huntSection');
+        const letsHuntBtn = document.getElementById('letsHuntBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const toast = new bootstrap.Toast(document.getElementById('toast'));
+        const toastMessage = document.getElementById('toastMessage');
 
-        const codeEntryOption = document.getElementById('code-entry-option');
-        const qrEntryOption = document.getElementById('qr-entry-option');
-        const validateCodeBtn = document.getElementById('validate-code-btn');
-        const backToOptionsBtn = document.getElementById('back-to-options-btn');
-        const backToOptionsFromQrBtn = document.getElementById('back-to-options-from-qr-btn');
-        const joinTeamBtn = document.getElementById('join-team-btn');
-
-        const teamCodeInput = document.getElementById('team-code');
-        const playerNameInput = document.getElementById('player-name');
-        const qrReader = document.getElementById('qr-reader');
-        const teamLobby = document.getElementById('team-lobby');
-        const displayTeamCode = document.getElementById('display-team-code');
-        const playerCount = document.getElementById('player-count');
-        const waitingMessage = document.getElementById('waiting-message');
-        const notification = document.getElementById('notification');
-
-        // State
+        // Global variables
         let currentTeam = null;
-        let currentPlayer = null;
-        let html5QrCode = null;
-        let validatedTeamCode = null;
-        let teamListener = null;
-        let gameStateListener = null;
-        let connectionStatus = true;
-        let reconnectAttempts = 0;
-        let maxReconnectAttempts = 5;
-        let gameStarted = false;
-        let mazeUrl = null;
-        let countdownInterval = null;
+        let currentTeamId = null;
+        let currentPlayerId = null;
+        let currentPlayerName = null;
+        let teamRef = null;
+        let playerRef = null;
 
-        // Connection monitoring
-        const connectedRef = database.ref('.info/connected');
-        connectedRef.on('value', (snap) => {
-            if (snap.val() === true) {
-                connectionStatus = true;
-                reconnectBanner.classList.remove('show');
-                reconnectAttempts = 0;
+        // Check if player is already logged in (from localStorage)
+        function checkExistingPlayer() {
+            const savedPlayerId = localStorage.getItem('playerId');
+            const savedPlayerName = localStorage.getItem('playerName');
+            const savedTeamId = localStorage.getItem('teamId');
 
-                // If we have a session but no team data, try to reconnect
-                if (currentTeam && !teamListener) {
-                    displayTeamLobby(currentTeam);
-                }
-            } else {
-                connectionStatus = false;
-                reconnectBanner.classList.add('show');
+            if (savedPlayerId && savedPlayerName && savedTeamId) {
+                currentPlayerId = savedPlayerId;
+                currentPlayerName = savedPlayerName;
+                currentTeamId = savedTeamId;
 
-                // Try to reconnect
-                attemptReconnect();
-            }
-        });
+                // Check if team still exists
+                database.ref(`teams/${savedTeamId}`).once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        currentTeam = snapshot.val();
+                        setupTeamListeners();
+                        showLobby();
 
-        function attemptReconnect() {
-            if (reconnectAttempts < maxReconnectAttempts) {
-                reconnectAttempts++;
-                setTimeout(() => {
-                    if (!connectionStatus) {
-                        // Try to reconnect by re-establishing listeners
-                        if (currentTeam) {
-                            database.ref(`teams/${currentTeam}`).off();
-                            displayTeamLobby(currentTeam);
-                        }
-                    }
-                }, 2000 * reconnectAttempts); // Exponential backoff
-            } else {
-                showNotification('Connection lost. Please refresh the page.', 'error');
-            }
-        }
-
-        // Notification system
-        function showNotification(message, type = 'info') {
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
-
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // Generate a simple session token (in a real app, use JWT)
-        function generateSessionToken() {
-            return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        }
-
-        // Step navigation
-        function showStep(stepNumber) {
-            // Hide all steps
-            step1.classList.add('hidden');
-            step2.classList.add('hidden');
-            step3.classList.add('hidden');
-            step4.classList.add('hidden');
-            step5.classList.add('hidden');
-
-            // Show the requested step
-            document.getElementById(`step${stepNumber}`).classList.remove('hidden');
-            document.getElementById(`step${stepNumber}`).classList.add('fade-in');
-        }
-
-        // Validate team code
-        async function validateTeamCode(teamCode) {
-            try {
-                // Check if team exists
-                const teamSnapshot = await database.ref(`teams/${teamCode}`).once('value');
-                const teamData = teamSnapshot.val();
-
-                if (!teamData) {
-                    showNotification('Team does not exist. Please check your code.', 'error');
-                    return false;
-                }
-
-                if (teamData.players && teamData.players.length >= 4) {
-                    showNotification('Team is full. Please join another team.', 'error');
-                    return false;
-                }
-
-                // Store validated team code
-                validatedTeamCode = teamCode;
-                return true;
-            } catch (error) {
-                console.error('Error validating team code:', error);
-                showNotification('Failed to validate team code. Please try again.', 'error');
-                return false;
-            }
-        }
-
-        // Join team function
-        async function joinTeam(teamCode, playerName) {
-            try {
-                // Check if team exists
-                const teamSnapshot = await database.ref(`teams/${teamCode}`).once('value');
-                const teamData = teamSnapshot.val();
-
-                if (!teamData) {
-                    showNotification('Team does not exist. Please check your code.', 'error');
-                    return false;
-                }
-
-                if (teamData.players && teamData.players.length >= 4) {
-                    showNotification('Team is full. Please join another team.', 'error');
-                    return false;
-                }
-
-                // Check if player already in team
-                const existingPlayerIndex = teamData.players ?
-                    teamData.players.findIndex(p => p.name.toLowerCase() === playerName.toLowerCase()) : -1;
-
-                if (existingPlayerIndex !== -1) {
-                    // Player already exists, check if they're rejoining
-                    const existingPlayer = teamData.players[existingPlayerIndex];
-
-                    // Update player status to online
-                    const updatedPlayers = [...teamData.players];
-                    updatedPlayers[existingPlayerIndex] = {
-                        ...existingPlayer,
-                        online: true,
-                        lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    };
-
-                    // Update team in database
-                    await database.ref(`teams/${teamCode}`).update({
-                        players: updatedPlayers,
-                        updatedAt: firebase.database.ServerValue.TIMESTAMP
-                    });
-
-                    // Store session info in both localStorage and sessionStorage
-                    const sessionData = {
-                        teamCode: teamCode,
-                        playerId: existingPlayer.id,
-                        playerName: playerName
-                    };
-
-                    localStorage.setItem('jumanjiSession', JSON.stringify(sessionData));
-                    sessionStorage.setItem('jumanjiSession', JSON.stringify(sessionData));
-
-                    // Update state
-                    currentTeam = teamCode;
-                    currentPlayer = existingPlayer;
-
-                    showNotification('Welcome back to the team!', 'success');
-                    return true;
-                }
-
-                // Create player object
-                const player = {
-                    id: generateSessionToken(),
-                    name: playerName,
-                    joinedAt: firebase.database.ServerValue.TIMESTAMP,
-                    online: true,
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP
-                };
-
-                // Add player to team
-                const players = teamData.players || [];
-                players.push(player);
-
-                // Update team in database
-                await database.ref(`teams/${teamCode}`).update({
-                    players: players,
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP
-                });
-
-                // Store session info in both localStorage and sessionStorage
-                const sessionData = {
-                    teamCode: teamCode,
-                    playerId: player.id,
-                    playerName: playerName
-                };
-
-                localStorage.setItem('jumanjiSession', JSON.stringify(sessionData));
-                sessionStorage.setItem('jumanjiSession', JSON.stringify(sessionData));
-
-                // Update state
-                currentTeam = teamCode;
-                currentPlayer = player;
-
-                showNotification('Successfully joined the team!', 'success');
-                return true;
-            } catch (error) {
-                console.error('Error joining team:', error);
-                showNotification('Failed to join team. Please try again.', 'error');
-                return false;
-            }
-        }
-
-        // Display team lobby
-        function displayTeamLobby(teamCode) {
-            // Show team lobby
-            showStep(5);
-            displayTeamCode.textContent = teamCode;
-
-            // Clear existing player slots
-            teamLobby.innerHTML = '';
-
-            // Create 4 player slots
-            for (let i = 0; i < 4; i++) {
-                const playerSlot = document.createElement('div');
-                playerSlot.className = 'player-slot';
-                playerSlot.id = `player-slot-${i}`;
-
-                playerSlot.innerHTML = `
-                    <div class="player-avatar">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="player-name">Empty Slot</div>
-                `;
-
-                teamLobby.appendChild(playerSlot);
-            }
-
-            // Remove any existing listener
-            if (teamListener) {
-                database.ref(`teams/${teamCode}`).off('value', teamListener);
-            }
-
-            // Listen for team updates
-            teamListener = database.ref(`teams/${teamCode}`).on('value', (snapshot) => {
-                const teamData = snapshot.val();
-
-                if (teamData && teamData.players) {
-                    // Update player count
-                    playerCount.textContent = teamData.players.length;
-
-                    // Update player slots
-                    teamData.players.forEach((player, index) => {
-                        const slot = document.getElementById(`player-slot-${index}`);
-                        if (slot) {
-                            slot.classList.add('filled');
-                            slot.innerHTML = `
-                                <div class="player-avatar">
-                                    <i class="fas fa-user-circle"></i>
-                                </div>
-                                <div class="player-name">${player.name}</div>
-                                <div class="player-status">
-                                    <span class="status-indicator ${player.online ? 'online' : 'offline'}"></span>
-                                    ${player.online ? 'Online' : 'Offline'}
-                                </div>
-                            `;
-                        }
-                    });
-
-                    // Show waiting message if team is not full
-                    if (teamData.players.length < 4) {
-                        waitingMessage.style.display = 'block';
+                        // Show rejoin message
+                        showToast(`Welcome back, ${savedPlayerName}!`, 'success');
                     } else {
-                        waitingMessage.style.display = 'none';
-                        showNotification('Team is full! Waiting for the game to start...', 'info');
+                        // Team no longer exists, clear localStorage
+                        localStorage.removeItem('playerId');
+                        localStorage.removeItem('playerName');
+                        localStorage.removeItem('teamId');
+                        showToast('Your team no longer exists. Please join a new team.', 'warning');
                     }
-                }
-            });
-        }
-
-        // Listen for game state changes
-        function listenForGameStateChanges() {
-            if (gameStateListener) {
-                database.ref('gameState').off('value', gameStateListener);
-            }
-
-            gameStateListener = database.ref('gameState').on('value', (snapshot) => {
-                const gameState = snapshot.val() || {};
-
-                if (gameState.isGameStarted && !gameStarted) {
-                    // Game just started
-                    gameStarted = true;
-                    mazeUrl = gameState.mazeLink;
-
-                    // Show game start overlay
-                    showGameStartOverlay();
-                }
-            });
-        }
-
-        // Show game start overlay
-        function showGameStartOverlay() {
-            gameStartOverlay.classList.add('show');
-
-            // Start countdown
-            let count = 5;
-            countdown.textContent = count;
-
-            countdownInterval = setInterval(() => {
-                count--;
-                countdown.textContent = count;
-
-                if (count <= 0) {
-                    clearInterval(countdownInterval);
-                    countdown.style.display = 'none';
-                }
-            }, 1000);
-        }
-
-        // Redirect to maze
-        function redirectToMaze() {
-            if (mazeUrl) {
-                // Update team's current location
-                database.ref(`teams/${currentTeam}`).update({
-                    currentLocation: mazeUrl,
-                    status: 'in_maze',
-                    updatedAt: firebase.database.ServerValue.TIMESTAMP
+                }).catch(error => {
+                    console.error('Error checking existing player:', error);
                 });
-
-                // Redirect to maze
-                window.location.href = mazeUrl;
             }
         }
 
-        // QR Code Scanner
-        function startQrScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode = null;
-                }).catch(err => {
-                    console.error(`Failed to stop QR scanner: ${err}`);
-                });
+        // Join team with code
+        joinTeamBtn.addEventListener('click', () => {
+            const teamCode = teamCodeInput.value.trim();
+
+            if (!teamCode) {
+                showToast('Please enter a team code', 'warning');
                 return;
             }
 
-            html5QrCode = new Html5Qrcode("qr-reader");
+            loadingSpinner.classList.add('active');
 
-            Html5Qrcode.getCameras().then(devices => {
-                if (devices && devices.length) {
-                    // Try to find the front camera (environment facing)
-                    let cameraId = devices[0].id;
+            // Find team with this code
+            database.ref('teams').orderByChild('teamCode').equalTo(teamCode).once('value').then(snapshot => {
+                loadingSpinner.classList.remove('active');
 
-                    // Look for a camera with "environment" in its label (usually the back camera)
-                    const environmentCamera = devices.find(device =>
-                        device.label.toLowerCase().includes('environment')
-                    );
+                if (snapshot.exists()) {
+                    const teams = snapshot.val();
+                    const teamId = Object.keys(teams)[0];
+                    currentTeam = teams[teamId];
+                    currentTeamId = teamId;
 
-                    // If found, use it; otherwise use the first camera
-                    if (environmentCamera) {
-                        cameraId = environmentCamera.id;
-                    }
+                    // Check if team has less than 4 players
+                    database.ref(`teams/${teamId}/players`).once('value').then(playerSnapshot => {
+                        const players = playerSnapshot.val() || {};
+                        const playerCount = Object.keys(players).length;
 
-                    html5QrCode.start(
-                        cameraId,
-                        {
-                            fps: 10,
-                            qrbox: { width: 250, height: 250 }
-                        },
-                        (decodedText, decodedResult) => {
-                            // QR code scanned successfully
-                            html5QrCode.stop().then(() => {
-                                html5QrCode = null;
-                                validatedTeamCode = decodedText.toUpperCase();
-                                showNotification('QR code scanned successfully!', 'success');
-                                showStep(4); // Go to player name step
-                            }).catch(err => {
-                                console.error(`Failed to stop QR scanner: ${err}`);
-                            });
-                        },
-                        (errorMessage) => {
-                            // Handle scan error silently
+                        if (playerCount >= 4) {
+                            showToast('This team already has 4 players', 'warning');
+                            return;
                         }
-                    ).catch(err => {
-                        console.error(`Unable to start scanning: ${err}`);
-                        showNotification('Failed to start camera. Please try again.', 'error');
-                        showStep(1); // Go back to options
+
+                        // Show player info section
+                        loginSection.style.display = 'none';
+                        playerInfoSection.style.display = 'block';
+                    }).catch(error => {
+                        console.error('Error checking player count:', error);
+                        showToast('Error checking team. Please try again.', 'danger');
                     });
+                } else {
+                    showToast('Invalid team code', 'danger');
                 }
-            }).catch(err => {
-                console.error(`No camera found: ${err}`);
-                showNotification('No camera found. Please enter team code manually.', 'error');
-                showStep(1); // Go back to options
+            }).catch(error => {
+                loadingSpinner.classList.remove('active');
+                console.error('Error finding team:', error);
+                showToast('Error finding team. Please try again.', 'danger');
             });
-        }
-
-        // Check for existing session on page load
-        function checkExistingSession() {
-            // Try sessionStorage first
-            let sessionData = sessionStorage.getItem('jumanjiSession');
-
-            // If not in sessionStorage, try localStorage
-            if (!sessionData) {
-                sessionData = localStorage.getItem('jumanjiSession');
-            }
-
-            if (sessionData) {
-                try {
-                    const session = JSON.parse(sessionData);
-
-                    // Auto-reconnect if session exists
-                    validateTeamCode(session.teamCode).then(success => {
-                        if (success) {
-                            joinTeam(session.teamCode, session.playerName).then(joinSuccess => {
-                                if (joinSuccess) {
-                                    displayTeamLobby(session.teamCode);
-
-                                    // Check if team has a current location and redirect if needed
-                                    database.ref(`teams/${session.teamCode}`).once('value').then(snapshot => {
-                                        const teamData = snapshot.val();
-                                        if (teamData && teamData.currentLocation && teamData.status === 'in_maze') {
-                                            // Team is already in the maze, redirect to current location
-                                            window.location.href = teamData.currentLocation;
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
-                } catch (error) {
-                    console.error('Error parsing session data:', error);
-                    // Clear invalid session data
-                    localStorage.removeItem('jumanjiSession');
-                    sessionStorage.removeItem('jumanjiSession');
-                }
-            }
-        }
-
-        // Event Listeners
-        codeEntryOption.addEventListener('click', () => {
-            showStep(2);
         });
 
-        qrEntryOption.addEventListener('click', () => {
-            showStep(3);
-            startQrScanner();
-        });
+        // Rejoin game with player ID
+        rejoinGameBtn.addEventListener('click', () => {
+            const playerId = playerIdInput.value.trim();
 
-        validateCodeBtn.addEventListener('click', async () => {
-            const teamCode = teamCodeInput.value.trim().toUpperCase();
-
-            if (!teamCode || teamCode.length !== 4) {
-                showNotification('Please enter a valid 4-character team code.', 'error');
+            if (!playerId) {
+                showToast('Please enter your player ID', 'warning');
                 return;
             }
 
-            validateCodeBtn.disabled = true;
-            validateCodeBtn.innerHTML = '<span class="loading"></span> Validating...';
+            loadingSpinner.classList.add('active');
 
-            const success = await validateTeamCode(teamCode);
+            // Find player with this ID
+            database.ref('teams').once('value').then(snapshot => {
+                loadingSpinner.classList.remove('active');
 
-            validateCodeBtn.disabled = false;
-            validateCodeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Validate Code';
+                const teams = snapshot.val();
+                let found = false;
 
-            if (success) {
-                showStep(4);
-            }
+                if (teams) {
+                    for (const teamId in teams) {
+                        const team = teams[teamId];
+                        if (team.players && team.players[playerId]) {
+                            currentTeam = team;
+                            currentTeamId = teamId;
+                            currentPlayerId = playerId;
+                            currentPlayerName = team.players[playerId].name;
+
+                            // Save to localStorage
+                            localStorage.setItem('playerId', currentPlayerId);
+                            localStorage.setItem('playerName', currentPlayerName);
+                            localStorage.setItem('teamId', currentTeamId);
+
+                            // Update player status to online
+                            database.ref(`teams/${teamId}/players/${playerId}`).update({
+                                isOnline: true,
+                                lastSeen: firebase.database.ServerValue.TIMESTAMP
+                            });
+
+                            setupTeamListeners();
+                            showLobby();
+
+                            showToast(`Welcome back, ${currentPlayerName}!`, 'success');
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!found) {
+                    showToast('Invalid player ID', 'danger');
+                }
+            }).catch(error => {
+                loadingSpinner.classList.remove('active');
+                console.error('Error finding player:', error);
+                showToast('Error finding player. Please try again.', 'danger');
+            });
         });
 
-        backToOptionsBtn.addEventListener('click', () => {
-            showStep(1);
-        });
-
-        backToOptionsFromQrBtn.addEventListener('click', () => {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode = null;
-                }).catch(err => {
-                    console.error(`Failed to stop QR scanner: ${err}`);
-                });
-            }
-            showStep(1);
-        });
-
-        joinTeamBtn.addEventListener('click', async () => {
+        // Save player info
+        savePlayerInfoBtn.addEventListener('click', () => {
             const playerName = playerNameInput.value.trim();
 
             if (!playerName) {
-                showNotification('Please enter your name.', 'error');
+                showToast('Please enter your name', 'warning');
                 return;
             }
 
-            joinTeamBtn.disabled = true;
-            joinTeamBtn.innerHTML = '<span class="loading"></span> Joining...';
+            loadingSpinner.classList.add('active');
 
-            const success = await joinTeam(validatedTeamCode, playerName);
+            // Create new player
+            const newPlayerRef = database.ref(`teams/${currentTeamId}/players`).push();
+            const playerId = newPlayerRef.key;
 
-            joinTeamBtn.disabled = false;
-            joinTeamBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Join Team';
+            newPlayerRef.set({
+                name: playerName,
+                isOnline: true,
+                joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                lastSeen: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                currentPlayerId = playerId;
+                currentPlayerName = playerName;
 
-            if (success) {
-                displayTeamLobby(validatedTeamCode);
-                listenForGameStateChanges();
-            }
+                // Save to localStorage
+                localStorage.setItem('playerId', currentPlayerId);
+                localStorage.setItem('playerName', currentPlayerName);
+                localStorage.setItem('teamId', currentTeamId);
+
+                loadingSpinner.classList.remove('active');
+
+                setupTeamListeners();
+                showLobby();
+
+                showToast(`Welcome to the team, ${playerName}!`, 'success');
+            }).catch(error => {
+                loadingSpinner.classList.remove('active');
+                console.error('Error creating player:', error);
+                showToast('Error joining team. Please try again.', 'danger');
+            });
         });
 
-        letsHuntBtn.addEventListener('click', redirectToMaze);
+        // Let's Hunt button
+        letsHuntBtn.addEventListener('click', () => {
+            if (!currentTeam.mazeUrl) {
+                showToast('Maze URL not available yet', 'warning');
+                return;
+            }
 
-        // Handle page visibility change to update online status
-        document.addEventListener('visibilitychange', () => {
-            if (currentTeam && currentPlayer) {
-                const isOnline = !document.hidden;
+            // Update team status to maze
+            database.ref(`teams/${currentTeamId}`).update({
+                status: 'maze',
+                currentLocation: currentTeam.mazeUrl
+            }).then(() => {
+                // Redirect to maze game
+                window.location.href = currentTeam.mazeUrl;
+            }).catch(error => {
+                console.error('Error updating team status:', error);
+                showToast('Error starting game. Please try again.', 'danger');
+            });
+        });
 
-                database.ref(`teams/${currentTeam}/players`).once('value', (snapshot) => {
-                    const teamData = snapshot.val();
-                    if (teamData && teamData.players) {
-                        const playerIndex = teamData.players.findIndex(p => p.id === currentPlayer.id);
-                        if (playerIndex !== -1) {
-                            const updatedPlayers = [...teamData.players];
-                            updatedPlayers[playerIndex].online = isOnline;
-                            updatedPlayers[playerIndex].lastSeen = firebase.database.ServerValue.TIMESTAMP;
+        // Setup team listeners
+        function setupTeamListeners() {
+            // Team reference
+            teamRef = database.ref(`teams/${currentTeamId}`);
 
-                            database.ref(`teams/${currentTeam}`).update({
-                                players: updatedPlayers,
-                                updatedAt: firebase.database.ServerValue.TIMESTAMP
-                            });
-                        }
+            // Player reference
+            playerRef = database.ref(`teams/${currentTeamId}/players/${currentPlayerId}`);
+
+            // Listen for team changes
+            teamRef.on('value', snapshot => {
+                if (snapshot.exists()) {
+                    currentTeam = snapshot.val();
+                    updateLobbyUI();
+                } else {
+                    // Team no longer exists
+                    showToast('Your team no longer exists', 'danger');
+                    logout();
+                }
+            });
+
+            // Update player last seen every 30 seconds
+            setInterval(() => {
+                if (playerRef) {
+                    playerRef.update({
+                        lastSeen: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            }, 30000);
+
+            // Handle page visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Page is hidden, update player status to offline
+                    if (playerRef) {
+                        playerRef.update({
+                            isOnline: false
+                        });
                     }
+                } else {
+                    // Page is visible, update player status to online
+                    if (playerRef) {
+                        playerRef.update({
+                            isOnline: true,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                }
+            });
+
+            // Handle beforeunload
+            window.addEventListener('beforeunload', () => {
+                if (playerRef) {
+                    playerRef.update({
+                        isOnline: false
+                    });
+                }
+            });
+        }
+
+        // Update lobby UI
+        function updateLobbyUI() {
+            if (!currentTeam) return;
+
+            // Update team info
+            teamNameSpan.textContent = currentTeam.teamName;
+            teamCodeDisplay.textContent = currentTeam.teamCode;
+            teamStatusSpan.textContent = currentTeam.status;
+
+            // Update players list
+            if (currentTeam.players) {
+                let html = '';
+                Object.keys(currentTeam.players).forEach(playerId => {
+                    const player = currentTeam.players[playerId];
+                    const statusClass = player.isOnline ? 'online' : 'offline';
+                    const isCurrentPlayer = playerId === currentPlayerId;
+
+                    html += `
+                        <div class="player-card ${isCurrentPlayer ? 'border-primary' : ''}">
+                            <div class="d-flex align-items-center">
+                                <div class="player-status ${statusClass}"></div>
+                                <span>${player.name} ${isCurrentPlayer ? '(You)' : ''}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                playersListDiv.innerHTML = html;
+            } else {
+                playersListDiv.innerHTML = '<p>No players joined yet.</p>';
+            }
+
+            // Show/hide hunt section based on team status
+            if (currentTeam.showMazeUrl && currentTeam.mazeUrl) {
+                huntSection.classList.add('active');
+            } else {
+                huntSection.classList.remove('active');
+            }
+
+            // Redirect if team status changed
+            if (currentTeam.status === 'maze' && currentTeam.currentLocation) {
+                window.location.href = currentTeam.currentLocation;
+            } else if (currentTeam.status === 'loading' && currentTeam.currentLocation) {
+                window.location.href = currentTeam.currentLocation;
+            } else if (currentTeam.status === 'location' && currentTeam.currentLocation) {
+                window.location.href = currentTeam.currentLocation;
+            }
+        }
+
+        // Show lobby
+        function showLobby() {
+            loginSection.style.display = 'none';
+            playerInfoSection.style.display = 'none';
+            lobbySection.style.display = 'block';
+            updateLobbyUI();
+        }
+
+        // Logout
+        function logout() {
+            // Update player status to offline
+            if (playerRef) {
+                playerRef.update({
+                    isOnline: false
                 });
             }
-        });
 
-        // Handle page unload to update online status
-        window.addEventListener('beforeunload', () => {
-            if (currentTeam && currentPlayer) {
-                // Update player status to offline
-                database.ref(`teams/${currentTeam}/players`).once('value', (snapshot) => {
-                    const teamData = snapshot.val();
-                    if (teamData && teamData.players) {
-                        const playerIndex = teamData.players.findIndex(p => p.id === currentPlayer.id);
-                        if (playerIndex !== -1) {
-                            const updatedPlayers = [...teamData.players];
-                            updatedPlayers[playerIndex].online = false;
-                            updatedPlayers[playerIndex].lastSeen = firebase.database.ServerValue.TIMESTAMP;
+            // Clear localStorage
+            localStorage.removeItem('playerId');
+            localStorage.removeItem('playerName');
+            localStorage.removeItem('teamId');
 
-                            database.ref(`teams/${currentTeam}`).update({
-                                players: updatedPlayers,
-                                updatedAt: firebase.database.ServerValue.TIMESTAMP
-                            });
-                        }
-                    }
-                });
+            // Reset variables
+            currentTeam = null;
+            currentTeamId = null;
+            currentPlayerId = null;
+            currentPlayerName = null;
+            teamRef = null;
+            playerRef = null;
+
+            // Show login section
+            lobbySection.style.display = 'none';
+            loginSection.style.display = 'block';
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            toastMessage.textContent = message;
+            const toastElement = document.getElementById('toast');
+            const toastHeader = toastElement.querySelector('.toast-header');
+
+            // Remove existing background classes
+            toastHeader.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info');
+
+            // Add appropriate background class
+            if (type === 'success') {
+                toastHeader.classList.add('bg-success', 'text-white');
+            } else if (type === 'danger') {
+                toastHeader.classList.add('bg-danger', 'text-white');
+            } else if (type === 'warning') {
+                toastHeader.classList.add('bg-warning');
+            } else {
+                toastHeader.classList.add('bg-info', 'text-white');
             }
-        });
 
-        // Check for existing session on page load
-        window.addEventListener('load', () => {
-            checkExistingSession();
-            listenForGameStateChanges();
-        });
+            toast.show();
+        }
+
+        // Initialize the page
+        function init() {
+            checkExistingPlayer();
+        }
+
+        // Start the app
+        init();
     </script>
 </body>
 
