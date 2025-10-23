@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunt the Prey</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Crimson+Text:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.8s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body.hint-page {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        }
+
+        .mystery-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            background-image:
+                radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, #fff 1px, transparent 1px),
+                radial-gradient(circle at 40% 50%, #fff 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px, 200px 200px;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(-20px, -20px) rotate(1deg);
+            }
+
+            66% {
+                transform: translate(20px, -10px) rotate(-1deg);
+            }
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #f39c12, #e74c3c, #3498db, #9b59b6);
+            border-radius: 20px;
+            opacity: 0.3;
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes borderGlow {
+            from {
+                opacity: 0.3;
+            }
+
+            to {
+                opacity: 0.6;
+            }
+        }
+
+        /* Code Entry Section */
+        .code-section {
+            display: block;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .code-section.hidden {
+            display: none;
+        }
+
+        .hint-section {
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .hint-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Crimson Text', serif;
+            color: #1e3c72;
+            margin-bottom: 40px;
+            font-weight: 600;
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .scanner-container {
+            margin: 30px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qr-reader {
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .scanner-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .scanner-placeholder i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+
+        .manual-entry-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .manual-entry-container.active {
+            display: block;
+        }
+
+        .manual-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .manual-input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn.hint-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.hint-btn:hover {
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.3);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+        }
+
+        .message {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+            font-size: 16px;
+        }
+
+        .message.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+            display: block;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .message.success {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            display: block;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .attempts {
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        /* Hint Section Styles */
+        .success-icon {
+            font-size: 70px;
+            color: #f39c12;
+            margin-bottom: 25px;
+            animation: scaleIn 0.6s ease-out, glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 10px rgba(243, 156, 18, 0.5));
+            }
+
+            to {
+                filter: drop-shadow(0 0 20px rgba(243, 156, 18, 0.8));
+            }
+        }
+
+        .hint-container {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 15px;
+            margin: 35px 0;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hint-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hint-title {
+            font-family: 'Crimson Text', serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hint-text {
+            font-family: 'Crimson Text', serif;
+            font-size: 26px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+            font-style: italic;
+        }
+
+        .mystery-symbol {
+            font-size: 100px;
+            color: rgba(52, 152, 219, 0.1);
+            position: absolute;
+            animation: rotate 20s linear infinite;
+        }
+
+        .mystery-symbol.top-left {
+            top: 20px;
+            left: 20px;
+        }
+
+        .mystery-symbol.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            animation-direction: reverse;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading {
+            display: none;
+            margin: 25px 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(52, 152, 219, 0.2);
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #f39c12;
+            border-radius: 50%;
+            animation: particle-float 3s linear infinite;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .mystery-text {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Crimson Text', serif;
+            font-size: 14px;
+            color: rgba(52, 152, 219, 0.3);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="mystery-bg"></div>
+
+    <div class="container">
+        <h1>Hunt the Prey</h1>
+
+        <i class="fas fa-key mystery-symbol top-left"></i>
+        <i class="fas fa-lock mystery-symbol bottom-right"></i>
+
+        <!-- Code Entry Section -->
+        <div id="codeSection" class="code-section">
+            <div class="mystery-text" style="color: black;">Scan or Enter Code</div>
+
+            <div class="tab-container">
+                <button class="tab active" id="scannerTab">QR Scanner</button>
+                <button class="tab" id="manualTab">Manual Entry</button>
+            </div>
+
+            <!-- QR Scanner Tab -->
+            <div id="scannerTabContent" class="tab-content active">
+                <div class="scanner-container">
+                    <div id="qr-reader"></div>
+                    <div class="scanner-placeholder" id="scannerPlaceholder">
+                        <i class="fas fa-qrcode"></i>
+                        <p>Click "Start Scanner" to begin</p>
+                    </div>
+                </div>
+                <button id="startScanner" class="btn">Start Scanner</button>
+                <button id="stopScanner" class="btn secondary" style="display: none;">Stop Scanner</button>
+            </div>
+
+            <!-- Manual Entry Tab -->
+            <div id="manualTabContent" class="tab-content">
+                <div class="manual-entry-container active">
+                    <input type="text" id="manualCodeInput" class="manual-input" placeholder="Enter the 4-digit code"
+                        maxlength="4">
+                    <button id="verifyManualCode" class="btn">Verify Code</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px; color: #666;">Verifying the code...</p>
+            </div>
+
+            <div id="message" class="message"></div>
+
+            <div class="attempts" id="attempts">Attempts remaining: 3</div>
+        </div>
+
+        <!-- Hint Display Section -->
+        <div id="hintSection" class="hint-section">
+            <i class="fas fa-unlock-alt success-icon"></i>
+            <h1>Mystery Solved!</h1>
+            <p>You've successfully cracked the code and found the hint.</p>
+
+            <div class="hint-container">
+                <div class="hint-title" style="color: white;">Next Location Hint</div>
+                <p class="hint-text" style="color: white;">Here's your clue to the next location:</p>
+                <img src="./images/exam.jpg" alt="Location Hint" class="hint-image" id="hintImage">
+            </div>
+            <style>
+                /* Hint Container Styles */
+                .hint-container {
+                    background-color: rgba(255, 255, 255, 0.95);
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin: 15px 0;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                    max-width: 100%;
+                    width: 100%;
+                }
+
+                .hint-title {
+                    font-size: 1.3rem;
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 12px;
+                }
+
+                .hint-text {
+                    font-size: 1rem;
+                    color: #555;
+                    margin-bottom: 15px;
+                    line-height: 1.4;
+                }
+
+                .hint-image {
+                    width: 100%;
+                    max-width: 100%;
+                    height: auto;
+                    max-height: 60vh;
+                    object-fit: contain;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+                    display: block;
+                    margin: 0 auto;
+                }
+
+                /* Mobile-specific adjustments */
+                @media (max-width: 768px) {
+                    .hint-container {
+                        padding: 15px;
+                        margin: 10px 0;
+                    }
+
+                    .hint-title {
+                        font-size: 1.1rem;
+                        margin-bottom: 10px;
+                    }
+
+                    .hint-text {
+                        font-size: 0.9rem;
+                        margin-bottom: 12px;
+                    }
+
+                    .hint-image {
+                        max-height: 50vh;
+                        border-radius: 6px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .hint-container {
+                        padding: 12px;
+                        margin: 8px 0;
+                    }
+
+                    .hint-title {
+                        font-size: 1rem;
+                    }
+
+                    .hint-text {
+                        font-size: 0.85rem;
+                    }
+
+                    .hint-image {
+                        max-height: 45vh;
+                        border-radius: 4px;
+                    }
+                }
+
+                /* Small mobile screens */
+                @media (max-width: 360px) {
+                    .hint-container {
+                        padding: 10px;
+                    }
+
+                    .hint-image {
+                        max-height: 40vh;
+                    }
+                }
+            </style>
+
+            <button class="btn hint-btn">JUMANJI</button>
+        </div>
+    </div>
+
+    <div class="particles" id="particles"></div>
+
+    <script>
+        let attempts = 3;
+        const correctCode = '7259';
+        let html5QrCode = null;
+        let isScanning = false;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const message = document.getElementById('message');
+            const loading = document.getElementById('loading');
+            const codeSection = document.getElementById('codeSection');
+            const hintSection = document.getElementById('hintSection');
+            const attemptsDisplay = document.getElementById('attempts');
+            const scannerTab = document.getElementById('scannerTab');
+            const manualTab = document.getElementById('manualTab');
+            const scannerTabContent = document.getElementById('scannerTabContent');
+            const manualTabContent = document.getElementById('manualTabContent');
+            const startScannerBtn = document.getElementById('startScanner');
+            const stopScannerBtn = document.getElementById('stopScanner');
+            const scannerPlaceholder = document.getElementById('scannerPlaceholder');
+            const manualCodeInput = document.getElementById('manualCodeInput');
+            const verifyManualCodeBtn = document.getElementById('verifyManualCode');
+
+            // Tab switching
+            scannerTab.addEventListener('click', function () {
+                scannerTab.classList.add('active');
+                manualTab.classList.remove('active');
+                scannerTabContent.classList.add('active');
+                manualTabContent.classList.remove('active');
+            });
+
+            manualTab.addEventListener('click', function () {
+                manualTab.classList.add('active');
+                scannerTab.classList.remove('active');
+                manualTabContent.classList.add('active');
+                scannerTabContent.classList.remove('active');
+
+                // Stop scanner if it's running
+                if (isScanning) {
+                    stopScanner();
+                }
+            });
+
+            // QR Scanner functionality
+            startScannerBtn.addEventListener('click', startScanner);
+            stopScannerBtn.addEventListener('click', stopScanner);
+
+            function startScanner() {
+                html5QrCode = new Html5Qrcode("qr-reader");
+
+                // This method will trigger user permissions
+                Html5Qrcode.getCameras().then(devices => {
+                    if (devices && devices.length) {
+                        const cameraId = devices[0].id;
+
+                        html5QrCode.start(
+                            cameraId,
+                            {
+                                fps: 10,
+                                qrbox: { width: 250, height: 250 }
+                            },
+                            (decodedText, decodedResult) => {
+                                // QR Code scanned successfully
+                                handleCodeVerification(decodedText);
+                                stopScanner();
+                            },
+                            (errorMessage) => {
+                                // Parse error, ignore it
+                            }
+                        ).then(() => {
+                            isScanning = true;
+                            scannerPlaceholder.style.display = 'none';
+                            startScannerBtn.style.display = 'none';
+                            stopScannerBtn.style.display = 'inline-block';
+                        }).catch((err) => {
+                            showMessage(`Unable to start scanning: ${err}`, 'error');
+                        });
+                    }
+                }).catch(err => {
+                    showMessage(`Unable to access camera: ${err}`, 'error');
+                });
+            }
+
+            function stopScanner() {
+                if (html5QrCode && isScanning) {
+                    html5QrCode.stop().then(() => {
+                        isScanning = false;
+                        scannerPlaceholder.style.display = 'flex';
+                        startScannerBtn.style.display = 'inline-block';
+                        stopScannerBtn.style.display = 'none';
+                    }).catch((err) => {
+                        showMessage(`Failed to stop scanning: ${err}`, 'error');
+                    });
+                }
+            }
+
+            // Manual code verification
+            verifyManualCodeBtn.addEventListener('click', function () {
+                const code = manualCodeInput.value.trim();
+
+                if (code.length !== 4) {
+                    showMessage('Please enter a 4-digit code', 'error');
+                    return;
+                }
+
+                handleCodeVerification(code);
+            });
+
+            // Only allow numbers in manual input
+            manualCodeInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            function handleCodeVerification(code) {
+                // Show loading state
+                loading.classList.add('active');
+
+                // Simulate verification delay
+                setTimeout(() => {
+                    // Verify the code
+                    if (code === correctCode) {
+                        showMessage('Mystery unlocked! Revealing the secret...', 'success');
+
+                        setTimeout(() => {
+                            // Change background
+                            document.body.classList.add('hint-page');
+
+                            // Switch to hint section
+                            codeSection.classList.add('hidden');
+                            hintSection.classList.add('active');
+
+                            // Create particle effect
+                            createParticles();
+                        }, 1500);
+                    } else {
+                        attempts--;
+                        attemptsDisplay.textContent = `Attempts remaining: ${attempts}`;
+
+                        if (attempts > 0) {
+                            showMessage(`Incorrect code. The mystery remains unsolved.`, 'error');
+                        } else {
+                            showMessage('No attempts remaining. The mystery remains locked forever...', 'error');
+                            verifyManualCodeBtn.disabled = true;
+                            startScannerBtn.disabled = true;
+
+                            setTimeout(() => {
+                                showMessage('The code is 6325', 'error');
+                            }, 2000);
+                        }
+                    }
+
+                    // Hide loading state
+                    loading.classList.remove('active');
+                }, 2000);
+            }
+
+            function showMessage(text, type) {
+                message.textContent = text;
+                message.className = 'message ' + type;
+
+                if (type === 'error') {
+                    setTimeout(() => {
+                        message.className = 'message';
+                    }, 4000);
+                }
+            }
+        });
+
+        function resetToCodeEntry() {
+            const codeSection = document.getElementById('codeSection');
+            const hintSection = document.getElementById('hintSection');
+            const manualCodeInput = document.getElementById('manualCodeInput');
+            const message = document.getElementById('message');
+            const attemptsDisplay = document.getElementById('attempts');
+            const verifyManualCodeBtn = document.getElementById('verifyManualCode');
+            const startScannerBtn = document.getElementById('startScanner');
+
+            // Reset attempts
+            attempts = 3;
+            attemptsDisplay.textContent = `Attempts remaining: ${attempts}`;
+
+            // Reset background
+            document.body.classList.remove('hint-page');
+
+            // Clear manual input
+            manualCodeInput.value = '';
+
+            // Clear message
+            message.className = 'message';
+
+            // Enable buttons
+            verifyManualCodeBtn.disabled = false;
+            startScannerBtn.disabled = false;
+
+            // Switch back to code section
+            hintSection.classList.remove('active');
+            codeSection.classList.remove('hidden');
+
+            // Clear particles
+            document.getElementById('particles').innerHTML = '';
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#f1c40f'];
+
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    particle.style.animationDelay = Math.random() * 2 + 's';
+                    particle.style.width = (Math.random() * 6 + 2) + 'px';
+                    particle.style.height = particle.style.width;
+                    particlesContainer.appendChild(particle);
+
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 5000);
+                }, i * 100);
+            }
+        }
+    </script>
+</body>
+
+</html>
