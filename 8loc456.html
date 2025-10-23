@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumanji: Forest Maze Quest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Creepster&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --dark-jungle: #0b2b14;
+            --leaf-green: #2e8b57;
+            --golden-glow: #e0a83b;
+            --wood-brown: #4a2f17;
+            --mist-white: #f4f4f4;
+            --highlight: #d4af37;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-jungle);
+            color: var(--mist-white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background jungle effect */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://picsum.photos/seed/jungle/1920/1080.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        /* Animated vines */
+        .vine {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .vine::before, .vine::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, var(--leaf-green), transparent);
+            opacity: 0.3;
+        }
+
+        .vine::before {
+            left: 5%;
+            animation: sway 15s infinite ease-in-out;
+        }
+
+        .vine::after {
+            right: 5%;
+            animation: sway 18s infinite ease-in-out reverse;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(2deg); }
+            50% { transform: rotate(-2deg); }
+        }
+
+        header {
+            padding: 1.5rem;
+            text-align: center;
+            background: linear-gradient(to bottom, rgba(11, 43, 20, 0.9), rgba(11, 43, 20, 0.7));
+            border-bottom: 3px solid var(--golden-glow);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-family: 'Creepster', cursive;
+            font-size: 3rem;
+            color: var(--golden-glow);
+            text-shadow: 0 0 10px var(--highlight);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--mist-white);
+        }
+
+        main {
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Lobby Section */
+        .lobby-section {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid var(--leaf-green);
+            margin-bottom: 20px;
+        }
+
+        .lobby-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .lobby-title {
+            font-family: 'Creepster', cursive;
+            font-size: 2rem;
+            color: var(--golden-glow);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .team-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--leaf-green);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .team-info h3 {
+            margin-bottom: 10px;
+            color: var(--golden-glow);
+            text-align: center;
+        }
+
+        .info-item {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: var(--mist-white);
+        }
+
+        .players-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--leaf-green);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .players-container h3 {
+            margin-bottom: 15px;
+            color: var(--golden-glow);
+            text-align: center;
+        }
+
+        .player-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--golden-glow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .online {
+            background-color: #28a745;
+        }
+
+        .offline {
+            background-color: #dc3545;
+        }
+
+        .player-name {
+            font-weight: bold;
+        }
+
+        .player-role {
+            background-color: rgba(224, 168, 59, 0.2);
+            border: 1px solid var(--golden-glow);
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            color: var(--golden-glow);
+        }
+
+        .start-button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-start {
+            background-color: var(--golden-glow);
+            color: var(--dark-jungle);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .btn-start:hover {
+            background-color: var(--highlight);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start.show {
+            display: inline-block;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid var(--golden-glow);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Game Section */
+        .game-section {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid var(--leaf-green);
+            display: none;
+        }
+
+        .game-header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-family: 'Creepster', cursive;
+            font-size: 1.8rem;
+            color: var(--golden-glow);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .connection-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #status-message {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .player-indicators {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .player-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .player-indicator.connected {
+            background-color: rgba(46, 139, 87, 0.5);
+            box-shadow: 0 0 10px rgba(46, 139, 87, 0.7);
+        }
+
+        .indicator-icon {
+            font-size: 1rem;
+        }
+
+        .indicator-text {
+            font-size: 0.75rem;
+        }
+
+        .game-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            position: relative;
+        }
+
+        .game-screen {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Maze Viewer Screen */
+        .maze-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        #maze-canvas {
+            border: 3px solid var(--golden-glow);
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background-color: #111;
+            max-width: 100%;
+            max-height: 60%;
+        }
+
+        .maze-legend {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .player-color {
+            background-color: #3498db;
+        }
+
+        .exit-color {
+            background-color: #2ecc71;
+        }
+
+        /* Controller Screens */
+        .controller-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .player-position {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .jungle-noise {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .noise-indicator {
+            width: 16px;
+            height: 16px;
+            background-color: var(--golden-glow);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(224, 168, 59, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(224, 168, 59, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(224, 168, 59, 0);
+            }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .control-btn {
+            background-color: var(--leaf-green);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background-color: #1a5c3a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .role-message {
+            text-align: center;
+            margin-top: 1rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .role-message h2 {
+            color: var(--golden-glow);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .role-message p {
+            font-size: 0.875rem;
+        }
+
+        /* Instructor Screen */
+        .instructor-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .instructions-box {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--golden-glow);
+            border-radius: 10px;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .instruction-item {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instruction-icon {
+            font-size: 1.2rem;
+            color: var(--golden-glow);
+        }
+
+        .instruction-text {
+            font-size: 1rem;
+        }
+
+        .instruction-time {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: auto;
+        }
+
+        /* Waiting Screen */
+        .jungle-animation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .jungle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/jungle/800/600.jpg') center/cover;
+            filter: brightness(0.5);
+            z-index: -1;
+        }
+
+        .jungle-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .room-info {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        .room-code {
+            font-family: monospace;
+            font-size: 1.25rem;
+            color: var(--golden-glow);
+            margin-top: 0.5rem;
+        }
+
+        /* Game Won Screen */
+        .win-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .win-animation h2 {
+            color: var(--golden-glow);
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(74, 47, 23, 0.7);
+            border: 2px solid var(--golden-glow);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .control-btn {
+                padding: 0.875rem;
+                font-size: 0.9rem;
+            }
+
+            .player-info,
+            .role-message,
+            .jungle-overlay,
+            .win-animation {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 1.25rem;
+            }
+
+            .indicator-text {
+                display: none;
+            }
+
+            .player-indicator {
+                padding: 0.25rem 0.5rem;
+            }
+
+            .control-btn {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="vine"></div>
+    
+    <header>
+        <h1>Jumanji: Forest Maze Quest</h1>
+        <p class="subtitle">Navigate through the jungle maze to find the treasure!</p>
+    </header>
+    
+    <main>
+        <!-- Lobby Section -->
+        <div id="lobbySection" class="lobby-section">
+            <div class="lobby-header">
+                <h1 class="lobby-title">JUMANJI MAZE LOBBY</h1>
+            </div>
+
+            <div class="team-info">
+                <h3>Team Information</h3>
+                <div class="info-item">
+                    <span class="info-label">Team Code:</span>
+                    <span class="info-value" id="team-code">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Team Name:</span>
+                    <span class="info-value" id="team-name">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Your Name:</span>
+                    <span class="info-value" id="player-name">-</span>
+                </div>
+            </div>
+
+            <div class="players-container">
+                <h3>Team Members (<span id="player-count">0</span>/4)</h3>
+                <div id="players-list"></div>
+            </div>
+
+            <div class="loading-spinner" id="loading-spinner">
+                <div class="spinner"></div>
+                <p>Assigning roles...</p>
+            </div>
+
+            <div class="start-button-container">
+                <button id="start-game-btn" class="btn-start">
+                    <i class="fas fa-play"></i> Start Game
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Section -->
+        <div id="gameSection" class="game-section">
+            <div class="team-info">
+                <h3>Team Information</h3>
+                <div class="info-item">
+                    <span class="info-label">Team Code:</span>
+                    <span class="info-value" id="team-code-game">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Player Name:</span>
+                    <span class="info-value" id="player-name-game">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Player Role:</span>
+                    <span class="info-value" id="player-role-game">-</span>
+                </div>
+            </div>
+
+            <div class="game-container">
+                <header class="game-header">
+                    <h1 class="game-title">JUMANJI MAZE CHALLENGE</h1>
+                    <div class="connection-status">
+                        <div id="status-message">Waiting for players...</div>
+                        <div class="player-indicators">
+                            <div class="player-indicator" id="maze-viewer-indicator">
+                                <span class="indicator-icon"><i class="fas fa-eye"></i></span>
+                                <span class="indicator-text">Maze Viewer</span>
+                            </div>
+                            <div class="player-indicator" id="forward-backward-indicator">
+                                <span class="indicator-icon"><i class="fas fa-arrows-alt-v"></i></span>
+                                <span class="indicator-text">Forward/Backward</span>
+                            </div>
+                            <div class="player-indicator" id="left-right-indicator">
+                                <span class="indicator-icon"><i class="fas fa-arrows-alt-h"></i></span>
+                                <span class="indicator-text">Left/Right</span>
+                            </div>
+                            <div class="player-indicator" id="instructor-indicator">
+                                <span class="indicator-icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                                <span class="indicator-text">Instructor</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="game-content">
+                    <!-- Maze Viewer Screen -->
+                    <div id="maze-viewer-screen" class="game-screen hidden">
+                        <div class="maze-container">
+                            <canvas id="maze-canvas"></canvas>
+                            <div class="maze-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color player-color"></div><span>Player</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color exit-color"></div><span>Exit</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="role-message">
+                            <h2>You are the Maze Viewer</h2>
+                            <p>You can see the maze but cannot control the player. Guide your teammates!</p>
+                        </div>
+                    </div>
+
+                    <!-- Forward/Backward Controller Screen -->
+                    <div id="forward-backward-screen" class="game-screen hidden">
+                        <div class="controller-container">
+                            <div class="player-info">
+                                <div class="player-position"><span>Position: </span><span id="position-text">Unknown</span>
+                                </div>
+                                <div class="jungle-noise">
+                                    <div class="noise-indicator"></div><span>Listening to the jungle...</span>
+                                </div>
+                            </div>
+                            <div class="controls">
+                                <button id="forward-btn" class="control-btn">
+                                    <i class="fas fa-arrow-up"></i> Forward
+                                </button>
+                                <button id="backward-btn" class="control-btn">
+                                    <i class="fas fa-arrow-down"></i> Backward
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-message">
+                            <h2>You control Forward/Backward</h2>
+                            <p>You can't see the maze. Listen to your teammates!</p>
+                        </div>
+                    </div>
+
+                    <!-- Left/Right Controller Screen -->
+                    <div id="left-right-screen" class="game-screen hidden">
+                        <div class="controller-container">
+                            <div class="player-info">
+                                <div class="player-position"><span>Position: </span><span
+                                        id="position-text-lr">Unknown</span>
+                                </div>
+                                <div class="jungle-noise">
+                                    <div class="noise-indicator"></div><span>Listening to the jungle...</span>
+                                </div>
+                            </div>
+                            <div class="controls">
+                                <button id="left-btn" class="control-btn">
+                                    <i class="fas fa-arrow-left"></i> Left
+                                </button>
+                                <button id="right-btn" class="control-btn">
+                                    <i class="fas fa-arrow-right"></i> Right
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-message">
+                            <h2>You control Left/Right</h2>
+                            <p>You can't see the maze. Listen to your teammates!</p>
+                        </div>
+                    </div>
+
+                    <!-- Instructor Screen -->
+                    <div id="instructor-screen" class="game-screen hidden">
+                        <div class="instructor-container">
+                            <div class="player-info">
+                                <div class="player-position"><span>Position: </span><span
+                                        id="position-text-inst">Unknown</span>
+                                </div>
+                                <div class="jungle-noise">
+                                    <div class="noise-indicator"></div><span>Guiding through the jungle...</span>
+                                </div>
+                            </div>
+                            <div class="instructions-box">
+                                <h3 style="color: var(--golden-glow); margin-bottom: 1rem;">Instructions</h3>
+                                <div id="instructions-list">
+                                    <div class="instruction-item">
+                                        <span class="instruction-icon"><i class="fas fa-info-circle"></i></span>
+                                        <span class="instruction-text">Wait for the game to start...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="role-message">
+                            <h2>You are the Instructor</h2>
+                            <p>Guide your team through the maze with your instructions!</p>
+                        </div>
+                    </div>
+
+                    <!-- Waiting Screen -->
+                    <div id="waiting-screen" class="game-screen hidden">
+                        <div class="jungle-animation">
+                            <div class="jungle-bg"></div>
+                            <div class="jungle-overlay">
+                                <h2>Welcome to Jumanji</h2>
+                                <p>Waiting for all players to connect...</p>
+                                <div class="loading-spinner"></div>
+                                <div class="room-info">
+                                    <p>Team Code: <span id="room-code">Loading...</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Game Won Screen -->
+                    <div id="game-won-screen" class="game-screen hidden">
+                        <div class="win-animation">
+                            <h2>You Escaped the Jungle!</h2>
+                            <p>Congratulations on completing the Jumanji Maze Challenge!</p>
+                            <button id="continue-btn" class="control-btn">
+                                <i class="fas fa-arrow-right"></i> Continue to Next Location
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </main>
+
+    <div class="sound-toggle" id="sound-toggle">🔊</div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <!-- ===== JAVASCRIPT LOGIC ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDeu-PF9W3fHf7shBV-_aVRCEZ6atBCJ5E",
+                authDomain: "jumanji-d14a9.firebaseapp.com",
+                databaseURL: "https://jumanji-d14a9-default-rtdb.asia-southeast1.firebasedatabase.app/",
+                projectId: "jumanji-d14a9",
+                storageBucket: "jumanji-d14a9.firebasestorage.app",
+                messagingSenderId: "1008263887985",
+                appId: "1:1008263887985:web:8be0e837e07bdecc9eafd0"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // DOM Elements - Lobby
+            const lobbySection = document.getElementById('lobbySection');
+            const gameSection = document.getElementById('gameSection');
+            const teamCodeDisplay = document.getElementById('team-code');
+            const teamNameDisplay = document.getElementById('team-name');
+            const playerNameDisplay = document.getElementById('player-name');
+            const playerCountDisplay = document.getElementById('player-count');
+            const playersList = document.getElementById('players-list');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const startGameBtn = document.getElementById('start-game-btn');
+
+            // DOM Elements - Game
+            const mazeViewerScreen = document.getElementById('maze-viewer-screen');
+            const forwardBackwardScreen = document.getElementById('forward-backward-screen');
+            const leftRightScreen = document.getElementById('left-right-screen');
+            const instructorScreen = document.getElementById('instructor-screen');
+            const waitingScreen = document.getElementById('waiting-screen');
+            const gameWonScreen = document.getElementById('game-won-screen');
+
+            const statusMessage = document.getElementById('status-message');
+            const mazeViewerIndicator = document.getElementById('maze-viewer-indicator');
+            const forwardBackwardIndicator = document.getElementById('forward-backward-indicator');
+            const leftRightIndicator = document.getElementById('left-right-indicator');
+            const instructorIndicator = document.getElementById('instructor-indicator');
+            const roomCodeElement = document.getElementById('room-code');
+
+            // Team info elements
+            const teamCodeDisplayGame = document.getElementById('team-code-game');
+            const playerNameDisplayGame = document.getElementById('player-name-game');
+            const playerRoleDisplayGame = document.getElementById('player-role-game');
+
+            const mazeCanvas = document.getElementById('maze-canvas');
+            const ctx = mazeCanvas ? mazeCanvas.getContext('2d') : null;
+
+            const positionText = document.getElementById('position-text');
+            const positionTextLR = document.getElementById('position-text-lr');
+            const positionTextInst = document.getElementById('position-text-inst');
+            const instructionsList = document.getElementById('instructions-list');
+
+            const forwardBtn = document.getElementById('forward-btn');
+            const backwardBtn = document.getElementById('backward-btn');
+            const leftBtn = document.getElementById('left-btn');
+            const rightBtn = document.getElementById('right-btn');
+            const continueBtn = document.getElementById('continue-btn');
+            const soundToggle = document.getElementById('sound-toggle');
+
+            // Game state
+            let playerRole = null;
+            let maze = null;
+            let playerPosition = { x: 1, y: 1 };
+            let exitPosition = { x: 0, y: 0 };
+            let cellSize = 20;
+            let gameRef = null;
+            let playersRef = null;
+            let myPlayerId = null;
+            let roomCode = null;
+            let isGameActive = false;
+            let roomRef = null;
+            let teamId = null;
+            let playerId = null;
+            let playerName = null;
+            let teamLobbyRef = null;
+            let rolesAssigned = false;
+            let soundEnabled = true;
+
+            // Sound effects (simulated)
+            function playSound(type) {
+                if (!soundEnabled) return;
+                
+                console.log(`Playing sound: ${type}`);
+                
+                // Visual feedback for sounds
+                if (type === 'move') {
+                    soundToggle.textContent = '🌿';
+                    setTimeout(() => {
+                        soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+                    }, 300);
+                } else if (type === 'win') {
+                    soundToggle.textContent = '🏆';
+                    setTimeout(() => {
+                        soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+                    }, 500);
+                }
+            }
+
+            // Get player info from localStorage
+            function getPlayerInfo() {
+                teamId = localStorage.getItem('teamId');
+                playerId = localStorage.getItem('playerId');
+                playerName = localStorage.getItem('playerName');
+
+                if (!teamId || !playerId || !playerName) {
+                    // Redirect to index.html if player info is missing
+                    window.location.href = 'index.html';
+                    return false;
+                }
+
+                // Update team info display
+                database.ref(`teams/${teamId}`).once('value').then(snapshot => {
+                    const team = snapshot.val();
+                    if (team) {
+                        teamCodeDisplay.textContent = team.teamCode;
+                        teamCodeDisplayGame.textContent = team.teamCode;
+                        teamNameDisplay.textContent = team.teamName;
+                        roomCodeElement.textContent = team.teamCode;
+                    }
+                });
+
+                playerNameDisplay.textContent = playerName;
+                playerNameDisplayGame.textContent = playerName;
+
+                return true;
+            }
+
+            // Initialize the game
+            function initGame() {
+                if (!getPlayerInfo()) return;
+
+                // Set up team-specific lobby reference
+                teamLobbyRef = database.ref(`mazeLobby/${teamId}`);
+
+                // Add player to lobby
+                teamLobbyRef.child(`players/${playerId}`).set({
+                    playerId: playerId,
+                    playerName: playerName,
+                    isOnline: true,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Set up listeners for this team's lobby
+                setupLobbyListeners();
+
+                // Update player status when they leave
+                window.addEventListener('beforeunload', () => {
+                    teamLobbyRef.child(`players/${playerId}`).update({
+                        isOnline: false
+                    });
+                });
+
+                // Handle page visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // Page is hidden, update player status to offline
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: false
+                        });
+                    } else {
+                        // Page is visible, update player status to online
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: true,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                });
+            }
+
+            function setupLobbyListeners() {
+                // Listen for players in the lobby
+                teamLobbyRef.child('players').on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    updatePlayersList(players);
+
+                    // Check if all 4 players have joined
+                    const playerCount = Object.keys(players).length;
+                    if (playerCount === 4 && !rolesAssigned) {
+                        assignRoles();
+                    }
+                });
+
+                // Listen for role assignments
+                teamLobbyRef.child('roles').on('value', (snapshot) => {
+                    const roles = snapshot.val() || {};
+                    if (roles[playerId]) {
+                        playerRole = roles[playerId];
+                        playerRoleDisplayGame.textContent = getRoleDisplayName(playerRole);
+
+                        // Show start button if all roles are assigned
+                        if (Object.keys(roles).length === 4) {
+                            startGameBtn.classList.add('show');
+                        }
+                    }
+                });
+
+                // Listen for game start
+                teamLobbyRef.child('gameStarted').on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        startMazeGame();
+                    }
+                });
+            }
+
+            function updatePlayersList(players) {
+                let html = '';
+                let playerCount = 0;
+
+                Object.keys(players).forEach(id => {
+                    const player = players[id];
+                    playerCount++;
+
+                    html += `
+                        <div class="player-card">
+                            <div class="player-info">
+                                <div class="player-status ${player.isOnline ? 'online' : 'offline'}"></div>
+                                <span class="player-name">${player.playerName} ${id === playerId ? '(You)' : ''}</span>
+                            </div>
+                            <div class="player-role" id="role-${id}">Waiting for role...</div>
+                        </div>
+                    `;
+                });
+
+                playersList.innerHTML = html;
+                playerCountDisplay.textContent = playerCount;
+            }
+
+            function assignRoles() {
+                rolesAssigned = true;
+                loadingSpinner.style.display = 'flex';
+
+                // Get all player IDs
+                teamLobbyRef.child('players').once('value').then(snapshot => {
+                    const players = snapshot.val() || {};
+                    const playerIds = Object.keys(players);
+
+                    // Shuffle the player IDs for random role assignment
+                    const shuffledIds = [...playerIds].sort(() => Math.random() - 0.5);
+
+                    // Define the roles
+                    const roles = ['mazeViewer', 'forwardBackward', 'leftRight', 'instructor'];
+
+                    // Assign roles to players
+                    const roleAssignments = {};
+                    shuffledIds.forEach((id, index) => {
+                        roleAssignments[id] = roles[index];
+                    });
+
+                    // Save role assignments to Firebase
+                    teamLobbyRef.child('roles').set(roleAssignments).then(() => {
+                        // Update UI with role assignments
+                        Object.keys(roleAssignments).forEach(id => {
+                            const roleElement = document.getElementById(`role-${id}`);
+                            if (roleElement) {
+                                roleElement.textContent = getRoleDisplayName(roleAssignments[id]);
+                            }
+                        });
+
+                        loadingSpinner.style.display = 'none';
+                    });
+                });
+            }
+
+            function getRoleDisplayName(role) {
+                switch (role) {
+                    case 'mazeViewer': return 'Maze Viewer';
+                    case 'forwardBackward': return 'Forward/Backward Controller';
+                    case 'leftRight': return 'Left/Right Controller';
+                    case 'instructor': return 'Instructor';
+                    default: return 'Unknown';
+                }
+            }
+
+            // Start game button click handler
+            startGameBtn.addEventListener('click', () => {
+                teamLobbyRef.child('gameStarted').set(true);
+            });
+
+            function startMazeGame() {
+                // Hide lobby and show game
+                lobbySection.style.display = 'none';
+                gameSection.style.display = 'block';
+
+                // Generate a unique ID for this player in the maze game
+                myPlayerId = 'maze_' + Math.random().toString(36).substr(2, 9);
+
+                // Set up team-specific game reference
+                gameRef = database.ref(`teams/${teamId}/mazeGame`);
+                playersRef = database.ref(`teams/${teamId}/mazeGame/players`);
+
+                // Set up listeners for this team's game
+                setupGameListeners();
+
+                // Assign player role in the game
+                assignPlayerRoleInGame();
+            }
+
+            function setupGameListeners() {
+                // Listen for game state changes
+                gameRef.on('value', (snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState) {
+                        // Initialize game if it doesn't exist
+                        initializeGame();
+                        return;
+                    }
+
+                    maze = gameState.maze;
+                    playerPosition = gameState.playerPosition;
+                    exitPosition = gameState.exitPosition;
+
+                    if (gameState.gameStarted && !gameState.gameWon) {
+                        isGameActive = true;
+                        waitingScreen.classList.add('hidden');
+                        gameWonScreen.classList.add('hidden');
+
+                        if (playerRole === 'mazeViewer') {
+                            mazeViewerScreen.classList.remove('hidden');
+                            setupMazeCanvas();
+                            drawMaze();
+                        } else if (playerRole === 'forwardBackward') {
+                            forwardBackwardScreen.classList.remove('hidden');
+                            updatePositionText();
+                        } else if (playerRole === 'leftRight') {
+                            leftRightScreen.classList.remove('hidden');
+                            updatePositionText();
+                        } else if (playerRole === 'instructor') {
+                            instructorScreen.classList.remove('hidden');
+                            updatePositionText();
+                            updateInstructions();
+                        }
+                        statusMessage.textContent = 'Game in progress';
+                    } else if (gameState.gameWon) {
+                        isGameActive = false;
+                        waitingScreen.classList.add('hidden');
+                        mazeViewerScreen.classList.add('hidden');
+                        forwardBackwardScreen.classList.add('hidden');
+                        leftRightScreen.classList.add('hidden');
+                        instructorScreen.classList.add('hidden');
+                        gameWonScreen.classList.remove('hidden');
+                        statusMessage.textContent = 'Game completed!';
+                        playSound('win');
+                    }
+                });
+
+                // Listen for player role assignment
+                playersRef.on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    mazeViewerIndicator.classList.toggle('connected', !!players.mazeViewer);
+                    forwardBackwardIndicator.classList.toggle('connected', !!players.forwardBackward);
+                    leftRightIndicator.classList.toggle('connected', !!players.leftRight);
+                    instructorIndicator.classList.toggle('connected', !!players.instructor);
+
+                    // Update status message with player count
+                    const playerCount = Object.keys(players).length;
+                    statusMessage.textContent = `Waiting for players... (${playerCount}/4)`;
+
+                    // Check if all players are connected
+                    if (players.mazeViewer && players.forwardBackward && players.leftRight && players.instructor) {
+                        gameRef.once('value').then((snapshot) => {
+                            const gameState = snapshot.val();
+                            if (!gameState || !gameState.gameStarted) {
+                                startNewGame();
+                            }
+                        });
+                    }
+                });
+            }
+
+            function initializeGame() {
+                gameRef.set({
+                    players: {},
+                    gameStarted: false,
+                    gameWon: false
+                });
+            }
+
+            // Assign player role in the game
+            function assignPlayerRoleInGame() {
+                playersRef.once('value').then((snapshot) => {
+                    const players = snapshot.val() || {};
+                    if (!players[playerRole]) {
+                        playersRef.child(playerRole).set({
+                            playerId: playerId,
+                            playerName: playerName,
+                            connected: true
+                        });
+                    }
+                });
+            }
+
+            function startNewGame() {
+                // Create a more complex maze (25x25)
+                const newMaze = generateMaze(25, 25);
+                const initialPosition = { x: 1, y: 1 };
+                const exitPos = { x: 23, y: 23 };
+                newMaze[exitPos.y][exitPos.x] = 2;
+
+                gameRef.update({
+                    maze: newMaze,
+                    playerPosition: initialPosition,
+                    exitPosition: exitPos,
+                    gameStarted: true,
+                    gameWon: false,
+                    instructions: []
+                });
+            }
+
+            function movePlayer(direction) {
+                if (!isGameActive) return;
+
+                gameRef.once('value').then((snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState.gameStarted || gameState.gameWon) return;
+
+                    let newPosition = { ...gameState.playerPosition };
+                    switch (direction) {
+                        case 'forward': newPosition.y -= 1; break;
+                        case 'backward': newPosition.y += 1; break;
+                        case 'left': newPosition.x -= 1; break;
+                        case 'right': newPosition.x += 1; break;
+                    }
+
+                    if (gameState.maze[newPosition.y][newPosition.x] !== 1) {
+                        gameRef.child('playerPosition').set(newPosition);
+                        playSound('move');
+
+                        // Add instruction for instructor
+                        if (playerRole === 'instructor') {
+                            addInstruction(`Player moved ${direction}`);
+                        }
+
+                        if (newPosition.x === gameState.exitPosition.x && newPosition.y === gameState.exitPosition.y) {
+                            gameRef.child('gameWon').set(true);
+                        }
+                    }
+                });
+            }
+
+            function addInstruction(text) {
+                const timestamp = new Date().toLocaleTimeString();
+                const newInstruction = {
+                    text: text,
+                    time: timestamp,
+                    icon: 'fa-arrow-right'
+                };
+
+                gameRef.child('instructions').push().set(newInstruction);
+            }
+
+            function updateInstructions() {
+                gameRef.child('instructions').on('value', (snapshot) => {
+                    const instructions = snapshot.val() || {};
+                    let html = '';
+
+                    // Convert to array and sort by timestamp
+                    const instructionArray = Object.values(instructions);
+
+                    // Display the last 5 instructions
+                    const recentInstructions = instructionArray.slice(-5);
+
+                    if (recentInstructions.length === 0) {
+                        html = `
+                            <div class="instruction-item">
+                                <span class="instruction-icon"><i class="fas fa-info-circle"></i></span>
+                                <span class="instruction-text">Wait for the game to start...</span>
+                            </div>
+                        `;
+                    } else {
+                        recentInstructions.forEach(instruction => {
+                            html += `
+                                <div class="instruction-item">
+                                    <span class="instruction-icon"><i class="fas ${instruction.icon || 'fa-info-circle'}"></i></span>
+                                    <span class="instruction-text">${instruction.text}</span>
+                                    <span class="instruction-time">${instruction.time}</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    instructionsList.innerHTML = html;
+                });
+            }
+
+            function generateMaze(width, height) {
+                const maze = Array(height).fill().map(() => Array(width).fill(1));
+                const stack = [];
+                const start = { x: 1, y: 1 };
+                maze[start.y][start.x] = 0;
+                stack.push(start);
+
+                while (stack.length > 0) {
+                    const current = stack[stack.length - 1];
+                    const neighbors = getUnvisitedNeighbors(current, maze);
+                    if (neighbors.length > 0) {
+                        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        removeWall(current, next, maze);
+                        maze[next.y][next.x] = 0;
+                        stack.push(next);
+                    } else {
+                        stack.pop();
+                    }
+                }
+                return maze;
+            }
+
+            function getUnvisitedNeighbors(cell, maze) {
+                const neighbors = [];
+                const { x, y } = cell;
+                const directions = [
+                    { x: x, y: y - 2 }, { x: x + 2, y: y },
+                    { x: x, y: y + 2 }, { x: x - 2, y: y }
+                ];
+                for (const dir of directions) {
+                    if (dir.x > 0 && dir.x < maze[0].length - 1 && dir.y > 0 && dir.y < maze.length - 1 && maze[dir.y][dir.x] === 1) {
+                        neighbors.push(dir);
+                    }
+                }
+                return neighbors;
+            }
+
+            function removeWall(cell1, cell2, maze) {
+                const x = (cell1.x + cell2.x) / 2;
+                const y = (cell1.y + cell2.y) / 2;
+                maze[y][x] = 0;
+            }
+
+            function setupMazeCanvas() {
+                if (!ctx || !maze) return;
+                const mazeWidth = maze[0].length * cellSize;
+                const mazeHeight = maze.length * cellSize;
+                mazeCanvas.width = mazeWidth;
+                mazeCanvas.height = mazeHeight;
+            }
+
+            function drawMaze() {
+                if (!ctx || !maze) return;
+                ctx.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+
+                for (let y = 0; y < maze.length; y++) {
+                    for (let x = 0; x < maze[y].length; x++) {
+                        const cell = maze[y][x];
+                        if (cell === 1) { // Wall
+                            ctx.fillStyle = '#654321';
+                        } else if (cell === 0) { // Path
+                            ctx.fillStyle = '#1a1a1a';
+                        } else if (cell === 2) { // Exit
+                            ctx.fillStyle = '#2ecc71';
+                        }
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                        ctx.strokeStyle = '#333';
+                        ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+
+                // Draw player with shadow effect
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 5;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+
+                ctx.fillStyle = '#3498db';
+                ctx.beginPath();
+                ctx.arc(
+                    playerPosition.x * cellSize + cellSize / 2,
+                    playerPosition.y * cellSize + cellSize / 2,
+                    cellSize / 3, 0, Math.PI * 2
+                );
+                ctx.fill();
+
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
+
+            function updatePositionText() {
+                if (!maze) return;
+                let positionDescription = '';
+                const centerX = Math.floor(maze[0].length / 2);
+                const centerY = Math.floor(maze.length / 2);
+
+                if (playerPosition.x < centerX && playerPosition.y < centerY) positionDescription = 'Northwest quadrant';
+                else if (playerPosition.x >= centerX && playerPosition.y < centerY) positionDescription = 'Northeast quadrant';
+                else if (playerPosition.x < centerX && playerPosition.y >= centerY) positionDescription = 'Southwest quadrant';
+                else positionDescription = 'Southeast quadrant';
+
+                const distanceToExit = Math.abs(playerPosition.x - exitPosition.x) + Math.abs(playerPosition.y - exitPosition.y);
+                const maxDistance = maze[0].length + maze.length;
+                const progress = Math.round((1 - distanceToExit / maxDistance) * 100);
+                positionDescription += ` - ${progress}% to exit`;
+
+                if (positionText) positionText.textContent = positionDescription;
+                if (positionTextLR) positionTextLR.textContent = positionDescription;
+                if (positionTextInst) positionTextInst.textContent = positionDescription;
+            }
+
+            // Button event handlers
+            forwardBtn?.addEventListener('click', () => {
+                if (playerRole === 'forwardBackward') {
+                    movePlayer('forward');
+                    addInstruction('Forward');
+                }
+            });
+
+            backwardBtn?.addEventListener('click', () => {
+                if (playerRole === 'forwardBackward') {
+                    movePlayer('backward');
+                    addInstruction('Backward');
+                }
+            });
+
+            leftBtn?.addEventListener('click', () => {
+                if (playerRole === 'leftRight') {
+                    movePlayer('left');
+                    addInstruction('Left');
+                }
+            });
+
+            rightBtn?.addEventListener('click', () => {
+                if (playerRole === 'leftRight') {
+                    movePlayer('right');
+                    addInstruction('Right');
+                }
+            });
+
+            continueBtn?.addEventListener('click', () => {
+                // Update team status to loading and redirect to loading page
+                database.ref(`teams/${teamId}`).update({
+                    status: 'loading',
+                    currentLocation: 'loading.html'
+                }).then(() => {
+                    window.location.href = 'loading.html';
+                });
+            });
+
+            // Sound toggle
+            soundToggle.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            });
+
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>
