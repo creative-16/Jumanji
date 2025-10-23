@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumanji - Name and Hunt the Prey</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, #0a3d0a, #1a6b1a);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Jungle decorations */
+        .jungle-decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.2;
+        }
+
+        .leaf {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50,10 Q70,30 90,50 Q70,70 50,90 Q30,70 10,50 Q30,30 50,10" fill="%23228B22"/></svg>') no-repeat center center;
+            background-size: contain;
+        }
+
+        .leaf:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            transform: rotate(15deg);
+        }
+
+        .leaf:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            transform: rotate(-20deg);
+        }
+
+        .leaf:nth-child(3) {
+            bottom: 15%;
+            left: 8%;
+            transform: rotate(30deg);
+        }
+
+        .leaf:nth-child(4) {
+            bottom: 25%;
+            right: 5%;
+            transform: rotate(-10deg);
+        }
+
+        .leaf:nth-child(5) {
+            top: 40%;
+            left: 3%;
+            transform: rotate(5deg);
+        }
+
+        .leaf:nth-child(6) {
+            top: 60%;
+            right: 7%;
+            transform: rotate(-25deg);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid #3a7a3a;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            font-family: 'Bangers', cursive;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .game-header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 0.75rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-family: 'Bangers', cursive;
+            font-size: 1.8rem;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .connection-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #status-message {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .player-indicators {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .player-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .player-indicator.connected {
+            background-color: rgba(34, 139, 34, 0.5);
+            box-shadow: 0 0 10px rgba(34, 139, 34, 0.7);
+        }
+
+        .indicator-icon {
+            font-size: 1rem;
+        }
+
+        .indicator-text {
+            font-size: 0.75rem;
+        }
+
+        .game-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            position: relative;
+        }
+
+        .game-screen {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Team Info Section */
+        .team-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .team-info h3 {
+            margin-bottom: 10px;
+            color: #ffcc00;
+            text-align: center;
+        }
+
+        .info-item {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: #e0e0e0;
+        }
+
+        /* Lobby Section */
+        .lobby-section {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            position: relative;
+            border: 2px solid #3a7a3a;
+            margin-bottom: 20px;
+        }
+
+        .lobby-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .lobby-title {
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .players-container {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .players-container h3 {
+            margin-bottom: 15px;
+            color: #ffcc00;
+            text-align: center;
+        }
+
+        .player-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #ffcc00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .online {
+            background-color: #28a745;
+        }
+
+        .offline {
+            background-color: #dc3545;
+        }
+
+        .player-name {
+            font-weight: bold;
+        }
+
+        .player-role {
+            background-color: rgba(255, 204, 0, 0.2);
+            border: 1px solid #ffcc00;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            color: #ffcc00;
+        }
+
+        .start-button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-start {
+            background-color: #ffcc00;
+            color: #0a3d0a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .btn-start:hover {
+            background-color: #ffdd44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-start.show {
+            display: inline-block;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffcc00;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* QR Scanner Screen */
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hint-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            text-align: center;
+            color: #e0e0e0;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .instructions-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .instructions-box h3 {
+            color: #ffcc00;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .instruction-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .instruction-icon {
+            color: #ffcc00;
+            margin-top: 3px;
+        }
+
+        .scan-button {
+            display: block;
+            width: 90%;
+            max-width: 500px;
+            padding: 15px;
+            background-color: #ffcc00;
+            color: #0a3d0a;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .scan-button:hover {
+            background-color: #ffdd44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .scan-button:active {
+            transform: translateY(0);
+        }
+
+        .manual-button {
+            display: block;
+            width: 90%;
+            max-width: 500px;
+            padding: 12px;
+            background-color: transparent;
+            color: #ffcc00;
+            border: 2px solid #ffcc00;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .manual-button:hover {
+            background-color: rgba(255, 204, 0, 0.2);
+        }
+
+        .continue-button {
+            display: none;
+            width: 90%;
+            max-width: 500px;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        .continue-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .continue-button.show {
+            display: block;
+        }
+
+        .qr-result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        /* Controller Screens */
+        .controller-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .player-position {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .jungle-noise {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .noise-indicator {
+            width: 16px;
+            height: 16px;
+            background-color: #ffcc00;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(255, 204, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+            }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .control-btn {
+            background-color: #228b22;
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .control-btn:hover {
+            background-color: #1a6b1a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .role-message {
+            text-align: center;
+            margin-top: 1rem;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .role-message h2 {
+            color: #ffcc00;
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .role-message p {
+            font-size: 0.875rem;
+        }
+
+        /* Instructor Screen */
+        .instructor-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .instructions-box {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 2px solid #ffcc00;
+            border-radius: 10px;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .instruction-item {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instruction-icon {
+            font-size: 1.2rem;
+            color: #ffcc00;
+        }
+
+        .instruction-text {
+            font-size: 1rem;
+        }
+
+        .instruction-time {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: auto;
+        }
+
+        /* Waiting Screen */
+        .jungle-animation {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .jungle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://picsum.photos/seed/jungle/800/600.jpg') center/cover;
+            filter: brightness(0.5);
+            z-index: -1;
+        }
+
+        .jungle-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .room-info {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+
+        .room-code {
+            font-family: monospace;
+            font-size: 1.25rem;
+            color: #ffcc00;
+            margin-top: 0.5rem;
+        }
+
+        /* Game Won Screen */
+        .win-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .win-animation h2 {
+            color: #ffcc00;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal for QR scanner */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 500px;
+            background-color: #1a6b1a;
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+            color: #ffcc00;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+
+        #qr-reader-modal {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Manual input modal */
+        .manual-input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .manual-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #ffcc00;
+            color: #0a3d0a;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-button:hover {
+            background-color: #ffdd44;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffcc00;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Camera permission help */
+        .permission-help {
+            display: none;
+            background-color: rgba(255, 204, 0, 0.1);
+            border: 1px solid #ffcc00;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .permission-help h4 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .permission-help p {
+            margin-bottom: 8px;
+        }
+
+        /* QR scanning tips */
+        .scan-tips {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3a7a3a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .scan-tips h4 {
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .scan-tips p {
+            margin-bottom: 8px;
+        }
+
+        /* Camera switch button */
+        .camera-switch {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 204, 0, 0.8);
+            color: #0a3d0a;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .camera-switch:hover {
+            background-color: #ffdd44;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.5rem;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .control-btn {
+                padding: 0.875rem;
+                font-size: 0.9rem;
+            }
+
+            .player-info,
+            .role-message,
+            .jungle-overlay,
+            .win-animation {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 1.25rem;
+            }
+
+            .indicator-text {
+                display: none;
+            }
+
+            .player-indicator {
+                padding: 0.25rem 0.5rem;
+            }
+
+            .control-btn {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Jungle decorations -->
+    <div class="jungle-decoration">
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+    </div>
+
+    <!-- Lobby Section -->
+    <div id="lobbySection" class="lobby-section">
+        <div class="lobby-header">
+            <h1 class="lobby-title">NAME AND HUNT THE PREY LOBBY</h1>
+        </div>
+
+        <div class="team-info">
+            <h3>Team Information</h3>
+            <div class="info-item">
+                <span class="info-label">Team Code:</span>
+                <span class="info-value" id="team-code">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Team Name:</span>
+                <span class="info-value" id="team-name">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Your Name:</span>
+                <span class="info-value" id="player-name">-</span>
+            </div>
+        </div>
+
+        <div class="players-container">
+            <h3>Team Members (<span id="player-count">0</span>/4)</h3>
+            <div id="players-list"></div>
+        </div>
+
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner"></div>
+            <p>Assigning roles...</p>
+        </div>
+
+        <div class="start-button-container">
+            <button id="start-game-btn" class="btn-start">
+                <i class="fas fa-play"></i> Start Hunt
+            </button>
+        </div>
+    </div>
+
+    <div class="container" id="gameContainer" style="display: none;">
+        <div class="team-info">
+            <h3>Team Information</h3>
+            <div class="info-item">
+                <span class="info-label">Team Code:</span>
+                <span class="info-value" id="team-code-game">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Player Name:</span>
+                <span class="info-value" id="player-name-game">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Player Role:</span>
+                <span class="info-value" id="player-role-game">-</span>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <header class="game-header">
+                <h1 class="game-title">NAME AND HUNT THE PREY</h1>
+                <div class="connection-status">
+                    <div id="status-message">Waiting for players...</div>
+                    <div class="player-indicators">
+                        <div class="player-indicator" id="qr-scanner-indicator">
+                            <span class="indicator-icon"><i class="fas fa-qrcode"></i></span>
+                            <span class="indicator-text">QR Scanner</span>
+                        </div>
+                        <div class="player-indicator" id="helper1-indicator">
+                            <span class="indicator-icon"><i class="fas fa-binoculars"></i></span>
+                            <span class="indicator-text">Helper 1</span>
+                        </div>
+                        <div class="player-indicator" id="helper2-indicator">
+                            <span class="indicator-icon"><i class="fas fa-map"></i></span>
+                            <span class="indicator-text">Helper 2</span>
+                        </div>
+                        <div class="player-indicator" id="instructor-indicator">
+                            <span class="indicator-icon"><i class="fas fa-chalkboard-teacher"></i></span>
+                            <span class="indicator-text">Instructor</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="game-content">
+                <!-- QR Scanner Screen -->
+                <div id="qr-scanner-screen" class="game-screen hidden">
+                    <div class="qr-container">
+                        <div class="hint-box">
+                            <p>In the heart of the jungle, ancient creatures hide. Find their names by deciphering the
+                                sacred QR code that reveals their identity.</p>
+                        </div>
+
+                        <div class="instructions-box">
+                            <h3>Hunting Instructions</h3>
+                            <div class="instruction-item">
+                                <span class="instruction-icon"><i class="fas fa-search"></i></span>
+                                <span>Search for hidden QR codes throughout the jungle</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="instruction-icon"><i class="fas fa-qrcode"></i></span>
+                                <span>Scan the QR code to reveal the creature's name</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="instruction-icon"><i class="fas fa-users"></i></span>
+                                <span>Work together with your team to find all creatures</span>
+                            </div>
+                            <div class="instruction-item">
+                                <span class="instruction-icon"><i class="fas fa-trophy"></i></span>
+                                <span>Once you find the correct code, continue your journey</span>
+                            </div>
+                        </div>
+
+                        <button id="scan-button" class="scan-button">Scan QR Code</button>
+                        <button id="manual-button" class="manual-button">Enter Code Manually</button>
+
+                        <div id="qr-result" class="qr-result"></div>
+
+                        <button id="continue-button" class="continue-button">Continue Journey</button>
+
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>Verifying code...</p>
+                        </div>
+
+                        <div id="permission-help" class="permission-help">
+                            <h4>Camera Access Issue</h4>
+                            <p>If you're having trouble with camera access, try these solutions:</p>
+                            <p>1. Make sure you're using HTTPS (secure connection)</p>
+                            <p>2. Check browser permissions for camera access</p>
+                            <p>3. Try using a different browser (Chrome, Firefox, Safari)</p>
+                            <p>4. Use the "Enter Code Manually" option above</p>
+                        </div>
+
+                        <div id="scan-tips" class="scan-tips">
+                            <h4>QR Code Scanning Tips</h4>
+                            <p>1. Ensure good lighting on the QR code</p>
+                            <p>2. Hold your device steady and at the right distance</p>
+                            <p>3. Make sure the entire QR code is visible in the frame</p>
+                            <p>4. Clean your camera lens if it's blurry</p>
+                            <p>5. Try switching between front and back cameras</p>
+                        </div>
+                    </div>
+                    <div class="role-message">
+                        <h2>You are the QR Scanner</h2>
+                        <p>You can scan QR codes to find the creature's name. Guide your teammates!</p>
+                    </div>
+                </div>
+
+                <!-- Helper 1 Screen -->
+                <div id="helper1-screen" class="game-screen hidden">
+                    <div class="controller-container">
+                        <div class="player-info">
+                            <div class="player-position"><span>Hunting Status: </span><span
+                                    id="status-text">Searching...</span>
+                            </div>
+                            <div class="jungle-noise">
+                                <div class="noise-indicator"></div><span>Scanning the jungle...</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button id="zoom-in-btn" class="control-btn">
+                                <i class="fas fa-search-plus"></i> Zoom In
+                            </button>
+                            <button id="zoom-out-btn" class="control-btn">
+                                <i class="fas fa-search-minus"></i> Zoom Out
+                            </button>
+                        </div>
+                    </div>
+                    <div class="role-message">
+                        <h2>You are Helper 1</h2>
+                        <p>Help the QR Scanner find the right location with your binoculars!</p>
+                    </div>
+                </div>
+
+                <!-- Helper 2 Screen -->
+                <div id="helper2-screen" class="game-screen hidden">
+                    <div class="controller-container">
+                        <div class="player-info">
+                            <div class="player-position"><span>Hunting Status: </span><span
+                                    id="status-text-h2">Searching...</span>
+                            </div>
+                            <div class="jungle-noise">
+                                <div class="noise-indicator"></div><span>Reading the map...</span>
+                            </div>
+                        </div>
+                        <div class="controls">
+                            <button id="north-btn" class="control-btn">
+                                <i class="fas fa-arrow-up"></i> North
+                            </button>
+                            <button id="south-btn" class="control-btn">
+                                <i class="fas fa-arrow-down"></i> South
+                            </button>
+                            <button id="east-btn" class="control-btn">
+                                <i class="fas fa-arrow-right"></i> East
+                            </button>
+                            <button id="west-btn" class="control-btn">
+                                <i class="fas fa-arrow-left"></i> West
+                            </button>
+                        </div>
+                    </div>
+                    <div class="role-message">
+                        <h2>You are Helper 2</h2>
+                        <p>Guide the team with your map to find the hidden QR codes!</p>
+                    </div>
+                </div>
+
+                <!-- Instructor Screen -->
+                <div id="instructor-screen" class="game-screen hidden">
+                    <div class="instructor-container">
+                        <div class="player-info">
+                            <div class="player-position"><span>Hunting Status: </span><span
+                                    id="status-text-inst">Searching...</span>
+                            </div>
+                            <div class="jungle-noise">
+                                <div class="noise-indicator"></div><span>Guiding through the jungle...</span>
+                            </div>
+                        </div>
+                        <div class="instructions-box">
+                            <h3 style="color: #ffcc00; margin-bottom: 1rem;">Instructions</h3>
+                            <div id="instructions-list">
+                                <div class="instruction-item">
+                                    <span class="instruction-icon"><i class="fas fa-info-circle"></i></span>
+                                    <span class="instruction-text">Wait for the hunt to start...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="role-message">
+                        <h2>You are the Instructor</h2>
+                        <p>Guide your team through the jungle to find the creature's name!</p>
+                    </div>
+                </div>
+
+                <!-- Waiting Screen -->
+                <div id="waiting-screen" class="game-screen hidden">
+                    <div class="jungle-animation">
+                        <div class="jungle-bg"></div>
+                        <div class="jungle-overlay">
+                            <h2>Welcome to the Hunt</h2>
+                            <p>Waiting for all players to connect...</p>
+                            <div class="loading-spinner"></div>
+                            <div class="room-info">
+                                <p>Team Code: <span id="room-code">Loading...</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Won Screen -->
+                <div id="game-won-screen" class="game-screen hidden">
+                    <div class="win-animation">
+                        <h2>You Found the Creature!</h2>
+                        <p>Congratulations on completing the Name and Hunt the Prey challenge!</p>
+                        <button id="continue-btn" class="control-btn">
+                            <i class="fas fa-arrow-right"></i> Continue to Next Location
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal for QR scanner -->
+    <div id="scanner-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal">&times;</span>
+            <h2 class="modal-title">Scan the QR Code</h2>
+            <div id="qr-reader-modal">
+                <button id="camera-switch" class="camera-switch">🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for manual input -->
+    <div id="manual-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-manual-modal">&times;</span>
+            <h2 class="modal-title">Enter the Secret Code</h2>
+            <input type="text" id="manual-input" class="manual-input" placeholder="Enter the 8-character code"
+                maxlength="8">
+            <button id="submit-code" class="submit-button">Submit</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <!-- ===== JAVASCRIPT LOGIC ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // The correct QR code value
+            const CORRECT_QR_CODE = "jungle92";
+
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyDeu-PF9W3fHf7shBV-_aVRCEZ6atBCJ5E",
+                authDomain: "jumanji-d14a9.firebaseapp.com",
+                databaseURL: "https://jumanji-d14a9-default-rtdb.asia-southeast1.firebasedatabase.app/",
+                projectId: "jumanji-d14a9",
+                storageBucket: "jumanji-d14a9.firebasestorage.app",
+                messagingSenderId: "1008263887985",
+                appId: "1:1008263887985:web:8be0e837e07bdecc9eafd0"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // DOM Elements - Lobby
+            const lobbySection = document.getElementById('lobbySection');
+            const gameContainer = document.getElementById('gameContainer');
+            const teamCodeDisplay = document.getElementById('team-code');
+            const teamNameDisplay = document.getElementById('team-name');
+            const playerNameDisplay = document.getElementById('player-name');
+            const playerCountDisplay = document.getElementById('player-count');
+            const playersList = document.getElementById('players-list');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const startGameBtn = document.getElementById('start-game-btn');
+
+            // DOM Elements - Game
+            const qrScannerScreen = document.getElementById('qr-scanner-screen');
+            const helper1Screen = document.getElementById('helper1-screen');
+            const helper2Screen = document.getElementById('helper2-screen');
+            const instructorScreen = document.getElementById('instructor-screen');
+            const waitingScreen = document.getElementById('waiting-screen');
+            const gameWonScreen = document.getElementById('game-won-screen');
+
+            const statusMessage = document.getElementById('status-message');
+            const qrScannerIndicator = document.getElementById('qr-scanner-indicator');
+            const helper1Indicator = document.getElementById('helper1-indicator');
+            const helper2Indicator = document.getElementById('helper2-indicator');
+            const instructorIndicator = document.getElementById('instructor-indicator');
+            const roomCodeElement = document.getElementById('room-code');
+
+            // Team info elements
+            const teamCodeDisplayGame = document.getElementById('team-code-game');
+            const playerNameDisplayGame = document.getElementById('player-name-game');
+            const playerRoleDisplayGame = document.getElementById('player-role-game');
+
+            const statusText = document.getElementById('status-text');
+            const statusTextH2 = document.getElementById('status-text-h2');
+            const statusTextInst = document.getElementById('status-text-inst');
+            const instructionsList = document.getElementById('instructions-list');
+
+            const zoomInBtn = document.getElementById('zoom-in-btn');
+            const zoomOutBtn = document.getElementById('zoom-out-btn');
+            const northBtn = document.getElementById('north-btn');
+            const southBtn = document.getElementById('south-btn');
+            const eastBtn = document.getElementById('east-btn');
+            const westBtn = document.getElementById('west-btn');
+            const continueBtn = document.getElementById('continue-btn');
+
+            // QR Scanner elements
+            const scanButton = document.getElementById('scan-button');
+            const manualButton = document.getElementById('manual-button');
+            const qrResult = document.getElementById('qr-result');
+            const loading = document.getElementById('loading');
+            const scannerModal = document.getElementById('scanner-modal');
+            const manualModal = document.getElementById('manual-modal');
+            const closeModal = document.getElementById('close-modal');
+            const closeManualModal = document.getElementById('close-manual-modal');
+            const manualInput = document.getElementById('manual-input');
+            const submitCode = document.getElementById('submit-code');
+            const permissionHelp = document.getElementById('permission-help');
+            const scanTips = document.getElementById('scan-tips');
+            const cameraSwitch = document.getElementById('camera-switch');
+            const continueButton = document.getElementById('continue-button');
+
+            // HTML5 QR Code scanner instance
+            let html5QrCode = null;
+            let currentCameraIndex = 0;
+            let availableCameras = [];
+
+            // Game state
+            let playerRole = null;
+            let gameRef = null;
+            let playersRef = null;
+            let myPlayerId = null;
+            let roomCode = null;
+            let isGameActive = false;
+            let roomRef = null;
+            let teamId = null;
+            let playerId = null;
+            let playerName = null;
+            let teamLobbyRef = null;
+            let rolesAssigned = false;
+
+            // Get player info from localStorage
+            function getPlayerInfo() {
+                teamId = localStorage.getItem('teamId');
+                playerId = localStorage.getItem('playerId');
+                playerName = localStorage.getItem('playerName');
+
+                if (!teamId || !playerId || !playerName) {
+                    // Redirect to index.html if player info is missing
+                    window.location.href = 'index.html';
+                    return false;
+                }
+
+                // Update team info display
+                database.ref(`teams/${teamId}`).once('value').then(snapshot => {
+                    const team = snapshot.val();
+                    if (team) {
+                        teamCodeDisplay.textContent = team.teamCode;
+                        teamCodeDisplayGame.textContent = team.teamCode;
+                        teamNameDisplay.textContent = team.teamName;
+                        roomCodeElement.textContent = team.teamCode;
+                    }
+                });
+
+                playerNameDisplay.textContent = playerName;
+                playerNameDisplayGame.textContent = playerName;
+
+                return true;
+            }
+
+            // Initialize the game
+            function initGame() {
+                if (!getPlayerInfo()) return;
+
+                // Set up team-specific lobby reference
+                teamLobbyRef = database.ref(`nameHuntLobby/${teamId}`);
+
+                // Add player to lobby
+                teamLobbyRef.child(`players/${playerId}`).set({
+                    playerId: playerId,
+                    playerName: playerName,
+                    isOnline: true,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Set up listeners for this team's lobby
+                setupLobbyListeners();
+
+                // Update player status when they leave
+                window.addEventListener('beforeunload', () => {
+                    teamLobbyRef.child(`players/${playerId}`).update({
+                        isOnline: false
+                    });
+                });
+
+                // Handle page visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        // Page is hidden, update player status to offline
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: false
+                        });
+                    } else {
+                        // Page is visible, update player status to online
+                        teamLobbyRef.child(`players/${playerId}`).update({
+                            isOnline: true,
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                });
+            }
+
+            function setupLobbyListeners() {
+                // Listen for players in the lobby
+                teamLobbyRef.child('players').on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    updatePlayersList(players);
+
+                    // Check if all 4 players have joined
+                    const playerCount = Object.keys(players).length;
+                    if (playerCount === 4 && !rolesAssigned) {
+                        assignRoles();
+                    }
+                });
+
+                // Listen for role assignments
+                teamLobbyRef.child('roles').on('value', (snapshot) => {
+                    const roles = snapshot.val() || {};
+                    if (roles[playerId]) {
+                        playerRole = roles[playerId];
+                        playerRoleDisplayGame.textContent = getRoleDisplayName(playerRole);
+
+                        // Show start button if all roles are assigned
+                        if (Object.keys(roles).length === 4) {
+                            startGameBtn.classList.add('show');
+                        }
+                    }
+                });
+
+                // Listen for game start
+                teamLobbyRef.child('gameStarted').on('value', (snapshot) => {
+                    if (snapshot.val() === true) {
+                        startQRGame();
+                    }
+                });
+            }
+
+            function updatePlayersList(players) {
+                let html = '';
+                let playerCount = 0;
+
+                Object.keys(players).forEach(id => {
+                    const player = players[id];
+                    playerCount++;
+
+                    html += `
+                        <div class="player-card">
+                            <div class="player-info">
+                                <div class="player-status ${player.isOnline ? 'online' : 'offline'}"></div>
+                                <span class="player-name">${player.playerName} ${id === playerId ? '(You)' : ''}</span>
+                            </div>
+                            <div class="player-role" id="role-${id}">Waiting for role...</div>
+                        </div>
+                    `;
+                });
+
+                playersList.innerHTML = html;
+                playerCountDisplay.textContent = playerCount;
+            }
+
+            function assignRoles() {
+                rolesAssigned = true;
+                loadingSpinner.style.display = 'flex';
+
+                // Get all player IDs
+                teamLobbyRef.child('players').once('value').then(snapshot => {
+                    const players = snapshot.val() || {};
+                    const playerIds = Object.keys(players);
+
+                    // Shuffle the player IDs for random role assignment
+                    const shuffledIds = [...playerIds].sort(() => Math.random() - 0.5);
+
+                    // Define the roles
+                    const roles = ['qrScanner', 'helper1', 'helper2', 'instructor'];
+
+                    // Assign roles to players
+                    const roleAssignments = {};
+                    shuffledIds.forEach((id, index) => {
+                        roleAssignments[id] = roles[index];
+                    });
+
+                    // Save role assignments to Firebase
+                    teamLobbyRef.child('roles').set(roleAssignments).then(() => {
+                        // Update UI with role assignments
+                        Object.keys(roleAssignments).forEach(id => {
+                            const roleElement = document.getElementById(`role-${id}`);
+                            if (roleElement) {
+                                roleElement.textContent = getRoleDisplayName(roleAssignments[id]);
+                            }
+                        });
+
+                        loadingSpinner.style.display = 'none';
+                    });
+                });
+            }
+
+            function getRoleDisplayName(role) {
+                switch (role) {
+                    case 'qrScanner': return 'QR Scanner';
+                    case 'helper1': return 'Helper 1';
+                    case 'helper2': return 'Helper 2';
+                    case 'instructor': return 'Instructor';
+                    default: return 'Unknown';
+                }
+            }
+
+            // Start game button click handler
+            startGameBtn.addEventListener('click', () => {
+                teamLobbyRef.child('gameStarted').set(true);
+            });
+
+            function startQRGame() {
+                // Hide lobby and show game
+                lobbySection.style.display = 'none';
+                gameContainer.style.display = 'block';
+
+                // Generate a unique ID for this player in the QR game
+                myPlayerId = 'qr_' + Math.random().toString(36).substr(2, 9);
+
+                // Set up team-specific game reference
+                gameRef = database.ref(`teams/${teamId}/qrGame`);
+                playersRef = database.ref(`teams/${teamId}/qrGame/players`);
+
+                // Set up listeners for this team's game
+                setupGameListeners();
+
+                // Assign player role in the game
+                assignPlayerRoleInGame();
+            }
+
+            function setupGameListeners() {
+                // Listen for game state changes
+                gameRef.on('value', (snapshot) => {
+                    const gameState = snapshot.val();
+                    if (!gameState) {
+                        // Initialize game if it doesn't exist
+                        initializeGame();
+                        return;
+                    }
+
+                    if (gameState.gameStarted && !gameState.gameWon) {
+                        isGameActive = true;
+                        waitingScreen.classList.add('hidden');
+                        gameWonScreen.classList.add('hidden');
+
+                        if (playerRole === 'qrScanner') {
+                            qrScannerScreen.classList.remove('hidden');
+                        } else if (playerRole === 'helper1') {
+                            helper1Screen.classList.remove('hidden');
+                            updateStatusText();
+                        } else if (playerRole === 'helper2') {
+                            helper2Screen.classList.remove('hidden');
+                            updateStatusText();
+                        } else if (playerRole === 'instructor') {
+                            instructorScreen.classList.remove('hidden');
+                            updateStatusText();
+                            updateInstructions();
+                        }
+                        statusMessage.textContent = 'Hunt in progress';
+                    } else if (gameState.gameWon) {
+                        isGameActive = false;
+                        waitingScreen.classList.add('hidden');
+                        qrScannerScreen.classList.add('hidden');
+                        helper1Screen.classList.add('hidden');
+                        helper2Screen.classList.add('hidden');
+                        instructorScreen.classList.add('hidden');
+                        gameWonScreen.classList.remove('hidden');
+                        statusMessage.textContent = 'Hunt completed!';
+                    }
+
+                    // Check if QR has been scanned correctly
+                    if (gameState.qrScanned) {
+                        continueButton.classList.add('show');
+                    }
+                });
+
+                // Listen for player role assignment
+                playersRef.on('value', (snapshot) => {
+                    const players = snapshot.val() || {};
+                    qrScannerIndicator.classList.toggle('connected', !!players.qrScanner);
+                    helper1Indicator.classList.toggle('connected', !!players.helper1);
+                    helper2Indicator.classList.toggle('connected', !!players.helper2);
+                    instructorIndicator.classList.toggle('connected', !!players.instructor);
+
+                    // Update status message with player count
+                    const playerCount = Object.keys(players).length;
+                    statusMessage.textContent = `Waiting for players... (${playerCount}/4)`;
+
+                    // Check if all players are connected
+                    if (players.qrScanner && players.helper1 && players.helper2 && players.instructor) {
+                        gameRef.once('value').then((snapshot) => {
+                            const gameState = snapshot.val();
+                            if (!gameState || !gameState.gameStarted) {
+                                startNewGame();
+                            }
+                        });
+                    }
+                });
+            }
+
+            function initializeGame() {
+                gameRef.set({
+                    players: {},
+                    gameStarted: false,
+                    gameWon: false,
+                    qrScanned: false
+                });
+            }
+
+            // Assign player role in the game
+            function assignPlayerRoleInGame() {
+                playersRef.once('value').then((snapshot) => {
+                    const players = snapshot.val() || {};
+                    if (!players[playerRole]) {
+                        playersRef.child(playerRole).set({
+                            playerId: playerId,
+                            playerName: playerName,
+                            connected: true
+                        });
+                    }
+                });
+            }
+
+            function startNewGame() {
+                gameRef.update({
+                    gameStarted: true,
+                    gameWon: false,
+                    qrScanned: false,
+                    instructions: []
+                });
+            }
+
+            function addInstruction(text) {
+                const timestamp = new Date().toLocaleTimeString();
+                const newInstruction = {
+                    text: text,
+                    time: timestamp,
+                    icon: 'fa-arrow-right'
+                };
+
+                gameRef.child('instructions').push().set(newInstruction);
+            }
+
+            function updateInstructions() {
+                gameRef.child('instructions').on('value', (snapshot) => {
+                    const instructions = snapshot.val() || {};
+                    let html = '';
+
+                    // Convert to array and sort by timestamp
+                    const instructionArray = Object.values(instructions);
+
+                    // Display the last 5 instructions
+                    const recentInstructions = instructionArray.slice(-5);
+
+                    if (recentInstructions.length === 0) {
+                        html = `
+                            <div class="instruction-item">
+                                <span class="instruction-icon"><i class="fas fa-info-circle"></i></span>
+                                <span class="instruction-text">Wait for the hunt to start...</span>
+                            </div>
+                        `;
+                    } else {
+                        recentInstructions.forEach(instruction => {
+                            html += `
+                                <div class="instruction-item">
+                                    <span class="instruction-icon"><i class="fas ${instruction.icon || 'fa-info-circle'}"></i></span>
+                                    <span class="instruction-text">${instruction.text}</span>
+                                    <span class="instruction-time">${instruction.time}</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    instructionsList.innerHTML = html;
+                });
+            }
+
+            function updateStatusText() {
+                if (!isGameActive) return;
+                let statusDescription = 'Searching for clues...';
+
+                if (statusText) statusText.textContent = statusDescription;
+                if (statusTextH2) statusTextH2.textContent = statusDescription;
+                if (statusTextInst) statusTextInst.textContent = statusDescription;
+            }
+
+            // Button event handlers for helper controls
+            zoomInBtn?.addEventListener('click', () => {
+                if (playerRole === 'helper1') {
+                    addInstruction('Zoomed in to examine area');
+                }
+            });
+
+            zoomOutBtn?.addEventListener('click', () => {
+                if (playerRole === 'helper1') {
+                    addInstruction('Zoomed out to see wider area');
+                }
+            });
+
+            northBtn?.addEventListener('click', () => {
+                if (playerRole === 'helper2') {
+                    addInstruction('Checked northern area');
+                }
+            });
+
+            southBtn?.addEventListener('click', () => {
+                if (playerRole === 'helper2') {
+                    addInstruction('Checked southern area');
+                }
+            });
+
+            eastBtn?.addEventListener('click', () => {
+                if (playerRole === 'helper2') {
+                    addInstruction('Checked eastern area');
+                }
+            });
+
+            westBtn?.addEventListener('click', () => {
+                if (playerRole === 'helper2') {
+                    addInstruction('Checked western area');
+                }
+            });
+
+            continueBtn?.addEventListener('click', () => {
+                // Update team status to loading and redirect to loading page
+                database.ref(`teams/${teamId}`).update({
+                    status: 'loading',
+                    currentLocation: 'loading.html'
+                }).then(() => {
+                    window.location.href = 'loading.html';
+                });
+            });
+
+            // QR Scanner functionality
+            // Open scanner modal when scan button is clicked
+            scanButton?.addEventListener('click', function () {
+                scannerModal.style.display = 'flex';
+                startScanner();
+            });
+
+            // Open manual input modal when manual button is clicked
+            manualButton?.addEventListener('click', function () {
+                manualModal.style.display = 'flex';
+                manualInput.focus();
+            });
+
+            // Close scanner modal
+            closeModal?.addEventListener('click', function () {
+                stopScanner();
+                scannerModal.style.display = 'none';
+            });
+
+            // Close manual modal
+            closeManualModal?.addEventListener('click', function () {
+                manualModal.style.display = 'none';
+                manualInput.value = '';
+            });
+
+            // Close modal when clicking outside of it
+            window.addEventListener('click', function (event) {
+                if (event.target === scannerModal) {
+                    stopScanner();
+                    scannerModal.style.display = 'none';
+                }
+                if (event.target === manualModal) {
+                    manualModal.style.display = 'none';
+                    manualInput.value = '';
+                }
+            });
+
+            // Submit manual code
+            submitCode?.addEventListener('click', function () {
+                const code = manualInput.value.trim();
+                if (code) {
+                    handleScanResult(code);
+                    manualModal.style.display = 'none';
+                    manualInput.value = '';
+                } else {
+                    displayError("Please enter a valid code.");
+                }
+            });
+
+            // Allow Enter key to submit manual code
+            manualInput?.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    submitCode.click();
+                }
+            });
+
+            // Continue button click handler
+            continueButton?.addEventListener('click', function () {
+                gameRef.child('continueClicked').set(true);
+            });
+
+            // Switch camera
+            cameraSwitch?.addEventListener('click', function () {
+                if (availableCameras.length > 1) {
+                    currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+                    stopScanner();
+                    startScanner();
+                }
+            });
+
+            // Start the QR scanner
+            function startScanner() {
+                html5QrCode = new Html5Qrcode("qr-reader-modal");
+
+                Html5Qrcode.getCameras().then(devices => {
+                    if (devices && devices.length) {
+                        availableCameras = devices;
+
+                        // Try to find a back camera first
+                        let backCamera = devices.find(device =>
+                            device.label.toLowerCase().includes('back') ||
+                            device.label.toLowerCase().includes('environment')
+                        );
+
+                        // If no back camera found, use the first camera
+                        let selectedCamera = backCamera || devices[0];
+
+                        // Set current camera index
+                        currentCameraIndex = devices.indexOf(selectedCamera);
+
+                        // Hide camera switch if only one camera is available
+                        if (devices.length <= 1) {
+                            cameraSwitch.style.display = 'none';
+                        } else {
+                            cameraSwitch.style.display = 'flex';
+                        }
+
+                        html5QrCode.start(
+                            selectedCamera.id,
+                            {
+                                fps: 10,
+                                qrbox: { width: 280, height: 280 },
+                                aspectRatio: 1.0
+                            },
+                            (decodedText, decodedResult) => {
+                                // This callback is called when a QR code is successfully scanned
+                                handleScanResult(decodedText);
+                            },
+                            (errorMessage) => {
+                                // This callback is called when scanning fails
+                                // We can ignore this for now
+                            }
+                        ).catch(err => {
+                            console.error(`Unable to start scanning: ${err}`);
+                            displayError("Unable to access camera. Please check permissions or use manual entry.");
+                            permissionHelp.style.display = 'block';
+                            scanTips.style.display = 'block';
+                            stopScanner();
+                            scannerModal.style.display = 'none';
+                        });
+                    } else {
+                        displayError("No camera devices found. Please use manual entry.");
+                        permissionHelp.style.display = 'block';
+                        scannerModal.style.display = 'none';
+                    }
+                }).catch(err => {
+                    console.error(`Unable to get cameras: ${err}`);
+                    displayError("Unable to access camera. Please check permissions or use manual entry.");
+                    permissionHelp.style.display = 'block';
+                    scanTips.style.display = 'block';
+                    scannerModal.style.display = 'none';
+                });
+            }
+
+            // Stop the QR scanner
+            function stopScanner() {
+                if (html5QrCode && html5QrCode.isScanning) {
+                    html5QrCode.stop().then(() => {
+                        console.log("Scanner stopped");
+                    }).catch(err => {
+                        console.error(`Failed to stop scanning: ${err}`);
+                    });
+                }
+            }
+
+            // Handle the scan result
+            function handleScanResult(decodedText) {
+                stopScanner();
+                scannerModal.style.display = 'none';
+
+                // Show loading animation
+                loading.style.display = 'block';
+                qrResult.style.display = 'none';
+
+                // Simulate processing time
+                setTimeout(() => {
+                    loading.style.display = 'none';
+
+                    // Normalize both codes for comparison (trim whitespace and convert to lowercase)
+                    const normalizedDecodedText = decodedText.trim().toLowerCase();
+                    const normalizedCorrectCode = CORRECT_QR_CODE.trim().toLowerCase();
+
+                    console.log('Comparing codes:', {
+                        decoded: normalizedDecodedText,
+                        correct: normalizedCorrectCode,
+                        match: normalizedDecodedText === normalizedCorrectCode
+                    });
+
+                    if (normalizedDecodedText === normalizedCorrectCode) {
+                        // Correct QR code scanned
+                        displaySuccess("Correct QR code! You found the creature's name!");
+
+                        // Update game state to show that QR has been scanned
+                        gameRef.update({
+                            qrScanned: true,
+                            scannedBy: playerName
+                        });
+
+                        // Add instruction for instructor
+                        if (playerRole === 'instructor') {
+                            addInstruction(`QR code scanned by ${playerName}`);
+                        }
+                    } else {
+                        // Incorrect QR code
+                        displayError("Invalid QR code. That's not the right creature. Keep searching!");
+                        scanTips.style.display = 'block';
+                    }
+                }, 1000);
+            }
+
+            // Display success message
+            function displaySuccess(message) {
+                qrResult.textContent = message;
+                qrResult.className = 'qr-result success';
+                qrResult.style.display = 'block';
+            }
+
+            // Display error message
+            function displayError(message) {
+                qrResult.textContent = message;
+                qrResult.className = 'qr-result error';
+                qrResult.style.display = 'block';
+            }
+
+            // Listen for continue button click
+            gameRef?.child('continueClicked').on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    // Redirect all players to loading page
+                    window.location.href = 'loading.html';
+                }
+            });
+
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+
+</html>
